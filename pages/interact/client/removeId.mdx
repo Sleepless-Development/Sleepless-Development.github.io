@@ -1,0 +1,31 @@
+# removeId
+
+Removes an existing interaction using its unique identifier. This function is essential for managing the lifecycle of interactions within the game, allowing for the precise removal of specific interactions when they are no longer needed or relevant.
+
+## Parameters
+
+- `id` (`number | string`): The unique identifier of the interaction you wish to remove. This ID is returned by the function used to add the interaction initially.
+
+## Example
+
+```lua
+local interactionId = interact.addCoords({
+    id = "uniqueInteractionId", --id that is stored in variable
+    coords = vector3(123.4, 567.8, 250.0),
+    options = {
+        {
+            text = "Interact Option 1",
+            icon = "hand",  -- Example simple FA icon name
+            action = function(data) print("Action 1 triggered") end,
+            canInteract = function(entity, distance, coords, id)
+                return distance < 2.0 -- Example condition based on distance
+            end
+        }
+    },
+    renderDistance = 10.0,
+    activeDistance = 2.0,
+    cooldown = 1500
+})
+
+-- To remove the specific interaction by its ID:
+interact.removeId(interactionId)

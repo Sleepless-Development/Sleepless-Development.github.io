@@ -1,0 +1,18 @@
+# removeModel
+
+Removes global interactions associated with a specific model or an array of models. This function enables developers to dynamically manage model interactions, allowing for the removal of interactions when models are no longer needed or relevant within the game world.
+
+## Parameters
+
+- `model` (`number | number[]`): The model identifier (hash) or an array of model identifiers for which the interactions are to be removed. A single model identifier will remove the interaction for that specific model, while an array of identifiers will remove interactions for multiple models.
+
+## Example
+
+```lua
+-- Example 1: Removing an interaction for a single model
+local modelIdentifier = `prop_vend_snak_01` -- Example model hash
+interact.removeModel(modelIdentifier)
+
+-- Example 2: Removing interactions for multiple models
+local modelIdentifiers = {`prop_vend_snak_01`, `prop_vend_soda_02`} -- Example array of model hashes
+interact.removeModel(modelIdentifiers)

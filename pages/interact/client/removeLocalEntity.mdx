@@ -1,0 +1,13 @@
+# removeLocalEntity
+
+Removes an existing interaction associated with a local (non-networked) entity by its entity handle. This function allows for the cleanup of interactions tied to entities that are no longer present or required in the game world, helping maintain an organized and efficient interaction system.
+
+## Parameters
+
+- `entity` (`number`): The entity handle of the local entity whose interaction you wish to remove.
+
+## Example
+
+```lua
+-- To remove the interaction for this local entity, use its handle:
+interact.removeLocalEntity(entityHandle)

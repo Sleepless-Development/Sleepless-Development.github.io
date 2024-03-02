@@ -1,0 +1,40 @@
+# addGlobalPed
+
+Registers a global interaction for non-player characters (NPCs) or peds in the game. This function enables customizable interactions with NPCs, allowing for specific actions and conditions to be defined for interacting with these entities across the game world.
+
+## Parameters
+
+- `data` (`PedInteractionData`): A table containing the interaction data. It must include:
+  - `id` (`string | number`): A unique identifier for the interaction.
+  - `options` (`table`): A list of options and actions for the interaction. Each option is a table with the following fields:
+    - `text` (`string`): The text displayed for the option.
+    - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
+    - `action` (`function(data: EntityInteraction)`): The function to call when the option is selected.
+    - `canInteract` (`function(entity?: number, distance: number, coords: vector3, id: string | number): boolean`): A function that determines if the option can be interacted with, accepting parameters for optional entity, distance to the interaction, interaction coordinates, and the interaction ID.
+  - `offset?` (`vector3`): The offset from the ped's position where the interaction is located.
+  - `bone?` (`string`): The name of the bone for the ped where the interaction is attached.
+  - `renderDistance?` (`number`): distance at which the interaction indicator is visible. Defaults to `5.0`.
+  - `activeDistance?` (`number`): distance at which the interaction menu is visible. Defaults to `1.0`.
+  - `cooldown?` (`number`): The cooldown time in milliseconds between interactions to prevent spamming. Defaults to `1000`.
+
+## Example
+
+```lua
+interact.addGlobalPed({
+    id = "uniquePedInteractionId",
+    options = {
+        {
+            text = "Interact with NPC",
+            icon = "hand",  -- Example simple FA icon name
+            action = function(data) print("NPC interaction triggered") end,
+            canInteract = function(entity, distance, coords, id)
+                return distance < 2.0 -- Example condition based on distance
+            end
+        }
+    },
+    offset = vector3(0, 0, 1.0),
+    bone = "head",
+    renderDistance = 10.0,
+    activeDistance = 2.0,
+    cooldown = 1500
+})

@@ -1,0 +1,43 @@
+# addLocalEntity
+
+Registers an interaction for a local (non-networked) entity in the game. This allows players to interact with specified local entities within a defined distance, offering customizable interaction options.
+
+## Parameters
+
+- `data` (`LocalEntityData`): A table containing the interaction data. It must include:
+  - `id` (`string | number`): A unique identifier for the interaction.
+  - `entity` (`number`): The entity handle of the local entity.
+  - `offset?` (`vector3`): The offset from the entity's position where the interaction is located.
+  - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
+    - `text` (`string`): The text displayed for the option.
+    - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
+    - `action` (`function(data: LocalEntityInteraction)`): The function to call when the option is selected.
+    - `canInteract` (`function(entity?: number, distance: number, coords: vector3, id: string | number)`): A function that determines if the option can be interacted with.
+  - `renderDistance?` (`number`): distance at which the interaction indicator is visible. Defaults to `5.0`.
+  - `activeDistance?` (`number`): distance at which the interaction menu is visible. Defaults to `1.0`.
+  - `cooldown?` (`number`): The cooldown time in milliseconds between interactions to prevent spamming. Defaults to `1000`.
+
+## Returns
+
+- `id` (`string | number`): The unique identifier for the interaction that was added.
+
+## Example
+
+```lua
+interact.addLocalEntity({
+    id = "uniqueLocalEntityId",
+    entity = 123456,  -- Example entity handle
+    options = {
+        {
+            text = "Local Interact Option",
+            icon = "hand",  -- Example simple FA icon name
+            action = function(data) print("Local entity action triggered") end,
+            canInteract = function(entity, distance, coords, id)
+                return distance < 2.0 -- Example condition based on distance
+            end
+        }
+    },
+    renderDistance = 10.0,
+    activeDistance = 2.0,
+    cooldown = 1500
+})

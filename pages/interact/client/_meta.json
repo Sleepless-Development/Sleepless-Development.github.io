@@ -1,0 +1,13 @@
+{
+  "addCoords": "addCoords",
+  "addLocalEntity": "addLocalEntity",
+  "addEntity": "addEntity",
+  "addGlobalModel": "addGlobalModel",
+  "addGlobalPlayer": "addGlobalPlayer",
+  "addGlobalPed": "addGlobalPed",
+  "addGlobalVehicle": "addGlobalVehicle",
+  "removeLocalEntity": "removeLocalEntity",
+  "removeEntity": "removeEntity",
+  "removeId": "removeId",
+  "removeModel": "removeModel"
+}

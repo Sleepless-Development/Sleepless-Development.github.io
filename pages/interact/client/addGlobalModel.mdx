@@ -1,0 +1,42 @@
+# addGlobalModel
+
+Registers interactions for one or more models in the game. This function enables global interactions with specified models, allowing customizable options for each interaction regardless of the model's specific instances or locations.
+
+## Parameters
+
+- `data` (`ModelData`): A table containing the interaction data. It must include:
+  - `models` (`table`): A list of models and their interaction settings. Each entry in the list is a table with the following fields:
+    - `model` (`string | number`): The model name or hash for which the interaction is being registered.
+    - `offset?` (`vector3`): The offset from the model's position where the interaction is located.
+    - `bone?` (`string`): The name of the bone for the model where the interaction is attached.
+  - `options` (`table`): A list of options and actions for the interaction. Each option is a table with the following fields:
+    - `text` (`string`): The text displayed for the option.
+    - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
+    - `action` (`function(data: self)`): The function to call when the option is selected.
+    - `canInteract` (`function(entity?: number, distance: number, coords: vector3, id: string | number)`): A function that determines if the option can be interacted with.
+  - `renderDistance?` (`number`): distance at which the interaction indicator is visible. Defaults to `5.0`.
+  - `activeDistance?` (`number`): distance at which the interaction menu is visible. Defaults to `1.0`.
+  - `cooldown?` (`number`): The cooldown time in milliseconds between interactions to prevent spamming. Defaults to `1000`.
+
+## Example
+
+```lua
+interact.addGlobalModel({
+    models = {
+        {model = "prop_vend_snak_01", offset = vector3(0, 0, 1.0)},
+        {model = "prop_vend_soda_02", offset = vector3(0, 0, 1.0)},
+    },
+    options = {
+        {
+            text = "Interact with Model",
+            icon = "hand",  -- Example simple FA icon name
+            action = function(data) print("Model interaction triggered") end,
+            canInteract = function(entity, distance, coords, id)
+                return distance < 2.0 -- Example condition based on distance
+            end
+        }
+    },
+    renderDistance = 10.0,
+    activeDistance = 2.0,
+    cooldown = 1500
+})

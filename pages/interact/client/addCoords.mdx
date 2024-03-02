@@ -1,0 +1,42 @@
+# addCoords
+
+Adds a static coordinates-based interaction to the game. This function registers an interaction at a specific location, allowing players to interact with it when they are within a defined distance.
+
+## Parameters
+
+- `data` (`CoordsData`): A table containing the interaction data. It must include:
+  - `id` (`string | number`): A unique identifier for the interaction.
+  - `coords` (`vector3`): The coordinates where the interaction is located.
+  - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
+    - `text` (`string`): The text displayed for the option.
+    - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
+    - `action` (`function(data: CoordsInteraction)`): The function to call when the option is selected.
+    - `canInteract` (`function(entity?: number, distance: number, coords: vector3, id: string | number)`): A function that determines if the option can be interacted with.
+  - `renderDistance?` (`number`): distance at which the interaction indicator is visible. Defaults to `5.0`.
+  - `activeDistance?` (`number`): distance at which the interaction menu is visible. Defaults to `1.0`.
+  - `cooldown?` (`number`): The cooldown time in milliseconds between interactions to prevent spamming. Defaults to `1000`.
+
+## Returns
+
+- `id` (`string | number`): The unique identifier for the interaction that was added.
+
+## Example
+
+```lua
+interact.addCoords({
+    id = "uniqueInteractionId",
+    coords = vector3(123.4, 567.8, 250.0),
+    options = {
+        {
+            text = "Interact Option 1",
+            icon = "hand",  -- Example simple FA icon name
+            action = function(data) print("Action 1 triggered") end,
+            canInteract = function(entity, distance, coords, id)
+                return distance < 2.0 -- Example condition based on distance
+            end
+        }
+    },
+    renderDistance = 10.0,
+    activeDistance = 2.0,
+    cooldown = 1500
+})
