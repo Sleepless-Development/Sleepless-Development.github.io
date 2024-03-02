@@ -39,14 +39,14 @@ const config: DocsThemeConfig = {
   logo: (
     <div
       style={{
-        paddingLeft: '50px',
+        paddingLeft: '65px',
         lineHeight: '38px',
-        background: "url('https://avatars.githubusercontent.com/u/88127058?s=38') no-repeat left",
-        backgroundSize: '38px',
+        background: "url('https://i.imgur.com/ZIFuQi2.png') no-repeat left",
+        backgroundSize: '65px',
         fontWeight: 550,
       }}
     >
-      Overextended
+      Sleepless
     </div>
   ),
   project: {
