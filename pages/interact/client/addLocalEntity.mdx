@@ -8,6 +8,7 @@ Registers an interaction for a local (non-networked) entity in the game. This al
   - `id` (`string | number`): A unique identifier for the interaction.
   - `entity` (`number`): The entity handle of the local entity.
   - `offset?` (`vector3`): The offset from the entity's position where the interaction is located.
+  - `bone?` (`string`): The name of the bone for the entity where the interaction is attached.
   - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
     - `text` (`string`): The text displayed for the option.
     - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
