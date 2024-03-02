@@ -50,7 +50,7 @@ const config: DocsThemeConfig = {
     </div>
   ),
   project: {
-    link: 'https://sleepless-development.github.io/',
+    link: 'https://github.com/Sleepless-Development/Sleepless-Development.github.io/',
   },
   chat: {
     link: 'https://discord.gg/aUczAF8gd2',

@@ -1,3 +1,35 @@
-# Interact
+import { Callout } from 'nextra/components';
+import { Tabs, Tab, Steps } from 'nextra-theme-docs';
+import ResourceLinks from '@components/resource-links';
 
-This is the index page for the Advanced folder!
+# Sleepless Interact
+
+A 3D DUI interaction library for interacting with various entities and points in the world.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_interact" />
+
+## Installation
+
+### Download a [release](https://github.com/Sleepless-Development/sleepless_interact/releases) or build the source code.
+
+```bash
+git clone https://github.com/Sleepless-Development/sleepless_interact.git
+cd sleepless_interact/web
+pnpm i
+pnpm build
+```
+
+## Usage
+
+To enable the library inside of your resource just add `@demi_interact/init.lua` as a client_script in your `fxmanifest.lua` file.
+
+```lua
+client_scripts {
+    '@demi_interact/init.lua',
+}
+```
+
+When sleepless_interact has been imported into your script, it will make a new global:
+- `interact` for calling sleepless_interact functions into your script.
+
+You can now use the interact functions inside of your resource.
