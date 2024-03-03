@@ -10,6 +10,7 @@ Adds a static coordinates-based interaction to the game. This function registers
   - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
     - `text` (`string`): The text displayed for the option.
     - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
+    - `destroy?` (`boolean`): when true, the entire interaction will destroy when this option is selected
     - `action` (`function(data: CoordsInteraction)`): The function to call when the option is selected.
     - `canInteract` (`function(entity?: number, distance: number, coords: vector3, id: string | number)`): A function that determines if the option can be interacted with.
   - `renderDistance?` (`number`): distance at which the interaction indicator is visible. Defaults to `5.0`.
