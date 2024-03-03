@@ -5,6 +5,7 @@ Registers interactions for one or more models in the game. This function enables
 ## Parameters
 
 - `data` (`ModelData`): A table containing the interaction data. It must include:
+  - `id` (`string | number`): A unique identifier for the interaction.
   - `models` (`table`): A list of models and their interaction settings. Each entry in the list is a table with the following fields:
     - `model` (`string | number`): The model name or hash for which the interaction is being registered.
     - `offset?` (`vector3`): The offset from the model's position where the interaction is located.
@@ -23,6 +24,7 @@ Registers interactions for one or more models in the game. This function enables
 
 ```lua
 interact.addGlobalModel({
+    id = "uniqueModelInteractionId",
     models = {
         {model = "prop_vend_snak_01", offset = vector3(0, 0, 1.0)},
         {model = "prop_vend_soda_02", offset = vector3(0, 0, 1.0)},
