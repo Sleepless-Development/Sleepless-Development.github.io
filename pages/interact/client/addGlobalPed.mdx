@@ -6,7 +6,7 @@ Registers a global interaction for non-player characters (NPCs) or peds in the g
 
 - `data` (`PedInteractionData`): A table containing the interaction data. It must include:
   - `id` (`string | number`): A unique identifier for the interaction.
-  - `bone?` (`string or string[]`): name of the bone interact with or an array of bones. will use the first valid bone for the entity from the array
+  - `bone?` (`string or string[]`): name of the bone to interact with or an array of bones. will use the first valid bone for the entity from the array
   - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
     - `text` (`string`): The text displayed for the option.
     - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
