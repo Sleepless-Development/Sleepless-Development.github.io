@@ -6,13 +6,15 @@ Registers a global interaction for networked vehicles in the game. This function
 
 - `data` (`VehicleInteractionData`): A table containing the interaction data. It must include:
   - `id` (`string | number`): A unique identifier for the interaction.
-  - `options` (`table`): A list of options and actions for the interaction. Each option is a table with the following fields:
+  - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
     - `text` (`string`): The text displayed for the option.
     - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
-    - `groups` (`{['job'] = 1}`): table of allowed jobs and grades for this Option
+    - `groups?` (`table<string, number>`): table of allowed jobs and minimum grades for this Option
+    - `items?` (`string or string[] or table<string, number>`): An item, array of items, or pairs of items-count required to show the option.
+    - `anyItem?` (`boolean`): Only require a single item from the items table to exist.
     - `destroy?` (`boolean`): when true, the entire interaction will destroy when this option is selected
-    - `action` (`function(data: EntityInteraction)`): The function to call when the option is selected.
-    - `canInteract` (`function(entity?: number, distance: number, coords: vector3, id: string | number): boolean`): A function that determines if the option can be interacted with, accepting parameters for optional entity, distance to the interaction, interaction coordinates, and the interaction ID.
+    - `action` (`function(data: CoordsInteraction)`): The function to call when the option is selected.
+    - `canInteract?` (`function(entity?: number, distance: number, coords: vector3, id: string | number)`): A function that determines if the option can be interacted with.
   - `offset?` (`vector3`): The offset from the vehicle's position where the interaction is located.
   - `bone?` (`string`): The name of the bone for the vehicle where the interaction is attached.
   - `renderDistance?` (`number`): distance at which the interaction indicator is visible. Defaults to `5.0`.
