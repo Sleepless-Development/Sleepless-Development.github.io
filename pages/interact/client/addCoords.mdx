@@ -32,6 +32,7 @@ interact.addCoords({
         {
             text = "Interact Option 1",
             icon = "hand",  -- Example simple FA icon name
+            groups = {['police'] = 1},
             action = function(data) print("Action 1 triggered") end,
             canInteract = function(entity, distance, coords, id)
                 return distance < 2.0 -- Example condition based on distance

@@ -28,6 +28,7 @@ interact.addGlobalPed({
         {
             text = "Interact with NPC",
             icon = "hand",  -- Example simple FA icon name
+            groups = {['police'] = 1},
             action = function(data) print("NPC interaction triggered") end,
             canInteract = function(entity, distance, coords, id)
                 return distance < 2.0 -- Example condition based on distance
