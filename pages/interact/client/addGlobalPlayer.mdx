@@ -31,6 +31,7 @@ interact.addGlobalPlayer({
             text = "Interact with Player",
             icon = "hand",  -- Example simple FA icon name
             groups = {['police'] = 1},
+            items = {['money'] = 100},
             action = function(data) print("Player interaction triggered") end,
             canInteract = function(entity, distance, coords, id)
                 return distance < 2.0 -- Example condition based on distance

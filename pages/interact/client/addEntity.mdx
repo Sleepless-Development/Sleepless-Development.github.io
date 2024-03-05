@@ -37,6 +37,7 @@ interact.addEntity({
             text = "Networked Interact Option",
             icon = "hand",  -- Example simple FA icon name
             groups = {['police'] = 1},
+            items = {['money'] = 100},
             action = function(data) print("Networked entity action triggered") end,
             canInteract = function(entity, distance, coords, id)
                 return distance < 2.0 -- Example condition based on distance
