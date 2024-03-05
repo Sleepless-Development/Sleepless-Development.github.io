@@ -8,7 +8,7 @@ Registers an interaction for a networked entity in the game. This function enabl
   - `id` (`string | number`): A unique identifier for the interaction.
   - `netId` (`number`): The network ID for the networked entity.
   - `offset?` (`vector3`): The offset from the entity's position where the interaction is located.
-  - `bone?` (`string`): The name of the bone for the entity where the interaction is attached.
+  - `bone?` (`string or string[]`): name of the bone interact with or an array of bones. will use the first valid bone for the entity from the array
   - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
     - `text` (`string`): The text displayed for the option.
     - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
