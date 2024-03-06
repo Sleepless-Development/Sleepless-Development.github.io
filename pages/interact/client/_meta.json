@@ -6,8 +6,11 @@
   "addGlobalPlayer": "addGlobalPlayer",
   "addGlobalPed": "addGlobalPed",
   "addGlobalVehicle": "addGlobalVehicle",
-  "removeLocalEntity": "removeLocalEntity",
-  "removeEntity": "removeEntity",
-  "removeId": "removeId",
-  "removeModel": "removeModel"
+  "removeAllFromLocalEntity": "removeAllFromLocalEntity",
+  "removeAllFromEntity": "removeAllFromEntity",
+  "removeById": "removeById",
+  "removeGlobalModel": "removeGlobalModel",
+  "removeGlobalPlayer": "removeGlobalPlayer",
+  "removeGlobalPed": "removeGlobalPed",
+  "removeGlobalVehicle": "removeGlobalVehicle"
 }

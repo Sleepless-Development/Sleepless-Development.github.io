@@ -1,0 +1,31 @@
+# removeGlobalPlayerById
+
+Removes global player interactions associated with an id
+
+## Parameters
+
+- `id` (`number | string`): The unique identifier of the interaction you wish to remove. This ID is returned by the function used to add the interaction initially.
+
+## Example
+
+```lua
+local interactionId = interact.addGlobalPlayer({
+    id = "uniqueNetworkedEntityId",
+    options = {
+        {
+            text = "Networked Interact Option",
+            icon = "hand",  -- Example simple FA icon name
+            groups = {['police'] = 1},
+            items = {['money'] = 100},
+            action = function(data) print("Networked entity action triggered") end,
+            canInteract = function(entity, distance, coords, id)
+                return distance < 2.0 -- Example condition based on distance
+            end
+        }
+    },
+    renderDistance = 10.0,
+    activeDistance = 2.0,
+    cooldown = 1500
+})
+
+interact.removeGlobalPlayerById(interactionId)

@@ -1,0 +1,33 @@
+# removeGlobalModelById
+
+Removes global interactions associated with a specific model or an array of models and an id.
+
+## Parameters
+
+- `id` (`number | string`): The unique identifier of the interaction you wish to remove. This ID is returned by the function used to add the interaction initially.
+
+## Example
+
+```lua
+local interactionId = interact.addGlobalModel({
+        id = 'TakeNozzle',
+        models = {
+            { model = `prop_gas_pump_1a` },
+            { model = `prop_gas_pump_1b` },
+        },
+        options = {
+            {
+                text = "Take Nozzle",
+                icon = "hand", -- Example simple FA icon name
+                canInteract = function(entity, distance, coords, id)
+                end,
+                action = function(data)
+                end,
+            },
+        },
+        renderDistance = 5.0,
+        activeDistance = 2.0,
+        cooldown = 1500
+    })
+
+interact.removeGlobalModelById({`prop_gas_pump_1a`, `prop_gas_pump_1b`}, interactionId)

@@ -1,6 +1,6 @@
-# removeId
+# removeById
 
-Removes an existing interaction using its unique identifier. This function is essential for managing the lifecycle of interactions within the game, allowing for the precise removal of specific interactions when they are no longer needed or relevant.
+Removes an existing interaction associated with an id. `this wont work for global interactions`
 
 ## Parameters
 
@@ -28,4 +28,4 @@ local interactionId = interact.addCoords({
 })
 
 -- To remove the specific interaction by its ID:
-interact.removeId(interactionId)
+interact.removeById(interactionId)

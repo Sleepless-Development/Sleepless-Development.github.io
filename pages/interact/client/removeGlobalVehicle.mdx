@@ -1,0 +1,34 @@
+# removeGlobalVehicle
+
+Removes global vehicle interactions associated with an id
+
+## Parameters
+
+- `id` (`number | string`): The unique identifier of the interaction you wish to remove. This ID is returned by the function used to add the interaction initially.
+
+## Example
+
+```lua
+local interactionId = interact.addGlobalVehicle({
+    id = 'global:vehicle:Trunk',
+    bone = 'boot',
+    activeDistance = 1.5,
+    renderDistance = 3.0,
+    options = {
+        {
+            text = 'open trunk',
+            icon = 'car',
+            canInteract = function(entity, distance, coords, id)
+                local veh = entity
+                return GetVehicleDoorLockStatus(veh) ~= 2
+            end,
+            action = function(interaction)
+                local veh = interaction.entity
+                SetVehicleDoorOpen(veh, 5, false, false)
+                ExecuteCommand('+inv2')
+            end
+        },
+    }
+})
+
+interact.removeGlobalVehicle(interactionId)
