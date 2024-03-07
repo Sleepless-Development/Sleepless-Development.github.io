@@ -1,0 +1,80 @@
+# addPed
+
+add a new ped to be handled by the manager. allows for target options, animations, props, scenarios and more
+
+## Parameters
+
+- `data` (`PedConfig`): A table containing the config data.
+  - `model` (`string | number`): A hash or string for the ped model.
+  - `coords` (`vector4`): The coordinates/heading where the ped is located.
+  - `scenario?` (`string`): The name of a scenario for the ped to play when spawned
+  - `animation?` (`table`): table of animation data
+    - `dict` (`string`): animation dictionary
+    - `anim` (`string`): animation name
+    - `flag?` (`number`): animation flag
+  - `prop?` (`table`): table of prop data
+    - `propModel` (`string` or `number`): model hash or string for the prop
+    - `bone` (`string` or `number`): bone name or index of the ped to attach the prop to
+    - `pos?` (`vec3`): position of the prop relative to the bone its attached to
+    - `rot?` (`vec3`): rotation of the prop relative to the bone its attached to
+  - `targetOptions?` (`table`): an array of `ox_target` [options](https://overextended.dev/ox_target/Options)
+  - `interactOptions?` (`table`): a `sleepless_interact` [local entity interaction](https://sleeplessdevelopment.dev/interact/client/addLocalEntity)
+  - `renderDistance?` (`number`): distance from the player at which the ped spawns
+  - `onSpawn?` (`function(ped?: number)`): a function that gets called right *AFTER* the ped is spawned
+  - `onDespawn?` (`function(ped?: number)`): a function that gets called right *BEFORE* the ped is despawned
+
+## Returns
+
+- `ox_lib point instance`
+
+## Example
+
+```lua
+local pedPoint = exports.sleepless_pedmanager:addPed({
+        model = "u_m_y_zombie_01",
+        coords = vec4(-1665.4545, -3143.3169, 13.9914, 281.1344),
+        renderDistance = 8.0,
+        -- scenario = "WORLD_HUMAN_CLIPBOARD", --optionally use a scenario or an animation.
+        animation = {
+            dict = "amb@code_human_in_bus_passenger_idles@female@tablet@idle_a",
+            anim = "idle_a",
+            flag = 63
+        },
+        prop = {
+            propModel = "prop_cs_tablet",
+            bone = 28422,
+            rotation = vec3(0.0, 0.0, 0.03),
+            offset = vec3(0.0, 0.0, 0.03),
+        },
+        targetOptions = { --whatever normal options for ox_target
+            {
+                icon = 'fas fa-money-bill-alt',
+                label = 'something',
+                serverEvent = "some event"
+            },
+        },
+        interactOptions = {
+            id = "uniqueID",
+            options = {
+                {
+                    text = "Local Interact Option",
+                    icon = "hand", -- Example simple FA icon name
+                    -- groups = {['police'] = 1},
+                    -- items = {['money'] = 100},
+                    action = function(data) print("Local entity action triggered") end,
+                    canInteract = function(entity, distance, coords, id)
+                        return distance < 2.0 -- Example condition based on distance
+                    end
+                }
+            },
+            renderDistance = 10.0,
+            activeDistance = 2.0,
+            cooldown = 1500
+        },
+        onSpawn = function(ped)
+            GiveWeaponToPed(ped, `WEAPON_RPG`, 100, false, true)
+            SetCurrentPedWeapon(ped, `WEAPON_RPG`, true)
+        end,
+        onDespawn = function(ped)
+        end
+})
