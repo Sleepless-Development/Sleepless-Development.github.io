@@ -1,3 +1,5 @@
+import { Callout } from 'nextra/components';
+
 # addCoords
 
 Adds a static coordinates-based interaction to the game. This function registers an interaction at a specific location, allowing players to interact with it when they are within a defined distance.
@@ -6,7 +8,7 @@ Adds a static coordinates-based interaction to the game. This function registers
 
 - `data` (`CoordsData`): A table containing the interaction data. It must include:
   - `id` (`string | number`): A unique identifier for the interaction.
-  - `coords` (`vector3`): The coordinates where the interaction is located.
+  - `coords` (`vector3 or vector3[]`): The coordinates where the interaction is located.
   - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
     - `text` (`string`): The text displayed for the option.
     - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
@@ -28,7 +30,9 @@ Adds a static coordinates-based interaction to the game. This function registers
 
 - `id` (`string | number`): The unique identifier for the interaction that was added.
 
-## Example
+## Examples
+
+### single
 
 ```lua
 interact.addCoords({
@@ -50,3 +54,33 @@ interact.addCoords({
     activeDistance = 2.0,
     cooldown = 1500
 })
+```
+
+### multiple
+
+<Callout type="warning">
+    when sending a list of coords it will modify the id for eachone by adding the index to the end of the id: "uniqueid:1", "uniqueid:2", etc.
+</Callout>
+
+```lua
+interact.addCoords({
+    id = "uniqueInteractionId", --id that is stored in variable
+    coords = {
+        vector3(123.4, 567.8, 250.0),
+        vector3(421.4, 567.8, 125.0)
+    },
+    options = {
+        {
+            text = "Interact Option 1",
+            icon = "hand",  -- Example simple FA icon name
+            action = function(data) print("Action 1 triggered") end,
+            canInteract = function(entity, distance, coords, id)
+                return true
+            end
+        }
+    },
+    renderDistance = 10.0,
+    activeDistance = 2.0,
+    cooldown = 1500
+})
+```

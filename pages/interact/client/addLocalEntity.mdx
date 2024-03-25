@@ -44,7 +44,7 @@ interact.addLocalEntity({
             items = {['money'] = 100},
             action = function(data) print("Local entity action triggered") end,
             canInteract = function(entity, distance, coords, id)
-                return distance < 2.0 -- Example condition based on distance
+                return true
             end
         }
     },

@@ -20,8 +20,10 @@ local interactionId = interact.addGlobalModel({
                 text = "Take Nozzle",
                 icon = "hand", -- Example simple FA icon name
                 canInteract = function(entity, distance, coords, id)
-                end,
+                    return true
+                end
                 action = function(data)
+                    print("Global model action triggered")
                 end,
             },
         },

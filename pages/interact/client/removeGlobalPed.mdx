@@ -17,9 +17,9 @@ local interactionId = interact.addGlobalPed({
             icon = "hand",  -- Example simple FA icon name
             groups = {['police'] = 1},
             items = {['money'] = 100},
-            action = function(data) print("Networked entity action triggered") end,
+            action = function(data) print("Global ped action triggered") end,
             canInteract = function(entity, distance, coords, id)
-                return distance < 2.0 -- Example condition based on distance
+                return true
             end
         }
     },

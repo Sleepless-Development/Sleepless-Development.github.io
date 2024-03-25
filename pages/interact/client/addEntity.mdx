@@ -44,9 +44,8 @@ interact.addEntity({
             items = {['money'] = 100},
             action = function(data) print("Networked entity action triggered") end,
             canInteract = function(entity, distance, coords, id)
-                return distance < 2.0 -- Example condition based on distance
+                return true
             end
-        }
     },
     renderDistance = 10.0,
     activeDistance = 2.0,
