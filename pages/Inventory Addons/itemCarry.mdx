@@ -1,0 +1,69 @@
+# Item Carry
+
+This script is used to automatically attach and carry items when using `ox_inventory`. 
+
+## Adding New Entries to CARRY_ITEMS
+
+To add a new entry to the `config` table in `itemCarry/config.lua`, follow the structure provided below:
+
+```lua
+local config = {
+    ['box'] = {
+        walkOnly = true,
+        blockVehicle = true,
+        anim = {
+            dict = 'anim@heists@box_carry@',
+            clip = 'idle',
+            flag = 51
+        },
+        prop = {
+            bone = 60309,
+            model = joaat('hei_prop_heist_box'),
+            placement = {
+                pos = vector3(0.025000, 0.080000, 0.255000),
+                rot = vector3(-145.000000, 290.000000, 0.000000),
+            },
+        },
+    },
+}
+```
+
+- `walkOnly?`: (`boolean`) weather or not you want the player to only be able to walk while carrying this item.
+- `blockVehicle?`: (`boolean`) weather or not you want the player to be able to get in a vehicle with this item.
+- `animation`: (`{dict: string, clip: string, flag?: number}`) The name of the animation associated with the item.
+- `prop`: (`{bone: number, model: number, placement: {pos: vector3, rot: vector3}}`) prop attachment data for the item being carried
+
+### Example Usage
+
+Let's say you want to add a new item called 'briefcase' to the `config` table. Here's how the entry might look:
+
+```lua
+CARRY_ITEMS = {
+    ['box'] = {
+        animation = 'idle',
+        dictionary = 'anim@heists@box_carry@',
+        animationFlag = 51,
+        prop = {
+            bone = 60309,
+            model = 'hei_prop_heist_box',
+            placement = {
+                pos = vector3(0.025000, 0.080000, 0.255000),
+                rot = vector3(-145.000000, 290.000000, 0.000000),
+            },
+        },
+    },
+    ['briefcase'] = {
+        animation = 'idle',
+        dictionary = 'anim@heists@briefcase@',
+        animationFlag = 52,
+        prop = {
+            bone = 60310,
+            model = 'prop_briefcase_02',
+            placement = {
+                pos = vector3(0.035000, 0.070000, 0.240000),
+                rot = vector3(-135.000000, 280.000000, 0.000000),
+            },
+        },
+    },
+}
+```
