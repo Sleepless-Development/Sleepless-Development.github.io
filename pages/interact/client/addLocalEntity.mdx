@@ -25,7 +25,7 @@ Registers an interaction for a local (non-networked) entity in the game. This al
   - `renderDistance?` (`number`): distance at which the interaction indicator is visible. Defaults to `5.0`.
   - `activeDistance?` (`number`): distance at which the interaction menu is visible. Defaults to `1.0`.
   - `cooldown?` (`number`): The cooldown time in milliseconds between interactions to prevent spamming. Defaults to `1000`.
-  - `disableWhenDead?` (`boolean`): If this is set to true the interaction will be removed when the entity is dead.
+  - `removeWhenDead?` (`boolean`): If this is set to true the interaction will be removed when the entity is dead. if it is a global interation, it will prevent the interaction from being added again while dead
   - `sprite?` (`table`) a table of override data for the indicator sprite (small circle by default in config)
    - `dict?` (`string`) texture dictionary
    - `txt?` (`string`) texture name
