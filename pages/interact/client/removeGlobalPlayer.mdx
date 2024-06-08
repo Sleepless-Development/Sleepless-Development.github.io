@@ -13,11 +13,11 @@ local interactionId = interact.addGlobalPlayer({
     id = "uniqueNetworkedEntityId",
     options = {
         {
-            text = "Networked Interact Option",
+            label = "Networked Interact Option",
             icon = "hand",  -- Example simple FA icon name
             groups = {['police'] = 1},
             items = {['money'] = 100},
-            action = function(data) print("Global Player action triggered") end,
+            onSelect =function(data) print("Global Player action triggered") end,
             canInteract = function(entity, distance, coords, id)
                 return true
             end
@@ -28,4 +28,14 @@ local interactionId = interact.addGlobalPlayer({
     cooldown = 1500
 })
 
-interact.removeGlobalPlayerById(interactionId)
+interact.removeGlobalPlayer(interactionId)
+
+
+```
+
+
+### export
+
+```lua
+    exports.sleepless_interact:removeGlobalPlayer(interactionId)
+```

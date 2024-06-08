@@ -8,16 +8,16 @@ Adds a static coordinates-based interaction to the game. This function registers
 
 - `data` (`CoordsData`): A table containing the interaction data. It must include:
   - `id` (`string | number`): A unique identifier for the interaction.
-  - `coords` (`vector3 or vector3[]`): The coordinates where the interaction is located.
+  - `coords` (`vec3 or vec3[]`): The coordinates where the interaction is located.
   - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
-    - `text` (`string`): The text displayed for the option.
+    - `label` (`string`): The text displayed for the option.
     - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
     - `groups?` (`table<string, number>`): table of allowed jobs and minimum grades for this Option
     - `items?` (`string or string[] or table<string, number>`): An item, array of items, or pairs of items-count required to show the option.
     - `anyItem?` (`boolean`): Only require a single item from the items table to exist.
-    - `destroy?` (`boolean`): when true, the entire interaction will destroy when this option is selected
-    - `canInteract?` (`function(entity?: number, distance: number, coords: vector3, id: string | number)`): A function that determines if the option can be interacted with.
-    - `action?` (`function(id: string | number, entity?: number, coords: vec3, distance: number)`): function that gets called when the option is selected
+    - `remove?` (`boolean`): when true, the entire interaction will remove when this option is selected
+    - `canInteract?` (`function(entity?: number, distance: number, coords: vec3, id: string | number)`): A function that determines if the option can be interacted with.
+    - `onSelect` (`function(id: string | number, entity?: number, coords: vec3, distance: number)`): function that gets called when the option is selected
     - `export?` (`string`): export that gets called when the option is selected.
     - `event?` (`string`): client event that gets called when the option is selected.
     - `serverEvent?` (`string`): server event that gets called when the option is selected.
@@ -25,6 +25,11 @@ Adds a static coordinates-based interaction to the game. This function registers
   - `renderDistance?` (`number`): distance at which the interaction indicator is visible. Defaults to `5.0`.
   - `activeDistance?` (`number`): distance at which the interaction menu is visible. Defaults to `1.0`.
   - `cooldown?` (`number`): The cooldown time in milliseconds between interactions to prevent spamming. Defaults to `1000`.
+  - `disableWhenDead?` (`boolean`): If this is set to true the interaction will be removed when the entity is dead.
+  - `sprite?` (`table`) a table of override data for the indicator sprite (small circle by default in config)
+   - `dict?` (`string`) texture dictionary
+   - `txt?` (`string`) texture name
+   - `color?` (`vec4`) color
 
 ## Returns
 
@@ -37,14 +42,14 @@ Adds a static coordinates-based interaction to the game. This function registers
 ```lua
 interact.addCoords({
     id = "uniqueInteractionId",
-    coords = vector3(123.4, 567.8, 250.0),
+    coords = vec3(123.4, 567.8, 250.0),
     options = {
         {
-            text = "Interact Option 1",
+            label = "Interact Option 1",
             icon = "hand",  -- Example simple FA icon name
             groups = {['police'] = 1},
             items = {['money'] = 100},
-            action = function(data) print("Action 1 triggered") end,
+            onSelect =function(data) print("Action 1 triggered") end,
             canInteract = function(entity, distance, coords, id)
                 return distance < 2.0 -- Example condition based on distance
             end
@@ -66,14 +71,14 @@ interact.addCoords({
 interact.addCoords({
     id = "uniqueInteractionId", --id that is stored in variable
     coords = {
-        vector3(123.4, 567.8, 250.0),
-        vector3(421.4, 567.8, 125.0)
+        vec3(123.4, 567.8, 250.0),
+        vec3(421.4, 567.8, 125.0)
     },
     options = {
         {
-            text = "Interact Option 1",
+            label = "Interact Option 1",
             icon = "hand",  -- Example simple FA icon name
-            action = function(data) print("Action 1 triggered") end,
+            onSelect = function(data) print("Action 1 triggered") end,
             canInteract = function(entity, distance, coords, id)
                 return true
             end
@@ -83,4 +88,10 @@ interact.addCoords({
     activeDistance = 2.0,
     cooldown = 1500
 })
+```
+
+### export
+
+```lua
+    exports.sleepless_interact:addCoords(data)
 ```

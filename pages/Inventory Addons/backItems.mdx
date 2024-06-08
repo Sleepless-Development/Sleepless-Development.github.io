@@ -16,8 +16,8 @@ This configuration defines the default slots for item placement, each linked to 
 #### Slot Class Specification
 
 - `bone` (number): The ID of the bone where the slot is attached.
-- `pos` (vector3): The position vector (x, y, z) relative to the bone.
-- `rot` (vector3): The rotation vector (x, y, z) relative to the bone.
+- `pos` (vec3): The position vec (x, y, z) relative to the bone.
+- `rot` (vec3): The rotation vec (x, y, z) relative to the bone.
 
 ### 2. Back Items Configuration (`BackItems`)
 
@@ -29,8 +29,8 @@ This configuration outlines the properties and placement rules for back items.
 - `group` (string, optional): Defines the slot group for the item, defaulting to 'back'.
 - `customPos` (table, optional): Specifies a custom position for the item, which includes:
   - `bone` (number, optional): The bone ID for custom attachment. **Mandatory if `ignoreLimits` is utilized**.
-  - `pos` (vector3, optional): The custom position vector. **Mandatory if `ignoreLimits` is utilized**.
-  - `rot` (vector3, optional): The custom rotation vector. **Mandatory if `ignoreLimits` is utilized**.
+  - `pos` (vec3, optional): The custom position vec. **Mandatory if `ignoreLimits` is utilized**.
+  - `rot` (vec3, optional): The custom rotation vec. **Mandatory if `ignoreLimits` is utilized**.
 - `ignoreLimits` (boolean, optional): When true, the item attaches regardless of available slots. **Requires a full `customPos` setup**.
 - `model` (number, optional): Necessary for non-weapon items or alternative models for weapons.
 

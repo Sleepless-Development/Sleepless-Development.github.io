@@ -16,13 +16,13 @@ local interactionId = interact.addGlobalVehicle({
     renderDistance = 3.0,
     options = {
         {
-            text = 'open trunk',
+            label = 'open trunk',
             icon = 'car',
             canInteract = function(entity, distance, coords, id)
                 local veh = entity
                 return GetVehicleDoorLockStatus(veh) ~= 2
             end,
-            action = function(interaction)
+            onSelect =function(interaction)
                 local veh = interaction.entity
                 SetVehicleDoorOpen(veh, 5, false, false)
                 ExecuteCommand('+inv2')
@@ -32,3 +32,11 @@ local interactionId = interact.addGlobalVehicle({
 })
 
 interact.removeGlobalVehicle(interactionId)
+```
+
+
+### export
+
+```lua
+    exports.sleepless_interact:removeGlobalVehicle(interactionId)
+```

@@ -8,22 +8,27 @@ Registers a global interaction for players in the game. This function enables in
   - `id` (`string | number`): A unique identifier for the interaction.
   - `bone?` (`string or string[]`): name of the bone to interact with or an array of bones. will use the first valid bone for the entity from the array
   - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
-    - `text` (`string`): The text displayed for the option.
+    - `label` (`string`): The text displayed for the option.
     - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
     - `groups?` (`table<string, number>`): table of allowed jobs and minimum grades for this Option
     - `items?` (`string or string[] or table<string, number>`): An item, array of items, or pairs of items-count required to show the option.
     - `anyItem?` (`boolean`): Only require a single item from the items table to exist.
-    - `destroy?` (`boolean`): when true, the entire interaction will destroy when this option is selected
-    - `canInteract?` (`function(entity?: number, distance: number, coords: vector3, id: string | number)`): A function that determines if the option can be interacted with.
+    - `remove?` (`boolean`): when true, the entire interaction will destroy when this option is selected
+    - `canInteract?` (`function(entity?: number, distance: number, coords: vec3, id: string | number)`): A function that determines if the option can be interacted with.
     - `action?` (`function(id: string | number, entity?: number, coords: vec3, distance: number)`): function that gets called when the option is selected
     - `export?` (`string`): export that gets called when the option is selected.
     - `event?` (`string`): client event that gets called when the option is selected.
     - `serverEvent?` (`string`): server event that gets called when the option is selected.
     - `command?` (`string`): command that gets called when the option is selected.
-  - `offset?` (`vector3`): The offset from the player's position where the interaction is located.
+  - `offset?` (`vec3`): The offset from the player's position where the interaction is located.
   - `renderDistance?` (`number`): distance at which the interaction indicator is visible. Defaults to `5.0`.
   - `activeDistance?` (`number`): distance at which the interaction menu is visible. Defaults to `1.0`.
   - `cooldown?` (`number`): The cooldown time in milliseconds between interactions to prevent spamming. Defaults to `1000`.
+  - `disableWhenDead?` (`boolean`): If this is set to true the interaction will be removed when the entity is dead.
+  - `sprite?` (`table`) a table of override data for the indicator sprite (small circle by default in config)
+   - `dict?` (`string`) texture dictionary
+   - `txt?` (`string`) texture name
+   - `color?` (`vec4`) color
 
 ## Example
 
@@ -32,19 +37,26 @@ interact.addGlobalPlayer({
     id = "uniquePlayerInteractionId",
     options = {
         {
-            text = "Interact with Player",
+            label = "Interact with Player",
             icon = "hand",  -- Example simple FA icon name
             groups = {['police'] = 1},
             items = {['money'] = 100},
-            action = function(data) print("Player interaction triggered") end,
+            onSelect =function(data) print("Player interaction triggered") end,
             canInteract = function(entity, distance, coords, id)
                 return true
             end
         }
     },
-    offset = vector3(0, 0, 1.0),
+    offset = vec3(0, 0, 1.0),
     bone = "head",
     renderDistance = 10.0,
     activeDistance = 2.0,
     cooldown = 1500
 })
+
+
+### export
+
+```lua
+    exports.sleepless_interact:addGlobalPlayer(data)
+```

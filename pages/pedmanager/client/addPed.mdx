@@ -6,7 +6,7 @@ add a new ped to be handled by the manager. allows for target options, animation
 
 - `data` (`PedConfig`): A table containing the config data.
   - `model` (`string | number`): A hash or string for the ped model.
-  - `coords` (`vector4 | vector4[]`): The coordinates/heading where the ped(s) will be located.
+  - `coords` (`vec4 | vec4[]`): The coordinates/heading where the ped(s) will be located.
   - `scenario?` (`string`): The name of a scenario for the ped to play when spawned
   - `animation?` (`table`): table of animation data
     - `dict` (`string`): animation dictionary
@@ -57,11 +57,11 @@ local pedPoint = exports.sleepless_pedmanager:addPed({
             id = "uniqueID",
             options = {
                 {
-                    text = "Local Interact Option",
+                    label = "Local Interact Option",
                     icon = "hand", -- Example simple FA icon name
                     -- groups = {['police'] = 1},
                     -- items = {['money'] = 100},
-                    action = function(data) print("Local entity action triggered") end,
+                    onSelect =function(data) print("Local entity action triggered") end,
                     canInteract = function(entity, distance, coords, id)
                         return distance < 2.0 -- Example condition based on distance
                     end

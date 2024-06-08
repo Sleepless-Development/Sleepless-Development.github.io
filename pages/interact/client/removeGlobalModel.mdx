@@ -12,17 +12,17 @@ Removes global interactions associated with a specific model or an array of mode
 local interactionId = interact.addGlobalModel({
         id = 'TakeNozzle',
         models = {
-            { model = `prop_gas_pump_1a` },
-            { model = `prop_gas_pump_1b` },
+            `prop_gas_pump_1a`
+            `prop_gas_pump_1b`
         },
         options = {
             {
-                text = "Take Nozzle",
+                label = "Take Nozzle",
                 icon = "hand", -- Example simple FA icon name
                 canInteract = function(entity, distance, coords, id)
                     return true
                 end
-                action = function(data)
+                onSelect =function(data)
                     print("Global model action triggered")
                 end,
             },
@@ -30,6 +30,14 @@ local interactionId = interact.addGlobalModel({
         renderDistance = 5.0,
         activeDistance = 2.0,
         cooldown = 1500
-    })
+})
 
-interact.removeGlobalModelById({`prop_gas_pump_1a`, `prop_gas_pump_1b`}, interactionId)
+interact.removeGlobalModel(interactionId)
+
+```
+
+### export
+
+```lua
+    exports.sleepless_interact:removeGlobalModel(interactionId)
+```

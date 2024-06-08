@@ -20,8 +20,8 @@ local config = {
             bone = 60309,
             model = joaat('hei_prop_heist_box'),
             placement = {
-                pos = vector3(0.025000, 0.080000, 0.255000),
-                rot = vector3(-145.000000, 290.000000, 0.000000),
+                pos = vec3(0.025000, 0.080000, 0.255000),
+                rot = vec3(-145.000000, 290.000000, 0.000000),
             },
         },
     },
@@ -35,8 +35,8 @@ local config = {
             bone = 60310,
             model = 'prop_briefcase_02',
             placement = {
-                pos = vector3(0.035000, 0.070000, 0.240000),
-                rot = vector3(-135.000000, 280.000000, 0.000000),
+                pos = vec3(0.035000, 0.070000, 0.240000),
+                rot = vec3(-135.000000, 280.000000, 0.000000),
             },
         },
     },
@@ -46,4 +46,4 @@ local config = {
 - `walkOnly?`: (`boolean`) weather or not you want the player to only be able to walk while carrying this item.
 - `blockVehicle?`: (`boolean`) weather or not you want the player to be able to get in a vehicle with this item.
 - `animation`: (`{dict: string, clip: string, flag?: number}`) The name of the animation associated with the item.
-- `prop`: (`{bone: number, model: number, placement: {pos: vector3, rot: vector3}}`) prop attachment data for the item being carried
+- `prop`: (`{bone: number, model: number, placement: {pos: vec3, rot: vec3}}`) prop attachment data for the item being carried
