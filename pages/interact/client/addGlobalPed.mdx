@@ -15,7 +15,7 @@ Registers a global interaction for non-player characters (NPCs) or peds in the g
     - `anyItem?` (`boolean`): Only require a single item from the items table to exist.
     - `remove?` (`boolean`): when true, the entire interaction will destroy when this option is selected
     - `canInteract?` (`function(entity?: number, distance: number, coords: vec3, id: string | number)`): A function that determines if the option can be interacted with.
-    - `action?` (`function(id: string | number, entity?: number, coords: vec3, distance: number)`): function that gets called when the option is selected
+    - `onSelect?` (`function(id: string | number, entity?: number, coords: vec3, distance: number)`): function that gets called when the option is selected
     - `export?` (`string`): export that gets called when the option is selected.
     - `event?` (`string`): client event that gets called when the option is selected.
     - `serverEvent?` (`string`): server event that gets called when the option is selected.
