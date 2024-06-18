@@ -9,6 +9,9 @@ Adds a static coordinates-based interaction to the game. This function registers
 - `data` (`CoordsData`): A table containing the interaction data. It must include:
   - `id` (`string | number`): A unique identifier for the interaction.
   - `coords` (`vec3 or vec3[]`): The coordinates where the interaction is located.
+  - `onEnter` (`function(data: CPoint)`) [onEnter](https://overextended.dev/ox_lib/Modules/Points/Lua/Client) cb function for an ox_lib point
+  - `onExit` (`function(data: CPoint)`)  [onExit](https://overextended.dev/ox_lib/Modules/Points/Lua/Client) cb function for an ox_lib point
+  - `nearby` (`function(data: CPoint)`)  [nearby](https://overextended.dev/ox_lib/Modules/Points/Lua/Client) cb function for an ox_lib point
   - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
     - `label` (`string`): The text displayed for the option.
     - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
@@ -39,9 +42,25 @@ Adds a static coordinates-based interaction to the game. This function registers
 ### single
 
 ```lua
+local function onEnter(point)
+    print('Hello')
+end
+
+local function onExit(point)
+    print('Goodbye')
+end
+
+local function nearby(point) --- runs every frame when inside the render distance
+    print('wow')
+end
+
+
 interact.addCoords({
     id = "uniqueInteractionId",
     coords = vec3(123.4, 567.8, 250.0),
+    onEnter = onEnter,
+    onExit = onExit,
+    nearby = nearby,
     options = {
         {
             label = "Interact Option 1",
