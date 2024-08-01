@@ -1,22 +1,22 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { IconBrandGithub, IconTag, IconFileText, IconDownload, IconBrandNpm } from '@tabler/icons-react';
 
 interface Props {
-  icon?: React.ReactNode;
-  children?: React.ReactNode;
+  icon?: JSX.Element;
+  children?: ReactNode;
   side?: 'left' | 'right';
   link?: string;
   label?: string;
 }
 
-const Button: React.FC = ({ side = 'left', children, icon, link }: Props) => {
+const Button = ({ side = 'left', children, icon, link }: Props) => {
   return (
     <div className="h-fit w-fit">
       <a href={link}>
         <div className="flex w-26 items-center justify-center gap-1.5 rounded-sm border border-black p-1.5 text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black mt-2">
-          {side === 'left' && <div>{icon}</div>}
+          {side === 'left' && icon}
           {children}
-          {side === 'right' && <div>{icon}</div>}
+          {side === 'right' && icon}
         </div>
       </a>
     </div>
@@ -25,42 +25,42 @@ const Button: React.FC = ({ side = 'left', children, icon, link }: Props) => {
 
 export default Button;
 
-export function GhButton(props: Props) {
+export function GhButton({ side, link, label }: Props) {
   return (
-    <Button icon={<IconBrandGithub />} side={props.side} link={props.link}>
-      {props.label || "Github"}
+    <Button icon={<IconBrandGithub />} side={side} link={link}>
+      {label || "Github"}
     </Button>
   );
 }
 
-export function DocButton(props: Props) {
+export function DocButton({ side, link, label }: Props) {
   return (
-    <Button icon={<IconFileText />} side={props.side} link={props.link}>
-      {props.label || "Documentation"}
+    <Button icon={<IconFileText />} side={side} link={link}>
+      {label || "Documentation"}
     </Button>
   );
 }
 
-export function DownloadButton(props: Props) {
+export function DownloadButton({ side, link, label }: Props) {
   return (
-    <Button icon={<IconDownload />} side={props.side} link={props.link}>
-      {props.label || "Download"}
+    <Button icon={<IconDownload />} side={side} link={link}>
+      {label || "Download"}
     </Button>
   );
 }
 
-export function ReleaseButton(props: Props) {
+export function ReleaseButton({ side, link, label }: Props) {
   return (
-    <Button icon={<IconTag />} side={props.side} link={props.link}>
-      {props.label || "Releases"}
+    <Button icon={<IconTag />} side={side} link={link}>
+      {label || "Releases"}
     </Button>
   );
 }
 
-export function NpmButton(props: Props) {
+export function NpmButton({ side, link, label }: Props) {
   return (
-    <Button icon={<IconBrandNpm />} side={props.side} link={props.link}>
-      {props.label || "Package"}
+    <Button icon={<IconBrandNpm />} side={side} link={link}>
+      {label || "Package"}
     </Button>
   );
 }
