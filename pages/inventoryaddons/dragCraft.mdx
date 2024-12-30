@@ -9,7 +9,7 @@ To create a new item, follow the structure of the `RECIPES` table and add a new 
 - `duration`: (`number`) The duration in milliseconds for the craft to complete.
 - `client`: (`{before: function, after: function}`) client-side functions to be executed `before` and `after` crafting.
 - `server`: (`{before: function, after: function}`) server-side functions to be executed `before` and `after` crafting.
-- `result`: (`{name: string, amount: number}[]`) An array of objects representing the resulting items after the craft. Each object should have a `name` property specifying the item's name and an `amount` property indicating the quantity obtained.
+- `result`: (`{name: string, amount?: number, min?: number, max?: number}[]`) An array of objects representing the resulting items after the craft. Each object should have a `name` property specifying the item's name and an `amount` property indicating the quantity obtained. optionally use `min` and `max` for a random result.
 - `costs`: (`table<string, {need: number, remove: boolean}>`) A table that specifies the amount of both items needed to perform the craft and whether they should be removed upon completion. Each item is represented as a key-value pair, where the key is the item's name and the value is a table with `need` and `remove` properties. The `need` property specifies the required quantity or durability removal amount if between 0.0 and 1.0, and the `remove` property indicates whether the item should be removed from the inventory upon completion.
 
 You can add as many different item/amount pairs to the `result` array as desired, allowing for multiple items to be obtained from a single craft.
