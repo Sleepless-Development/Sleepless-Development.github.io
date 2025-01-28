@@ -9,6 +9,7 @@ Registers an interaction for a networked entity in the game. This function enabl
   - `netId` (`number`): The network ID for the networked entity.
   - `offset?` (`vec3`): The offset from the entity's position where the interaction is located.
   - `bone?` (`string or string[]`): name of the bone to interact with or an array of bones. will use the first valid bone for the entity from the array
+  - `allowInVehicle?` (`boolean`): wether or not you can use this interaction in a car (default: `false`).
   - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
     - `label` (`string`): The text displayed for the option.
     - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").

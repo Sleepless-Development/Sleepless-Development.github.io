@@ -12,6 +12,7 @@ Adds a static coordinates-based interaction to the game. This function registers
   - `onEnter` (`function(data: CPoint)`) [onEnter](https://overextended.dev/ox_lib/Modules/Points/Lua/Client) cb function for an ox_lib point
   - `onExit` (`function(data: CPoint)`)  [onExit](https://overextended.dev/ox_lib/Modules/Points/Lua/Client) cb function for an ox_lib point
   - `nearby` (`function(data: CPoint)`)  [nearby](https://overextended.dev/ox_lib/Modules/Points/Lua/Client) cb function for an ox_lib point
+  - `allowInVehicle?` (`boolean`): wether or not you can use this interaction in a car (default: `false`).
   - `options` (`table`): A list of options for the interaction. Each option is a table with the following fields:
     - `label` (`string`): The text displayed for the option.
     - `icon` (`string`): The simple FontAwesome icon name displayed for the option (e.g., "hand").
