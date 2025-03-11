@@ -1,0 +1,25 @@
+# addGlobalPlayer
+
+Adds interaction options globally for all players.
+
+### Parameters
+- `options` (`Option` | `Option[]`): Single option or array of options
+
+### Example
+```lua
+-- Using interact namespace
+interact.addGlobalPlayer({
+    label = "Trade",
+    name = 'player_trade',
+    icon = "exchange",
+    onSelect = function(data) print("Trading with player") end
+})
+
+-- Using export
+exports.sleepless_interact:addGlobalPlayer({
+    label = "Trade",
+    name = 'player_trade',
+    icon = "exchange",
+    onSelect = function(data) print("Trading with player") end
+})
+```

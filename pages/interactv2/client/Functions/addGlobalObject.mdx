@@ -1,0 +1,25 @@
+# addGlobalObject
+
+Adds interaction options globally for all objects.
+
+### Parameters
+- `options` (`Option` | `Option[]`): Single option or array of options
+
+### Example
+```lua
+-- Using interact namespace
+interact.addGlobalObject({
+    label = "Pickup Object",
+    name = "pickup_object",
+    icon = "box",
+    onSelect = function(data) print("Picking up object") end
+})
+
+-- Using export
+exports.sleepless_interact:addGlobalObject({
+    label = "Pickup Object",
+    name = "pickup_object",
+    icon = "box",
+    onSelect = function(data) print("Picking up object") end
+})
+```

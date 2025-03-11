@@ -1,0 +1,26 @@
+# addEntity
+
+Adds interaction options for specific networked entities.
+
+### Parameters
+- `arr` (`number` | `number[]`): Net ID or array of net IDs
+- `options` (`Option` | `Option[]`): Single option or array of options
+
+### Example
+```lua
+-- Using interact namespace
+local NetId = NetworkGetNetworkIdFromEntity(entity)
+
+interact.addEntity(NetId, {
+    label = "Networked Interaction",
+    name = 'networked_interaction',
+    onSelect = function(data) print("Network entity interaction") end
+})
+
+-- Using export
+exports.sleepless_interact:addEntity(NetId, {
+    label = "Networked Interaction",
+    name = 'networked_interaction',
+    onSelect = function(data) print("Network entity interaction") end
+})
+```

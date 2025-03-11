@@ -1,0 +1,56 @@
+import { Callout } from 'nextra/components';
+import { Tabs, Tab, Steps } from 'nextra-theme-docs';
+import ResourceLinks from '@components/resource-links';
+
+# Sleepless Interact
+
+A 3D DUI interaction library for interacting with various entities and points in the world.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_interact" />
+
+## Installation
+
+### Download a [release](https://github.com/Sleepless-Development/sleepless_interact/releases) or build the source code.
+
+```bash
+git clone https://github.com/Sleepless-Development/sleepless_interact.git
+cd sleepless_interact/web
+pnpm i
+pnpm build
+```
+
+## Configure
+
+To changed the config settings, look inside `imports/config.lua`
+
+```lua
+-- this is the maximum distance that interacts will render the indicator sprite (little cirlce)
+-- recommend keeping this pretty low for optimization
+config.maxInteractDistance = 5.0
+
+-- {R: 0-255, G: 0-255, B: 0-255, A: 0-255}
+config.themeColor = { 28, 100, 184, 200 } --- r, g, b, a
+
+--- texture dictionary and texture name for the sprite used to show non active interactions.
+config.IndicatorSprite = { dict = 'shared', txt = 'emptydot_32' }
+
+```
+
+## Usage
+
+To enable the library inside of your resource just add `@sleepless_interact/init.lua` as a client_script in your `fxmanifest.lua` file.
+
+```lua
+client_scripts {
+    '@sleepless_interact/init.lua',
+}
+```
+
+When sleepless_interact has been imported into your script, it will make a new global:
+- `interact` for calling sleepless_interact functions into your script.
+
+<Callout type="info">
+    all of the functions can also be called via exports. example: `exports.sleepless_interact:addEntity(netId, options)`
+</Callout>
+
+You can now use the interact functions inside of your resource.

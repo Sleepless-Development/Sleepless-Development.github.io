@@ -1,0 +1,20 @@
+# removeEntity
+
+Removes interaction options from networked entities.
+
+### Parameters
+- `arr` (`number` | `number[]`): Net ID or array of net IDs
+- `options` (`string` | `string[]`): Option name(s) to remove
+
+### Example
+```lua
+local NetId = NetworkGetNetworkIdFromEntity(entity)
+
+-- Using interact namespace
+interact.removeEntity(NetId, "networked_interaction") --- remove only options with this/these name(s)
+interact.removeEntity(NetId) -- remove all options from networked entity
+
+-- Using export
+exports.sleepless_interact:removeEntity(NetId, "networked_interaction") --- remove only options with this/these name(s)
+exports.sleepless_interact:removeEntity(NetId) -- remove all options from networked entity
+```

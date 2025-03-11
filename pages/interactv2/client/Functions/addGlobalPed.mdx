@@ -1,0 +1,25 @@
+# addGlobalPed
+
+Adds interaction options globally for all peds.
+
+### Parameters
+- `options` (`Option` | `Option[]`): Single option or array of options
+
+### Example
+```lua
+-- Using interact namespace
+interact.addGlobalPed({
+    label = "Talk to Ped",
+    name = "talk_to_ped",
+    icon = "comment",
+    onSelect = function(data) print("Talking to ped") end
+})
+
+-- Using export
+exports.sleepless_interact:addGlobalPed({
+    label = "Talk to Ped",
+    name = "talk_to_ped",
+    icon = "comment",
+    onSelect = function(data) print("Talking to ped") end
+})
+```

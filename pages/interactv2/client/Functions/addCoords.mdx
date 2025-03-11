@@ -1,0 +1,64 @@
+import { Callout } from 'nextra/components';
+
+# addCoords
+
+Adds static coordinate-based interactions to the game. Registers interactions at specific locations that players can interact with when within range.
+
+### Returns
+- `id` (`string`): The unique identifier for the added coordinate interaction
+
+### Parameters
+- `coords` (`vector3` | `vector3[]`): Single coordinate or array of coordinates
+- `options` (`Option` | `Option[]`): Single option or array of interaction options
+
+### Examples
+
+#### Single Coordinate
+```lua
+-- Using interact namespace
+local id = interact.addCoords(vec3(100.0, 200.0, 30.0), {
+    label = "Interact Here",
+    icon = "hand",
+    distance = 2.0,
+    onSelect = function(data) print("Selected!") end,
+    canInteract = function(entity, distance, coords, name)
+        return distance < 2.0
+    end
+})
+
+-- Using export
+local id = exports.sleepless_interact:addCoords(vec3(100.0, 200.0, 30.0), {
+    label = "Interact Here",
+    icon = "hand",
+    distance = 2.0,
+    onSelect = function(data) print("Selected!") end,
+    canInteract = function(entity, distance, coords, name)
+        return distance < 2.0
+    end
+})
+```
+
+#### Multiple Coordinates
+<Callout type="warning">
+    When using multiple coordinates, each option maintains the same ID but is tracked separately in the system
+</Callout>
+
+```lua
+-- Using interact namespace
+local id = interact.addCoords({
+    vec3(100.0, 200.0, 30.0),
+    vec3(150.0, 250.0, 30.0)
+}, {
+    label = "Interact Here",
+    onSelect = function(data) print("Multi-point interaction") end
+})
+
+-- Using export
+local id = exports.sleepless_interact:addCoords({
+    vec3(100.0, 200.0, 30.0),
+    vec3(150.0, 250.0, 30.0)
+}, {
+    label = "Interact Here",
+    onSelect = function(data) print("Multi-point interaction") end
+})
+```

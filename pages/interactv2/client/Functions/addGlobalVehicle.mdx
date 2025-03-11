@@ -1,0 +1,25 @@
+# addGlobalVehicle
+
+Adds interaction options globally for all vehicles.
+
+### Parameters
+- `options` (`Option` | `Option[]`): Single option or array of options
+
+### Example
+```lua
+-- Using interact namespace
+interact.addGlobalVehicle({
+    label = "Enter Vehicle",
+    name = 'enter_vehicle',
+    icon = "car",
+    onSelect = function(data) print("Entering vehicle") end
+})
+
+-- Using export
+exports.sleepless_interact:addGlobalVehicle({
+    label = "Enter Vehicle",
+    name = 'enter_vehicle',
+    icon = "car",
+    onSelect = function(data) print("Entering vehicle") end
+})
+```

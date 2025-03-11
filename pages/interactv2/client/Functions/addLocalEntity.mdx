@@ -1,0 +1,25 @@
+# addLocalEntity
+
+Adds interaction options for specific non-networked local entities.
+
+### Parameters
+- `arr` (`number` | `number[]`): Entity ID or array of entity IDs
+- `options` (`Option` | `Option[]`): Single option or array of options
+
+### Example
+```lua
+
+-- Using interact namespace
+interact.addLocalEntity(entityId, {
+    label = "Local Interaction",
+    name = 'local_interaction',
+    onSelect = function(data) print("Local entity interaction") end
+})
+
+-- Using export
+exports.sleepless_interact:addLocalEntity(entityId, {
+    label = "Local Interaction",
+    name = 'local_interaction',
+    onSelect = function(data) print("Local entity interaction") end
+})
+```

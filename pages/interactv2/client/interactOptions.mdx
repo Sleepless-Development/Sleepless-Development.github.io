@@ -1,0 +1,51 @@
+# Interact Options
+
+All interact actions are formated as an array containing objects with the following properties.
+
+## Interact Option
+
+# Option Type Definition
+
+```lua
+---@class Option
+{
+    label: string,              -- Display label
+    icon?: string,              -- Icon name
+    distance?: number,          -- Max interaction distance
+    canInteract?: function,     -- Function returning boolean
+    name?: string,             -- Unique identifier
+    resource?: string,         -- Owning resource
+    offset?: vector3,          -- Relative offset
+    offsetAbsolute?: vector3,  -- Absolute offset
+    bones?: string | string[], -- Bone ID(s)
+    onSelect?: function,       -- Selection callback
+    cooldown?: number,         -- Cooldown in milliseconds
+    export?: string,          -- Export function name
+    event?: string,           -- Client-side event
+    serverEvent?: string,     -- Server-side event
+    command?: string          -- Command to execute
+}
+```
+
+## Callback
+
+This is the data returned to a registered callback or event for selected option.
+
+A selected option will trigger a single action, in order of priority:
+
+1. onSelect
+2. export
+3. event
+4. server event
+5. command
+
+- data: `table`
+  - entity: `number`
+    - The id of the entity hit by the shape test. If triggering a server event, this is the network id instead.
+  - coords: `vector3`
+    - The resulting coordinates where the shape test hit a collision. 
+  - distance: `number`
+    - The player's distance from the coords.
+  - zone?: `number`
+    - The id of the selected zone, if applicable.
+

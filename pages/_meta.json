@@ -1,6 +1,7 @@
 {
   "index": "Introduction",
-  "interact": "Interact",
+  "interactv1": "Interact v1",
+  "interactv2": "Interact v2",
   "pedmanager": "Ped Manager",
   "inventoryaddons": "Inventory Addons",
   "lockpick": "Lockpick",

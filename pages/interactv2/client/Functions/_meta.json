@@ -1,0 +1,18 @@
+{
+  "addCoords": "addCoords",
+  "addLocalEntity": "addLocalEntity",
+  "addEntity": "addEntity",
+  "addModel": "addModel",
+  "addGlobalObject": "addGlobalObject",
+  "addGlobalPlayer": "addGlobalPlayer",
+  "addGlobalPed": "addGlobalPed",
+  "addGlobalVehicle": "addGlobalVehicle",
+  "removeCoords": "removeCoords",
+  "removeLocalEntity": "removeLocalEntity",
+  "removeEntity": "removeEntity",
+  "removeModel": "removeModel",
+  "removeGlobalObject": "removeGlobalObject",
+  "removeGlobalPlayer": "removeGlobalPlayer",
+  "removeGlobalPed": "removeGlobalPed",
+  "removeGlobalVehicle": "removeGlobalVehicle"
+}

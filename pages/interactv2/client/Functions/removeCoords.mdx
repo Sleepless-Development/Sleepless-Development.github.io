@@ -1,0 +1,29 @@
+# removeCoords
+
+Removes coordinate-based interactions from the game.
+
+### Parameters
+- `id` (`string`): The coordinate ID to remove
+- `options?` (`string` | `string[]`): Specific option names to remove (optional)
+- `suppressWarning?` (`boolean`): Suppress warning if ID doesn't exist (optional)
+
+### Example
+```lua
+local id = interact.addCoords(vec3(100.0, 200.0, 30.0), {
+    label = "Interact Here",
+    icon = "hand",
+    distance = 2.0,
+    onSelect = function(data) print("Selected!") end,
+    canInteract = function(entity, distance, coords, name)
+        return distance < 2.0
+    end
+})
+
+-- Using interact namespace
+interact.removeCoords(id, {"option1"})
+interact.removeCoords(id) -- Remove all options
+
+-- Using export
+exports.sleepless_interact:removeCoords(id, {"option1"})
+exports.sleepless_interact:removeCoords(id) -- Remove all options
+```

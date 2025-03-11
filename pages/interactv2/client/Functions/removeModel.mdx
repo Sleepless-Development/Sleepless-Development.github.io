@@ -1,0 +1,18 @@
+# removeModel
+
+Removes interaction options from specific models.
+
+### Parameters
+- `arr` (`number` | `string` | `(number | string)[]`): Model hash/name or array of models
+- `options` (`string` | `string[]`): Option name(s) to remove
+
+### Example
+```lua
+-- Using interact namespace
+interact.removeModel("prop_boxpile_01a", "box_interact")  --- remove only options with this/these name(s)
+interact.removeModel("prop_boxpile_01a") --- remove all options
+
+-- Using export
+exports.sleepless_interact:removeModel("prop_boxpile_01a", "box_interact")  --- remove only options with this/these name(s)
+exports.sleepless_interact:removeModel("prop_boxpile_01a") --- remove all options
+```

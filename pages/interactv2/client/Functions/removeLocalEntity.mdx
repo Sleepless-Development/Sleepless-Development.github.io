@@ -1,0 +1,18 @@
+# removeLocalEntity
+
+Removes interaction options from non-networked local entities.
+
+### Parameters
+- `arr` (`number` | `number[]`): Entity ID or array of entity IDs
+- `options` (`string` | `string[]`): Option name(s) to remove
+
+### Example
+```lua
+-- Using interact namespace
+interact.removeLocalEntity(entityId, "local_interaction") --- remove only options with this/these name(s)
+interact.removeLocalEntity(entityId)  -- remove all entity specific options from local entity
+
+-- Using export
+exports.sleepless_interact:removeLocalEntity(entityId, "local_interaction") --- remove only options with this/these name(s)
+exports.sleepless_interact:removeLocalEntity(entityId) -- remove all entity specific options from local entity
+```
