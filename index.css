@@ -33,3 +33,12 @@ ol.nx-list-decimal {
   --docsearch-highlight-color: #0ea5e9;
   --docsearch-primary-color: #0ea5e9;
 }
+
+
+:is([dir="ltr"] .ltr\:nx-pl-3) {
+  padding-left: 0.6rem;
+}
+
+:is([dir="ltr"] .ltr\:nx-ml-3) {
+  margin-left: 0.6rem;
+}
