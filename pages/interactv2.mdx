@@ -32,11 +32,20 @@ To changed the config settings, look inside `imports/config.lua`
 -- recommend keeping this pretty low for optimization
 config.maxInteractDistance = 5.0
 
--- {R: 0-255, G: 0-255, B: 0-255, A: 0-255}
+-- {0-255, 0-255, 0-255, 0-255}
 config.themeColor = { 28, 100, 184, 200 } --- r, g, b, a
 
 --- texture dictionary and texture name for the sprite used to show non active interactions.
 config.IndicatorSprite = { dict = 'shared', txt = 'emptydot_32' }
+
+-- boolean true/false use a keybind to show and hide the interactions
+config.useShowKeyBind = true
+
+-- string default key mapping for the show interactions keybind
+config.defaultShowKeyBind = 'LMENU'
+
+-- "hold" | "toggle" sets the behavior of the show interactions key bind
+config.showKeyBindBehavior = 'toggle'
 
 ```
 
