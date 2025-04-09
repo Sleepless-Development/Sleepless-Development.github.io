@@ -7,24 +7,30 @@ All interact actions are formated as an array containing objects with the follow
 ### Option Type Definition
 
 ```lua
----@class Option
-{
-    label: string,              -- Display label
-    icon?: string,              -- Icon name
-    distance?: number,          -- Max interaction distance
-    canInteract?: function,     -- Function returning boolean
-    name?: string,             -- Unique identifier
-    resource?: string,         -- Owning resource
-    offset?: vector3,          -- Relative offset
-    offsetAbsolute?: vector3,  -- Absolute offset
-    bones?: string | string[], -- Bone ID(s)
-    onSelect?: function,       -- Selection callback
-    cooldown?: number,         -- Cooldown in milliseconds
-    export?: string,          -- Export function name
-    event?: string,           -- Client-side event
-    serverEvent?: string,     -- Server-side event
-    command?: string          -- Command to execute
-}
+--- Represents an interaction option with various properties.
+---@class InteractOption
+---@field label string The display label for the option.
+---@field icon? string The icon associated with the option.
+---@field iconColor? string The css color for the icon
+---@field distance? number The maximum distance at which the option is available.
+---@field holdTime? number Makes the option a press and hold and sets how long it should be held for. (miliseconds)
+---@field canInteract? fun(entity: number, distance: number, coords: vector3, name: string): boolean? A function to determine if the option can be interacted with.
+---@field name? string A unique identifier for the option.
+---@field resource? string The resource that registered the option.
+---@field offset? vector3 A relative offset from the entity's position.
+---@field offsetAbsolute? vector3 An absolute offset in world coordinates.
+---@field color? number[] 4 numbers in an array that will be used for rgba and will overwrite the theme color for that option.
+---@field bones? string | string[] An array of bone IDs associated with the option.
+---@field allowInVehicle? boolean marks the option as being able to be used inside a vehicle.
+---@field onSelect? fun(data: InteractResponse) A function to execute when the option is selected.
+---@field cooldown? number number of miliseconds the interact system should cooldown for after this option is selected. prevents spam.
+---@field export? string Optional export function name
+---@field event? string Client-side event to trigger
+---@field serverEvent? string Server-side event to trigger
+---@field command? string Command to execute
+---@field onActive? fun(data: InteractResponse) A function to execute when the option is active.
+---@field onInactive? fun(data: InteractResponse) A function to execute when the option was active and is now inactive.
+---@field whileActive? fun(data: InteractResponse) A function to execute while the option is active on a loop.
 ```
 
 ## Callback
