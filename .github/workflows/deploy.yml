@@ -16,13 +16,14 @@ jobs:
         with:
           version: 9
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: 18.x
-          cache: pnpm
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install
+
       - name: Build website
         run: pnpm build
 
