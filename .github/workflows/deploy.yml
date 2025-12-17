@@ -12,19 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: pnpm/action-setup@v2
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 9
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 18.x
-          cache: pnpm
+          bun-version: latest
 
       - name: Install dependencies
-        run: pnpm install
+        run: bun install
       - name: Build website
-        run: pnpm build
+        run: bun run build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

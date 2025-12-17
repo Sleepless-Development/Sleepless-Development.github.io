@@ -1,0 +1,51 @@
+# removeAll
+
+Removes all active waypoints created by the client. Useful for cleanup operations.
+
+## Examples
+
+### Basic Usage
+
+```lua
+-- Remove all waypoints
+exports.sleepless_waypoints:removeAll()
+```
+
+### Mission Cleanup
+
+```lua
+local waypointIds = {}
+
+-- Create multiple waypoints for a mission route
+local checkpoints = {
+    { coords = vec3(100, 200, 30), label = 'CHECKPOINT 1' },
+    { coords = vec3(150, 250, 30), label = 'CHECKPOINT 2' },
+    { coords = vec3(200, 300, 30), label = 'CHECKPOINT 3' },
+}
+
+for i, checkpoint in ipairs(checkpoints) do
+    waypointIds[i] = exports.sleepless_waypoints:create({
+        coords = checkpoint.coords,
+        type = 'checkpoint',
+        color = '#f5a623',
+        label = checkpoint.label,
+    })
+end
+
+-- Clean up all waypoints when player cancels mission
+RegisterNetEvent('mission:cancel', function()
+    exports.sleepless_waypoints:removeAll()
+    waypointIds = {}
+end)
+```
+
+### Resource Cleanup
+
+```lua
+-- Clean up waypoints when resource stops
+AddEventHandler('onResourceStop', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        exports.sleepless_waypoints:removeAll()
+    end
+end)
+```

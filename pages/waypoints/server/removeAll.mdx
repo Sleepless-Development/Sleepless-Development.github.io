@@ -1,0 +1,63 @@
+import { Callout } from 'nextra/components';
+
+# removeAll
+
+Removes all server-created waypoints. Can optionally target a specific player's waypoints only.
+
+## Parameters
+
+- `playerId?` (`number`): Optional player server ID. If provided, only removes waypoints for that player. If omitted, removes all waypoints for all players.
+
+## Examples
+
+### Remove All Global Waypoints
+
+```lua
+-- Remove all waypoints for all players
+exports.sleepless_waypoints:removeAll()
+```
+
+### Remove Waypoints for Specific Player
+
+```lua
+-- Clean up waypoints when player leaves a job
+RegisterNetEvent('job:quit', function()
+    local playerId = source
+    exports.sleepless_waypoints:removeAll(playerId)
+end)
+```
+
+### Event Cleanup
+
+```lua
+local eventWaypoints = {}
+
+-- Create waypoints for an event
+RegisterCommand('startevent', function(source)
+    local eventCoords = {
+        vector3(100, 200, 30),
+        vector3(150, 250, 30),
+        vector3(200, 300, 30),
+    }
+
+    for i, coords in ipairs(eventCoords) do
+        local id = exports.sleepless_waypoints:create(-1, {
+            coords = coords,
+            type = 'checkpoint',
+            label = 'CHECKPOINT ' .. i,
+            color = '#3498db',
+        })
+        table.insert(eventWaypoints, id)
+    end
+end, true)
+
+-- Clean up all waypoints when event ends
+RegisterCommand('endevent', function(source)
+    exports.sleepless_waypoints:removeAll()
+    eventWaypoints = {}
+end, true)
+```
+
+<Callout type="info">
+    When called without a `playerId`, this removes ALL server-created waypoints across the entire server. Use with caution.
+</Callout>

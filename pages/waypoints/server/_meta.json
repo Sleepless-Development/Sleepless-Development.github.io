@@ -1,0 +1,10 @@
+{
+  "create": "create",
+  "update": "update",
+  "remove": "remove",
+  "removeAll": "removeAll",
+  "removeForPlayer": "removeForPlayer",
+  "get": "get",
+  "getAll": "getAll",
+  "getForPlayer": "getForPlayer"
+}

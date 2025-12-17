@@ -1,0 +1,99 @@
+import { Callout } from 'nextra/components';
+
+# create
+
+Creates a new waypoint for specific player(s) from the server. The waypoint will be synced to the target client(s) and rendered on their screen.
+
+## Parameters
+
+- `target` (`number` | `number[]`): Target player(s) to show the waypoint to
+  - Use a single player server ID to target one player
+  - Use an array of server IDs to target multiple players
+  - Use `-1` to target all connected players (global waypoint)
+- `data` (`WaypointData`): A table containing the waypoint configuration
+  - `coords` (`vector3`): The 3D position of the waypoint
+  - `type?` (`'small'` | `'checkpoint'`): Waypoint style type (default: `'small'`)
+  - `color?` (`string`): Hex color for the waypoint (default: `'#f5a623'`)
+  - `label?` (`string`): Text label for the waypoint
+  - `icon?` (`string`): Icon name for the waypoint
+  - `image?` (`string`): Image URL for the waypoint
+  - `size?` (`number`): Size multiplier (default: `1.0`)
+  - `displayDistance?` (`boolean`): Whether to show distance text (default: `true`)
+  - `drawDistance?` (`number`): Maximum distance to render (default: `500.0`)
+  - `fadeDistance?` (`number`): Distance to start fading (default: `400.0`)
+  - `minHeight?` (`number`): Minimum height for checkpoint line
+  - `maxHeight?` (`number`): Maximum height for checkpoint line
+  - `groundZ?` (`number`): Ground Z coordinate for the line
+
+## Returns
+
+- `serverId` (`number`): The server-side waypoint ID for managing this waypoint
+
+## Examples
+
+### Single Player Waypoint
+
+```lua
+RegisterCommand('sendwaypoint', function(source, args)
+    local targetPlayer = tonumber(args[1])
+    if not targetPlayer then return end
+
+    local ped = GetPlayerPed(targetPlayer)
+    local coords = GetEntityCoords(ped)
+    local targetPos = vector3(coords.x + 100, coords.y, coords.z)
+
+    local id = exports.sleepless_waypoints:create(targetPlayer, {
+        coords = targetPos,
+        type = 'checkpoint',
+        color = '#4ecdc4',
+        label = 'GO HERE',
+        size = 1.0,
+        drawDistance = 500.0,
+        groundZ = coords.z,
+    })
+
+    print(('Created waypoint %d for player %d'):format(id, targetPlayer))
+end, true)
+```
+
+### Multiple Players Waypoint
+
+```lua
+-- Send a waypoint to multiple specific players
+local playerIds = { 1, 2, 3 } -- Server IDs of target players
+
+local id = exports.sleepless_waypoints:create(playerIds, {
+    coords = vector3(0, 0, 72),
+    type = 'checkpoint',
+    color = '#f5a623',
+    label = 'MEETING POINT',
+    size = 1.0,
+    drawDistance = 1000.0,
+})
+```
+
+### Global Waypoint
+
+```lua
+-- Create a waypoint visible to all players
+local id = exports.sleepless_waypoints:create(-1, {
+    coords = vector3(0, 0, 72),
+    type = 'checkpoint',
+    color = '#9b59b6',
+    label = 'EVENT LOCATION',
+    size = 1.5,
+    drawDistance = 5000.0,
+    groundZ = 70.0,
+})
+
+print(('Created global waypoint %d'):format(id))
+
+-- Remove after 1 minute
+SetTimeout(60000, function()
+    exports.sleepless_waypoints:remove(id)
+end)
+```
+
+<Callout type="info">
+    Server-created waypoints are automatically cleaned up when a player disconnects. Global waypoints (target `-1`) persist until explicitly removed.
+</Callout>

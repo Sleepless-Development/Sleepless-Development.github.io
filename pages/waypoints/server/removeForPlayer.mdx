@@ -1,0 +1,51 @@
+# removeForPlayer
+
+Removes all waypoints associated with a specific player. This is automatically called when a player disconnects, but can be used manually for cleanup.
+
+## Parameters
+
+- `playerId` (`number`): The player's server ID
+
+## Examples
+
+### Manual Cleanup
+
+```lua
+-- Clean up all waypoints for a player when they respawn
+RegisterNetEvent('player:respawned', function()
+    local playerId = source
+    exports.sleepless_waypoints:removeForPlayer(playerId)
+end)
+```
+
+### Job Change Cleanup
+
+```lua
+-- Remove waypoints when player changes jobs
+RegisterNetEvent('job:changed', function(oldJob, newJob)
+    local playerId = source
+    exports.sleepless_waypoints:removeForPlayer(playerId)
+    
+    -- Optionally create new waypoints for the new job
+    if newJob.name == 'police' then
+        -- Create police-specific waypoints
+    end
+end)
+```
+
+### Admin Cleanup
+
+```lua
+-- Admin command to clear waypoints for a specific player
+RegisterCommand('clearwaypoints', function(source, args)
+    local targetId = tonumber(args[1])
+    
+    if not targetId then
+        print('Usage: clearwaypoints [player_id]')
+        return
+    end
+
+    exports.sleepless_waypoints:removeForPlayer(targetId)
+    print(('Cleared all waypoints for player %d'):format(targetId))
+end, true)
+```

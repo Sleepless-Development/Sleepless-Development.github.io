@@ -1,0 +1,77 @@
+import { Callout } from 'nextra/components';
+
+# update
+
+Updates an existing waypoint's properties. Only the properties you specify will be changed.
+
+## Parameters
+
+- `id` (`number`): The waypoint ID returned from `create`
+- `data` (`WaypointData`): A table containing the properties to update
+  - `coords?` (`vector3`): New position for the waypoint
+  - `color?` (`string`): New hex color
+  - `label?` (`string`): New label text
+  - `icon?` (`string`): New icon
+  - `size?` (`number`): New size multiplier
+  - `drawDistance?` (`number`): New maximum render distance
+  - `fadeDistance?` (`number`): New fade distance
+  - `minHeight?` (`number`): New minimum height
+  - `maxHeight?` (`number`): New maximum height
+  - `groundZ?` (`number`): New ground Z coordinate
+
+## Examples
+
+### Update Position
+
+```lua
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(100.0, 200.0, 30.0),
+    type = 'checkpoint',
+    label = 'TARGET',
+})
+
+-- Move the waypoint to a new position
+exports.sleepless_waypoints:update(id, {
+    coords = vec3(150.0, 250.0, 35.0),
+})
+```
+
+### Update Appearance
+
+```lua
+-- Change the color and label
+exports.sleepless_waypoints:update(id, {
+    color = '#e74c3c',
+    label = 'DANGER ZONE',
+})
+```
+
+### Dynamic Waypoint
+
+```lua
+-- Create a waypoint that follows an entity
+local targetEntity = GetClosestPed(GetEntityCoords(cache.ped), 50.0, true, true, true, true)
+
+local id = exports.sleepless_waypoints:create({
+    coords = GetEntityCoords(targetEntity),
+    type = 'small',
+    color = '#3498db',
+    icon = 'user',
+    size = 0.2,
+})
+
+-- Update the waypoint position periodically
+CreateThread(function()
+    while DoesEntityExist(targetEntity) do
+        exports.sleepless_waypoints:update(id, {
+            coords = GetEntityCoords(targetEntity),
+        })
+        Wait(100)
+    end
+    exports.sleepless_waypoints:remove(id)
+end)
+```
+
+<Callout type="warning">
+    If you need to update multiple properties at once, pass them all in a single `update` call for better performance.
+</Callout>

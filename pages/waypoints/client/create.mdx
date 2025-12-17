@@ -1,0 +1,84 @@
+import { Callout } from 'nextra/components';
+
+# create
+
+Creates a new 3D waypoint at the specified coordinates with customizable appearance and behavior.
+
+## Parameters
+
+- `data` (`WaypointData`): A table containing the waypoint configuration
+  - `coords` (`vector3`): The 3D position of the waypoint
+  - `type?` (`'small'` | `'checkpoint'`): Waypoint style type (default: `'small'`)
+  - `color?` (`string`): Hex color for the waypoint (default: `'#f5a623'`)
+  - `label?` (`string`): Text label for the waypoint
+  - `icon?` (`string`): Icon name for the waypoint
+  - `image?` (`string`): Image URL for the waypoint (e.g., `'nui://ox_inventory/web/images/item.webp'`)
+  - `size?` (`number`): Size multiplier (default: `1.0`)
+  - `displayDistance?` (`boolean`): Whether to show distance text (default: `true`)
+  - `drawDistance?` (`number`): Maximum distance to render (default: `500.0`)
+  - `fadeDistance?` (`number`): Distance to start fading (default: `400.0`)
+  - `minHeight?` (`number`): Minimum height for checkpoint line (default: `0.5`)
+  - `maxHeight?` (`number`): Maximum height for checkpoint line (default: `50.0`)
+  - `groundZ?` (`number`): Ground Z coordinate for the line (default: `coords.z - 2`)
+
+## Returns
+
+- `id` (`number`): The unique identifier for the created waypoint
+
+## Examples
+
+### Small Waypoint
+
+```lua
+-- Create a small waypoint with an icon
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(100.0, 200.0, 30.0),
+    type = 'small',
+    color = '#ff6b6b',
+    icon = 'hand',
+    size = 0.15,
+    drawDistance = 100.0,
+})
+
+print('Created waypoint:', id)
+```
+
+### Checkpoint Waypoint
+
+```lua
+-- Create a checkpoint-style beacon
+local playerPos = GetEntityCoords(cache.ped)
+local targetPos = vec3(200.0, 300.0, 30.0)
+
+local id = exports.sleepless_waypoints:create({
+    coords = targetPos,
+    type = 'checkpoint',
+    color = '#f5a623',
+    label = 'DESTINATION',
+    size = 1.0,
+    drawDistance = 500.0,
+    groundZ = playerPos.z - 1,
+    minHeight = 5.0,
+    maxHeight = 80.0,
+})
+```
+
+### Waypoint with Image
+
+```lua
+-- Create a waypoint with a custom image
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(150.0, 250.0, 30.0),
+    type = 'checkpoint',
+    color = '#4ecdc4',
+    label = 'COLLECT',
+    image = 'nui://ox_inventory/web/images/copper_ore.webp',
+    size = 1.0,
+    drawDistance = 300.0,
+    displayDistance = true,
+})
+```
+
+<Callout type="info">
+    The `groundZ` property determines where the vertical line of checkpoint-style waypoints begins. Set this to the ground level for the best visual effect.
+</Callout>

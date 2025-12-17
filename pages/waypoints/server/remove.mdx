@@ -1,0 +1,74 @@
+# remove
+
+Removes a server-created waypoint by its ID. The removal will be synced to all target clients.
+
+## Parameters
+
+- `id` (`number`): The server-side waypoint ID returned from `create`
+
+## Examples
+
+### Basic Removal
+
+```lua
+local waypointId = exports.sleepless_waypoints:create(source, {
+    coords = vector3(100, 200, 30),
+    type = 'checkpoint',
+    label = 'OBJECTIVE',
+})
+
+-- Remove after 30 seconds
+SetTimeout(30000, function()
+    exports.sleepless_waypoints:remove(waypointId)
+    print('Removed waypoint:', waypointId)
+end)
+```
+
+### Mission Complete
+
+```lua
+local activeWaypoints = {}
+
+RegisterNetEvent('mission:assignWaypoint', function(playerId, coords)
+    local id = exports.sleepless_waypoints:create(playerId, {
+        coords = coords,
+        type = 'checkpoint',
+        label = 'OBJECTIVE',
+        color = '#2ecc71',
+    })
+    activeWaypoints[playerId] = id
+end)
+
+RegisterNetEvent('mission:complete', function()
+    local playerId = source
+    local waypointId = activeWaypoints[playerId]
+    
+    if waypointId then
+        exports.sleepless_waypoints:remove(waypointId)
+        activeWaypoints[playerId] = nil
+    end
+end)
+```
+
+### Timed Event Marker
+
+```lua
+-- Create a global event marker that expires
+local function createTimedEventMarker(coords, duration)
+    local id = exports.sleepless_waypoints:create(-1, {
+        coords = coords,
+        type = 'checkpoint',
+        color = '#f39c12',
+        label = 'EVENT',
+        size = 1.5,
+        drawDistance = 2000.0,
+    })
+
+    SetTimeout(duration, function()
+        exports.sleepless_waypoints:remove(id)
+        TriggerClientEvent('event:ended', -1)
+    end)
+
+    return id
+end
+```

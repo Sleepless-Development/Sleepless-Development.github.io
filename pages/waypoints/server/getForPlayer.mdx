@@ -1,0 +1,105 @@
+# getForPlayer
+
+Retrieves all waypoints that are visible to a specific player.
+
+## Parameters
+
+- `playerId` (`number`): The player's server ID
+
+## Returns
+
+- `waypoints` (`table<number, ServerWaypointEntry>`): Waypoints for this player indexed by server ID
+  - Each entry contains:
+    - `target` (`number` | `number[]`): The target player(s)
+    - `data` (`WaypointData`): The waypoint's configuration
+    - `clientIds` (`table<number, number>`): Player to client ID mapping
+
+## Examples
+
+### List Player's Waypoints
+
+```lua
+RegisterCommand('mywaypoints', function(source)
+    local waypoints = exports.sleepless_waypoints:getForPlayer(source)
+    
+    local count = 0
+    for id, waypoint in pairs(waypoints) do
+        count = count + 1
+        TriggerClientEvent('chat:addMessage', source, {
+            args = { ('Waypoint %d: %s'):format(id, waypoint.data.label or 'No Label') }
+        })
+    end
+    
+    TriggerClientEvent('chat:addMessage', source, {
+        args = { ('You have %d active waypoints'):format(count) }
+    })
+end, false)
+```
+
+### Check Player Has Waypoints
+
+```lua
+local function playerHasWaypoints(playerId)
+    local waypoints = exports.sleepless_waypoints:getForPlayer(playerId)
+    
+    for _ in pairs(waypoints) do
+        return true
+    end
+    
+    return false
+end
+
+-- Usage
+if playerHasWaypoints(source) then
+    print('Player has active waypoints')
+else
+    print('Player has no waypoints')
+end
+```
+
+### Mission Waypoint Check
+
+```lua
+-- Check if player already has a mission waypoint before assigning new one
+RegisterNetEvent('mission:accept', function(missionId)
+    local playerId = source
+    local waypoints = exports.sleepless_waypoints:getForPlayer(playerId)
+    
+    -- Check for existing mission waypoints
+    for id, waypoint in pairs(waypoints) do
+        if waypoint.data.label and waypoint.data.label:find('MISSION') then
+            TriggerClientEvent('notify', playerId, 'You already have an active mission!')
+            return
+        end
+    end
+    
+    -- Create new mission waypoint
+    local missionData = GetMissionData(missionId)
+    exports.sleepless_waypoints:create(playerId, {
+        coords = missionData.coords,
+        type = 'checkpoint',
+        label = 'MISSION OBJECTIVE',
+        color = '#2ecc71',
+    })
+end)
+```
+
+### Admin Inspection
+
+```lua
+RegisterCommand('inspectplayerwaypoints', function(source, args)
+    local targetId = tonumber(args[1])
+    if not targetId then return end
+    
+    local waypoints = exports.sleepless_waypoints:getForPlayer(targetId)
+    
+    print(('=== Waypoints for Player %d ==='):format(targetId))
+    for id, waypoint in pairs(waypoints) do
+        print(('  ID: %d | Type: %s | Label: %s'):format(
+            id,
+            waypoint.data.type,
+            waypoint.data.label or 'N/A'
+        ))
+    end
+end, true)
+```

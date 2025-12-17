@@ -1,0 +1,63 @@
+# get
+
+Retrieves a waypoint instance by its ID. Returns the waypoint data and DUI reference if the waypoint exists.
+
+## Parameters
+
+- `id` (`number`): The waypoint ID returned from `create`
+
+## Returns
+
+- `waypoint` (`WaypointInstance?`): The waypoint instance, or `nil` if not found
+  - `id` (`number`): The waypoint's unique identifier
+  - `data` (`WaypointData`): The waypoint's configuration data
+  - `dui` (`Dui`): The DUI instance used for rendering
+  - `active` (`boolean`): Whether the waypoint is currently active
+
+## Examples
+
+### Check Waypoint Exists
+
+```lua
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(100.0, 200.0, 30.0),
+    type = 'checkpoint',
+    label = 'TARGET',
+})
+
+-- Check if waypoint still exists
+local waypoint = exports.sleepless_waypoints:get(id)
+
+if waypoint then
+    print('Waypoint exists at:', waypoint.data.coords)
+    print('Active:', waypoint.active)
+else
+    print('Waypoint not found')
+end
+```
+
+### Get Waypoint Properties
+
+```lua
+local waypoint = exports.sleepless_waypoints:get(waypointId)
+
+if waypoint and waypoint.active then
+    local data = waypoint.data
+    print('Type:', data.type)
+    print('Color:', data.color)
+    print('Label:', data.label)
+    print('Draw Distance:', data.drawDistance)
+end
+```
+
+### Calculate Distance to Waypoint
+
+```lua
+local waypoint = exports.sleepless_waypoints:get(waypointId)
+
+if waypoint then
+    local playerPos = GetEntityCoords(cache.ped)
+    local distance = #(playerPos - waypoint.data.coords)
+    print('Distance to waypoint:', distance)
+end
+```

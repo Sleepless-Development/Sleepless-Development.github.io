@@ -1,0 +1,69 @@
+# get
+
+Retrieves a server-created waypoint by its ID.
+
+## Parameters
+
+- `id` (`number`): The server-side waypoint ID returned from `create`
+
+## Returns
+
+- `waypoint` (`ServerWaypointEntry?`): The waypoint entry, or `nil` if not found
+  - `target` (`number` | `number[]`): The target player(s) for this waypoint
+  - `data` (`WaypointData`): The waypoint's configuration data
+  - `clientIds` (`table<number, number>`): Mapping of player IDs to their client-side waypoint IDs
+
+## Examples
+
+### Check if Waypoint Exists
+
+```lua
+local waypointId = exports.sleepless_waypoints:create(source, {
+    coords = vector3(100, 200, 30),
+    type = 'checkpoint',
+    label = 'TARGET',
+})
+
+-- Later, check if it still exists
+local waypoint = exports.sleepless_waypoints:get(waypointId)
+
+if waypoint then
+    print('Waypoint exists')
+    print('Target:', json.encode(waypoint.target))
+    print('Coords:', waypoint.data.coords)
+else
+    print('Waypoint not found')
+end
+```
+
+### Get Waypoint Data
+
+```lua
+local waypoint = exports.sleepless_waypoints:get(waypointId)
+
+if waypoint then
+    local data = waypoint.data
+    print('Type:', data.type)
+    print('Label:', data.label)
+    print('Color:', data.color)
+    print('Draw Distance:', data.drawDistance)
+end
+```
+
+### Verify Target
+
+```lua
+local waypoint = exports.sleepless_waypoints:get(waypointId)
+
+if waypoint then
+    local target = waypoint.target
+    
+    if target == -1 then
+        print('This is a global waypoint')
+    elseif type(target) == 'table' then
+        print('Waypoint is shown to', #target, 'players')
+    else
+        print('Waypoint is shown to player', target)
+    end
+end
+```

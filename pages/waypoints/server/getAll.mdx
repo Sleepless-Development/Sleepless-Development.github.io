@@ -1,0 +1,82 @@
+# getAll
+
+Retrieves all server-created waypoints indexed by their server IDs.
+
+## Returns
+
+- `waypoints` (`table<number, ServerWaypointEntry>`): All waypoints indexed by server ID
+  - Each entry contains:
+    - `target` (`number` | `number[]`): The target player(s)
+    - `data` (`WaypointData`): The waypoint's configuration
+    - `clientIds` (`table<number, number>`): Player to client ID mapping
+
+## Examples
+
+### List All Waypoints
+
+```lua
+local waypoints = exports.sleepless_waypoints:getAll()
+
+for id, waypoint in pairs(waypoints) do
+    print(('Waypoint %d: %s at %s'):format(
+        id,
+        waypoint.data.label or 'No Label',
+        waypoint.data.coords
+    ))
+end
+```
+
+### Count Active Waypoints
+
+```lua
+local waypoints = exports.sleepless_waypoints:getAll()
+local count = 0
+
+for _ in pairs(waypoints) do
+    count = count + 1
+end
+
+print('Total active waypoints:', count)
+```
+
+### Debug Command
+
+```lua
+RegisterCommand('debugwaypoints', function(source)
+    local waypoints = exports.sleepless_waypoints:getAll()
+    
+    print('=== Active Waypoints ===')
+    for id, waypoint in pairs(waypoints) do
+        local targetStr
+        if waypoint.target == -1 then
+            targetStr = 'Global'
+        elseif type(waypoint.target) == 'table' then
+            targetStr = 'Players: ' .. table.concat(waypoint.target, ', ')
+        else
+            targetStr = 'Player ' .. waypoint.target
+        end
+        
+        print(('ID: %d | Target: %s | Label: %s'):format(
+            id,
+            targetStr,
+            waypoint.data.label or 'N/A'
+        ))
+    end
+    print('========================')
+end, true)
+```
+
+### Find Waypoints by Type
+
+```lua
+local waypoints = exports.sleepless_waypoints:getAll()
+local checkpoints = {}
+
+for id, waypoint in pairs(waypoints) do
+    if waypoint.data.type == 'checkpoint' then
+        checkpoints[id] = waypoint
+    end
+end
+
+print('Found', #checkpoints, 'checkpoint waypoints')
+```

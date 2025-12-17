@@ -1,0 +1,50 @@
+# remove
+
+Removes a waypoint by its ID. The waypoint will be destroyed and its DUI resources freed.
+
+## Parameters
+
+- `id` (`number`): The waypoint ID returned from `create`
+
+## Examples
+
+### Basic Removal
+
+```lua
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(100.0, 200.0, 30.0),
+    type = 'checkpoint',
+    label = 'TEMPORARY',
+})
+
+-- Remove the waypoint after 30 seconds
+SetTimeout(30000, function()
+    exports.sleepless_waypoints:remove(id)
+    print('Removed waypoint:', id)
+end)
+```
+
+### Conditional Removal
+
+```lua
+local waypointId = nil
+
+-- Create waypoint when player starts a mission
+RegisterNetEvent('mission:start', function(targetCoords)
+    waypointId = exports.sleepless_waypoints:create({
+        coords = targetCoords,
+        type = 'checkpoint',
+        color = '#2ecc71',
+        label = 'OBJECTIVE',
+        drawDistance = 500.0,
+    })
+end)
+
+-- Remove waypoint when mission ends
+RegisterNetEvent('mission:complete', function()
+    if waypointId then
+        exports.sleepless_waypoints:remove(waypointId)
+        waypointId = nil
+    end
+end)
+```

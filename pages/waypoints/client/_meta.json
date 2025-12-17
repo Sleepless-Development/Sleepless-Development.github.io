@@ -1,0 +1,7 @@
+{
+  "create": "create",
+  "update": "update",
+  "remove": "remove",
+  "removeAll": "removeAll",
+  "get": "get"
+}

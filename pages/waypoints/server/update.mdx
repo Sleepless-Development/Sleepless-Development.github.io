@@ -1,0 +1,70 @@
+import { Callout } from 'nextra/components';
+
+# update
+
+Updates an existing server-created waypoint's properties. The update will be synced to all target clients.
+
+## Parameters
+
+- `id` (`number`): The server-side waypoint ID returned from `create`
+- `data` (`WaypointData`): A table containing the properties to update
+  - `coords?` (`vector3`): New position for the waypoint
+  - `color?` (`string`): New hex color
+  - `label?` (`string`): New label text
+  - `icon?` (`string`): New icon
+  - `size?` (`number`): New size multiplier
+  - `drawDistance?` (`number`): New maximum render distance
+  - `fadeDistance?` (`number`): New fade distance
+  - `minHeight?` (`number`): New minimum height
+  - `maxHeight?` (`number`): New maximum height
+  - `groundZ?` (`number`): New ground Z coordinate
+
+## Examples
+
+### Update Position
+
+```lua
+-- Track a moving objective
+local waypointId = exports.sleepless_waypoints:create(-1, {
+    coords = vector3(100, 200, 30),
+    type = 'checkpoint',
+    label = 'OBJECTIVE',
+})
+
+-- Update position when objective moves
+RegisterNetEvent('objective:moved', function(newCoords)
+    exports.sleepless_waypoints:update(waypointId, {
+        coords = newCoords,
+    })
+end)
+```
+
+### Update Appearance Based on State
+
+```lua
+local waypointId = nil
+
+-- Create waypoint for a delivery mission
+RegisterNetEvent('delivery:start', function(targetPlayer, dropoffCoords)
+    waypointId = exports.sleepless_waypoints:create(targetPlayer, {
+        coords = dropoffCoords,
+        type = 'checkpoint',
+        color = '#3498db',
+        label = 'DELIVER HERE',
+    })
+end)
+
+-- Update to show urgency when time is running low
+RegisterNetEvent('delivery:urgent', function()
+    if waypointId then
+        exports.sleepless_waypoints:update(waypointId, {
+            color = '#e74c3c',
+            label = 'HURRY!',
+        })
+    end
+end)
+```
+
+<Callout type="warning">
+    Only waypoints created with server-side `create` can be updated using the server-side `update`. Client-created waypoints cannot be modified from the server.
+</Callout>
