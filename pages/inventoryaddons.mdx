@@ -1,0 +1,105 @@
+import { Callout } from 'nextra/components';
+import { Tabs, Tab, Steps } from 'nextra-theme-docs';
+import ResourceLinks from '@components/resource-links';
+
+# Sleepless Inventory Addons
+
+Addon Modules for ox_inventory to enhance the utility with back items, drag crafting, and item carrying systems.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_inventory_addons" />
+
+## Features
+
+- **Back Items**: Attach items to player models with customizable bone positions and rotations
+- **Drag Craft**: Simple crafting system using ox_inventory drag-and-drop mechanics
+- **Item Carry**: Automatic item carrying with animations and prop attachments
+
+## Installation
+
+### Download a [release](https://github.com/Sleepless-Development/sleepless_inventory_addons/releases) or build the source code.
+
+```bash
+git clone https://github.com/Sleepless-Development/sleepless_inventory_addons.git
+```
+
+## Usage
+
+Add the desired addon resources to your `resources` folder and ensure them in your `server.cfg`:
+
+```cfg
+ensure ox_inventory
+ensure sleepless_inventory_addons
+```
+
+Each addon can be configured independently in their respective `config.lua` files.
+
+## Addons Overview
+
+### Back Items
+Configure item attachments to player models with bone-specific positioning. Supports weapons, backpacks, and custom items with priority-based slot management.
+
+### Drag Craft
+Create crafting recipes that work with ox_inventory's drag-and-drop system. Supports multi-item recipes, durability costs, and client/server-side callbacks.
+
+### Item Carry
+Automatically attach props and play animations when players receive specific items. Includes vehicle blocking and walk-only options for realistic item carrying.
+
+## Configuration
+
+Each addon has its own configuration file:
+
+### Back Items (`backitems/config.lua`)
+```lua
+Config.defaultSlots = {
+    ['back'] = {
+        { bone = 24818, pos = vec3(0.09, -0.16, 0.12), rot = vec3(0.0, 180.0, 0.0) },
+    }
+}
+
+Config.BackItems = {
+    ['weapon_rifle'] = {
+        prio = 1,
+        group = 'back',
+    }
+}
+```
+
+### Drag Craft (`dragcraft/config.lua`)
+```lua
+RECIPES = {
+    ['garbage scrapmetal'] = {
+        duration = 2000,
+        costs = {
+            ['garbage'] = {need = 1, remove = true},
+            ['scrapmetal'] = {need = 0.1, remove = true},
+        },
+        result = {
+            {name = 'lockpick', amount = 1},
+        },
+    }
+}
+```
+
+### Item Carry (`itemcarry/config.lua`)
+```lua
+local config = {
+    ['box'] = {
+        walkOnly = true,
+        blockVehicle = true,
+        anim = {
+            dict = 'anim@heists@box_carry@',
+            clip = 'idle',
+            flag = 51
+        },
+        prop = {
+            bone = 60309,
+            model = joaat('hei_prop_heist_box'),
+            placement = {
+                pos = vec3(0.025000, 0.080000, 0.255000),
+                rot = vec3(-145.000000, 290.000000, 0.000000),
+            },
+        },
+    }
+}
+```</content>
+<parameter name="filePath">c:\Users\austi\Desktop\Work\FiveM\github\Sleepless-Development.github.io\pages\inventoryaddons\index.mdx
