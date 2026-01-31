@@ -1,0 +1,95 @@
+import { Callout } from 'nextra/components';
+import { Tabs, Tab, Steps } from 'nextra-theme-docs';
+import { PaidResourceLinks } from '@components/resource-links';
+
+# Sleepless Crafting
+
+<Callout type="warning">
+    This is a **paid resource**. The core functionality is encrypted, but all configuration files and bridges are fully accessible and customizable.
+</Callout>
+
+A flexible and modern crafting system for FiveM servers with a React-based UI, upgradable stations, and full framework compatibility.
+
+<PaidResourceLinks tebex="https://sleeplessdev.tebex.io/" />
+
+## Features
+
+- **Multi-Framework Support**: Works with ESX, QB-Core, QBX, and OX_Core
+- **Inventory Support**: Compatible with ox_inventory and qb-inventory
+- **Modern UI**: Built with React featuring 3D item previews and smooth animations
+- **Customizable Stations**: Create unlimited station types with unique recipes and props
+- **Upgradable Benches**: Stations can be upgraded to unlock new recipes and change appearance
+- **Player Placeable**: Allow players to place and pick up their own crafting stations
+- **Static Stations**: Pre-configure permanent crafting locations
+- **Job/Gang Restrictions**: Lock stations to specific groups with grade requirements
+- **Crafting Queue**: Queue up multiple items with progress indicators
+- **Station Storage**: Built-in stash system that scales with upgrade level
+- **Auto Database Setup**: SQL tables are created automatically on first start
+- **Optimized Performance**: Grid-based loading system for minimal resource usage
+- **Localization**: Full locale support with customizable messages
+- **Property Integration**: Optional support for housing/property systems
+- **Hooks & Events**: Customize behavior with server-side hooks and listen to crafting events
+
+## Dependencies
+
+- [ox_lib](https://github.com/overextended/ox_lib)
+- [oxmysql](https://github.com/overextended/oxmysql)
+- A supported framework (ESX, QB-Core, QBX, or OX_Core)
+- A supported inventory (ox_inventory or qb-inventory)
+
+## Preview
+
+<iframe 
+    width="560" 
+    height="315" 
+    src="https://www.youtube.com/embed/qAtMj2TALBQ?si=bTVcEZS8vZffXRQd" 
+    title="YouTube video player" 
+    frameborder="0" 
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+    referrerpolicy="strict-origin-when-cross-origin" 
+    allowfullscreen
+/>
+
+## Installation
+
+<Steps>
+
+### Download the Resource
+
+Purchase and download `sleepless_crafting` from our Tebex store.
+
+### Add to Server
+
+Place the `sleepless_crafting` folder in your server's resources directory.
+
+### Configure Your Server
+
+Add the following to your `server.cfg`:
+
+```cfg
+ensure ox_lib
+ensure oxmysql
+ensure sleepless_crafting
+```
+
+### Configure the Resource
+
+Edit the configuration files in the `config/` folder to customize the resource for your server:
+
+- `config.lua` - General settings
+- `stationTypes.lua` - Define crafting stations, recipes, and props
+- `stationLocations.lua` - Pre-placed static station locations
+
+### Set Up Inventory Items
+
+Make sure you have the required items registered in your inventory system. See the [Items Setup](/crafting/items) page for examples.
+
+### Restart Your Server
+
+The database tables will be created automatically on first start.
+
+</Steps>
+
+## Support
+
+If you need help or have questions, join our [Discord](https://discord.gg/A2bDPbfgNP) server for support.

@@ -1,0 +1,401 @@
+import { Callout } from 'nextra/components';
+import { Tabs, Tab } from 'nextra-theme-docs';
+
+# Station Types
+
+Station types define the different kinds of crafting stations available in your server. Each station type has its own recipes, props, upgrade paths, and visual appearance.
+
+The configuration file is located at `config/stationTypes.lua`.
+
+## Structure Overview
+
+Each station type is defined as a key in the `stationTypes` table:
+
+```lua
+local stationTypes = {
+    ["general"] = {
+        placeItem = 'crafting_bench',
+        size = vec3(2, 1.05, 2),
+        upgradeItems = { ... },
+        stashSizes = { ... },
+        sceneObjects = { ... },
+        categories = { ... },
+        recipes = { ... },
+    },
+    -- Add more station types here
+}
+```
+
+## Station Type Properties
+
+### `placeItem`
+
+The inventory item used to place this station type. Each station type should have a unique placement item.
+
+```lua
+placeItem = 'crafting_bench'
+```
+
+### `size`
+
+The footprint dimensions of the station in meters (Length x Width x Height). Used for collision detection and placement validation.
+
+```lua
+size = vec3(2, 1.05, 2)
+```
+
+### `upgradeItems`
+
+A table of inventory items required to upgrade the station to each level. Keys must be sequential starting from 2 (level 1 is the base level).
+
+```lua
+upgradeItems = {
+    [2] = "bench_upgrade_2",
+    [3] = "bench_upgrade_3",
+    [4] = "bench_upgrade_4"
+}
+```
+
+### `stashSizes`
+
+Defines the storage capacity for each upgrade level of the station.
+
+```lua
+stashSizes = {
+    [1] = { weight = 5000, slots = 3 },
+    [2] = { weight = 10000, slots = 5 },
+    [3] = { weight = 20000, slots = 7 },
+    [4] = { weight = 50000, slots = 10 },
+}
+```
+
+### `sceneObjects`
+
+Defines the props displayed for each upgrade level. The first prop in each level is the "anchor" prop where the camera and interactions attach.
+
+```lua
+sceneObjects = {
+    [1] = { -- Level 1 props
+        {
+            model = `prop_tool_bench02_ld`,
+            pos = vec3(0, 0, 0.0),
+            rot = vec3(0, 0, 90),
+            interactOffset = vec3(0, 0, 1),
+            previewOffsets = {
+                pos = vec3(0.1, 0, 1.1),
+                rot = vec3(0, 0, -90)
+            },
+            camSettings = {
+                posOffset = vec3(1, -0.25, 1.3),
+                viewOffset = vec3(0, -0.25, 1),
+                fov = 75
+            }
+        },
+        -- Additional decorative props can be added here
+    },
+    [2] = { ... },
+    [3] = { ... },
+    [4] = { ... }
+}
+```
+
+#### Prop Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `model` | `hash` | The prop model hash (use backticks for hash) |
+| `pos` | `vec3` | Position offset relative to the station origin |
+| `rot` | `vec3` | Rotation offset in degrees |
+| `interactOffset` | `vec3` | Offset for the interaction point |
+| `previewOffsets` | `table` | Position and rotation for item preview |
+| `camSettings` | `table` | Camera position, view target, and FOV |
+| `active` | `table` | (Optional) Alternative model to show when crafting is active |
+
+#### Active Model Example
+
+You can specify a different prop model to display when the station is actively crafting (e.g., a furnace with fire):
+
+```lua
+{
+    model = `bzzz_prop_mine_furnace_a`,
+    active = {
+        model = `bzzz_prop_mine_furnace_b`, -- Model when active
+    },
+    pos = vec3(0, 0, 0.0),
+    rot = vec3(0, 0, 180),
+    -- ... other properties
+}
+```
+
+### `categories`
+
+Categories are used for filtering recipes in the UI. Each category needs a unique ID, a display label, and a FontAwesome icon name.
+
+```lua
+categories = {
+    {
+        id = "weapons",
+        label = "Weapons",
+        icon = "gun"
+    },
+    {
+        id = "healing",
+        label = "Healing",
+        icon = "band-aid"
+    },
+}
+```
+
+<Callout type="info">
+  Icons use [FontAwesome](https://fontawesome.com/icons) icon names. Only use the icon name without the `fa-` prefix.
+</Callout>
+
+### `recipes`
+
+Recipes define what items can be crafted at each upgrade level. Recipes are organized by level, and all recipes from lower levels are automatically available at higher levels.
+
+```lua
+recipes = {
+    [1] = {
+        {
+            name = "bandage",                -- Item name in inventory
+            label = "Bandage",               -- Display name in UI
+            previewModel = `prop_bandage`,   -- (Optional) 3D preview model
+            category = "healing",            -- Category ID from above
+            description = "A makeshift bandage for treating wounds.",
+            time = 10,                       -- Crafting time in seconds
+            materials = {
+                { name = "scrapcloth", label = "Scrap Cloth", quantity = 5 },
+                { name = "vodka", label = "Vodka", quantity = 1 }
+            }
+        },
+    },
+    [2] = {
+        {
+            name = "WEAPON_PISTOL",
+            label = "Pistol",
+            category = "weapons",
+            description = "A standard issue pistol.",
+            time = 60,
+            materials = {
+                { name = "metalscrap", label = "Metal Scrap", quantity = 30 },
+                { name = "rubber", label = "Rubber", quantity = 15 },
+                { name = "steel", label = "Steel", quantity = 10 }
+            }
+        },
+    },
+    -- Level 3 and 4 recipes...
+}
+```
+
+#### Recipe Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `name` | `string` | Yes | The item name in your inventory system |
+| `label` | `string` | Yes | Display name shown in the UI |
+| `category` | `string` | Yes | Category ID to group the recipe |
+| `description` | `string` | Yes | Description shown in the UI |
+| `time` | `number` | Yes | Crafting time in seconds |
+| `materials` | `table` | Yes | Array of required materials |
+| `previewModel` | `hash` | No | 3D model to preview (auto-detects weapons) |
+
+#### Material Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | `string` | Item name in inventory |
+| `label` | `string` | Display name in UI |
+| `quantity` | `number` | Amount required |
+
+<Callout type="info">
+  For weapons (items starting with `WEAPON_`), the preview model is automatically set to the weapon model if not specified.
+</Callout>
+
+## Complete Example
+
+Here's a complete example of a station type configuration:
+
+```lua
+["general"] = {
+    placeItem = 'crafting_bench',
+    size = vec3(2, 1.05, 2),
+    upgradeItems = {
+        [2] = "bench_upgrade_2",
+        [3] = "bench_upgrade_3",
+        [4] = "bench_upgrade_4"
+    },
+    stashSizes = {
+        [1] = { weight = 5000, slots = 3 },
+        [2] = { weight = 10000, slots = 5 },
+        [3] = { weight = 20000, slots = 7 },
+        [4] = { weight = 50000, slots = 10 },
+    },
+    sceneObjects = {
+        [1] = {
+            {
+                model = `prop_tool_bench02_ld`,
+                pos = vec3(0, 0, 0.0),
+                rot = vec3(0, 0, 90),
+                interactOffset = vec3(0, 0, 1),
+                previewOffsets = {
+                    pos = vec3(0.1, 0, 1.1),
+                    rot = vec3(0, 0, -90)
+                },
+                camSettings = {
+                    posOffset = vec3(1, -0.25, 1.3),
+                    viewOffset = vec3(0, -0.25, 1),
+                    fov = 75
+                }
+            },
+        },
+        [2] = {
+            {
+                model = `prop_tool_bench02`,
+                pos = vec3(0, 0, 0.0),
+                rot = vec3(0, 0, 90),
+                interactOffset = vec3(0, 0, 1),
+                previewOffsets = {
+                    pos = vec3(0.1, 0, 1.1),
+                    rot = vec3(0, 0, -90)
+                },
+                camSettings = {
+                    posOffset = vec3(1, -0.25, 1.3),
+                    viewOffset = vec3(0, -0.25, 1),
+                    fov = 75
+                }
+            },
+        },
+        -- ... levels 3 and 4
+    },
+    categories = {
+        {
+            id = "weapons",
+            label = "Weapons",
+            icon = "gun"
+        },
+        {
+            id = "healing",
+            label = "Healing",
+            icon = "band-aid"
+        },
+    },
+    recipes = {
+        [1] = {
+            {
+                name = "bandage",
+                label = "Bandage",
+                category = "healing",
+                description = "A makeshift bandage for treating wounds.",
+                time = 10,
+                materials = {
+                    { name = "scrapcloth", label = "Scrap Cloth", quantity = 5 },
+                    { name = "vodka", label = "Vodka", quantity = 1 }
+                }
+            },
+        },
+        [2] = {
+            {
+                name = "WEAPON_PISTOL",
+                label = "Pistol",
+                category = "weapons",
+                description = "A standard issue pistol.",
+                time = 60,
+                materials = {
+                    { name = "metalscrap", label = "Metal Scrap", quantity = 30 },
+                    { name = "rubber", label = "Rubber", quantity = 15 },
+                    { name = "steel", label = "Steel", quantity = 10 }
+                }
+            },
+        },
+        [3] = {
+            {
+                name = "WEAPON_SMG",
+                label = "Submachine Gun",
+                category = "weapons",
+                description = "A compact submachine gun.",
+                time = 60,
+                materials = {
+                    { name = "metalscrap", label = "Metal Scrap", quantity = 50 },
+                    { name = "rubber", label = "Rubber", quantity = 25 },
+                    { name = "steel", label = "Steel", quantity = 20 }
+                }
+            },
+        },
+        [4] = {
+            {
+                name = "WEAPON_ASSAULTRIFLE",
+                label = "Assault Rifle",
+                category = "weapons",
+                description = "A standard issue assault rifle.",
+                time = 60,
+                materials = {
+                    { name = "metalscrap", label = "Metal Scrap", quantity = 50 },
+                    { name = "rubber", label = "Rubber", quantity = 25 },
+                    { name = "steel", label = "Steel", quantity = 20 }
+                }
+            },
+        }
+    }
+}
+```
+
+## Adding a New Station Type
+
+To add a new station type:
+
+1. Add a new key to the `stationTypes` table with a unique identifier
+2. Define all required properties (placeItem, size, sceneObjects, categories, recipes)
+3. Create the corresponding inventory items (see [Items Setup](/crafting/items))
+4. Optionally add upgrade items and stash sizes for upgradable stations
+
+```lua
+["cooking"] = {
+    placeItem = 'cooking_station',
+    size = vec3(1.5, 1.5, 1.5),
+    stashSizes = {
+        [1] = { weight = 10000, slots = 5 },
+    },
+    sceneObjects = {
+        [1] = {
+            {
+                model = `prop_bbq_2`,
+                pos = vec3(0, 0, 0.0),
+                rot = vec3(0, 0, 0),
+                interactOffset = vec3(0, 0, 1),
+                previewOffsets = {
+                    pos = vec3(0, 0, 1),
+                    rot = vec3(0, 0, 0)
+                },
+                camSettings = {
+                    posOffset = vec3(1, 0, 1),
+                    viewOffset = vec3(0, 0, 0.5),
+                    fov = 60
+                }
+            },
+        },
+    },
+    categories = {
+        {
+            id = "food",
+            label = "Food",
+            icon = "utensils"
+        },
+    },
+    recipes = {
+        [1] = {
+            {
+                name = "burger",
+                label = "Burger",
+                category = "food",
+                description = "A delicious grilled burger.",
+                time = 15,
+                materials = {
+                    { name = "raw_meat", label = "Raw Meat", quantity = 1 },
+                    { name = "bread", label = "Bread", quantity = 1 }
+                }
+            },
+        },
+    }
+}
+```

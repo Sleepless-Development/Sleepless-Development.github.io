@@ -1,0 +1,262 @@
+import { Callout } from 'nextra/components';
+import { Tabs, Tab } from 'nextra-theme-docs';
+
+# Items Setup
+
+To use the crafting system, you need to register the required items in your inventory system. This includes the crafting bench placement items, upgrade items, and any materials/recipes you've configured.
+
+## Default Items
+
+The resource includes example item definitions in `setup_inv_items.lua` for reference. You'll need to add these items to your inventory system.
+
+<Tabs items={['ox_inventory', 'qb-inventory']}>
+<Tab>
+## ox_inventory Items
+
+Add these items to your `ox_inventory/data/items.lua` file:
+
+### Crafting Bench
+
+```lua
+['crafting_bench'] = {
+    label = 'Crafting Bench',
+    consume = 0,
+    weight = 100,
+    stack = false,
+    close = false,
+    client = {
+        export = "sleepless_crafting.placeCraftStation",
+    }
+},
+```
+
+<Callout type="info">
+  The `client.export` property automatically calls the placement function when the item is used. This is required for placing crafting stations.
+</Callout>
+
+### Upgrade Items
+
+```lua
+['bench_upgrade_2'] = {
+    label = 'Crafting Bench Upgrade Tier 2',
+    weight = 50,
+    stack = false,
+    close = false,
+},
+
+['bench_upgrade_3'] = {
+    label = 'Crafting Bench Upgrade Tier 3',
+    weight = 75,
+    stack = false,
+    close = false,
+},
+
+['bench_upgrade_4'] = {
+    label = 'Crafting Bench Upgrade Tier 4',
+    weight = 100,
+    stack = false,
+    close = false,
+},
+```
+
+</Tab>
+<Tab>
+## qb-inventory Items
+
+Add these items to your `qb-core/shared/items.lua` file:
+
+### Crafting Bench
+
+```lua
+crafting_bench = {
+    name = 'crafting_bench',
+    label = 'Crafting Bench',
+    weight = 100,
+    type = 'item',
+    image = 'crafting_bench.png',
+    unique = true,
+    useable = true,
+    shouldClose = true,
+    description = 'A Useable Crafting Bench'
+},
+```
+
+<Callout type="warning">
+  For QB-Core, you'll also need to add a useable item handler in your server scripts to trigger the placement function.
+</Callout>
+
+### Upgrade Items
+
+```lua
+bench_upgrade_2 = {
+    name = 'bench_upgrade_2',
+    label = 'Crafting Bench Upgrade Tier 2',
+    weight = 50,
+    type = 'item',
+    image = 'bench_upgrade_2.png',
+    unique = false,
+    useable = false,
+    shouldClose = false,
+    description = 'Upgrade your crafting bench to tier 2.'
+},
+
+bench_upgrade_3 = {
+    name = 'bench_upgrade_3',
+    label = 'Crafting Bench Upgrade Tier 3',
+    weight = 75,
+    type = 'item',
+    image = 'bench_upgrade_3.png',
+    unique = false,
+    useable = false,
+    shouldClose = false,
+    description = 'Upgrade your crafting bench to tier 3.'
+},
+
+bench_upgrade_4 = {
+    name = 'bench_upgrade_4',
+    label = 'Crafting Bench Upgrade Tier 4',
+    weight = 100,
+    type = 'item',
+    image = 'bench_upgrade_4.png',
+    unique = false,
+    useable = false,
+    shouldClose = false,
+    description = 'Upgrade your crafting bench to tier 4.'
+},
+```
+
+</Tab>
+</Tabs>
+
+## Custom Station Types
+
+If you create additional station types in `stationTypes.lua`, you'll need to create corresponding items for each one.
+
+For example, if you add a `cooking` station type:
+
+```lua
+["cooking"] = {
+    placeItem = 'cooking_station',
+    -- ... rest of config
+}
+```
+
+You'll need to add the `cooking_station` item:
+
+<Tabs items={['ox_inventory', 'qb-inventory']}>
+<Tab>
+```lua
+['cooking_station'] = {
+    label = 'Cooking Station',
+    consume = 0,
+    weight = 150,
+    stack = false,
+    close = false,
+    client = {
+        export = "sleepless_crafting.placeCraftStation",
+    }
+},
+```
+</Tab>
+<Tab>
+```lua
+cooking_station = {
+    name = 'cooking_station',
+    label = 'Cooking Station',
+    weight = 150,
+    type = 'item',
+    image = 'cooking_station.png',
+    unique = true,
+    useable = true,
+    shouldClose = true,
+    description = 'A portable cooking station'
+},
+```
+</Tab>
+</Tabs>
+
+## Recipe Materials
+
+Don't forget to also register all the materials and output items used in your recipes. For example, if your recipe requires `scrapcloth` and `vodka` to craft a `bandage`:
+
+<Tabs items={['ox_inventory', 'qb-inventory']}>
+<Tab>
+```lua
+['scrapcloth'] = {
+    label = 'Scrap Cloth',
+    weight = 10,
+},
+
+['vodka'] = {
+    label = 'Vodka',
+    weight = 50,
+},
+
+['bandage'] = {
+    label = 'Bandage',
+    weight = 20,
+},
+```
+</Tab>
+<Tab>
+```lua
+scrapcloth = {
+    name = 'scrapcloth',
+    label = 'Scrap Cloth',
+    weight = 10,
+    type = 'item',
+    image = 'scrapcloth.png',
+    unique = false,
+    useable = false,
+    shouldClose = false,
+    description = 'A piece of scrap cloth'
+},
+
+vodka = {
+    name = 'vodka',
+    label = 'Vodka',
+    weight = 50,
+    type = 'item',
+    image = 'vodka.png',
+    unique = false,
+    useable = true,
+    shouldClose = true,
+    description = 'A bottle of vodka'
+},
+
+bandage = {
+    name = 'bandage',
+    label = 'Bandage',
+    weight = 20,
+    type = 'item',
+    image = 'bandage.png',
+    unique = false,
+    useable = true,
+    shouldClose = true,
+    description = 'A bandage for treating wounds'
+},
+```
+</Tab>
+</Tabs>
+
+## Item Images
+
+You'll need to add images for your items to your inventory's image folder:
+
+- **ox_inventory**: `ox_inventory/web/images/`
+- **qb-inventory**: `qb-inventory/html/images/`
+
+<Callout type="tip">
+  For best results, use PNG images with a transparent background. The recommended size is 100x100 pixels.
+</Callout>
+
+## Checklist
+
+Before starting your server, make sure you have:
+
+- [ ] Added the crafting bench placement item(s)
+- [ ] Added upgrade items for each tier (if using upgrades)
+- [ ] Added all material items used in recipes
+- [ ] Added all output items from recipes
+- [ ] Added images for all items
+- [ ] Restarted your inventory resource after adding items

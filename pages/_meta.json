@@ -1,13 +1,29 @@
 {
   "index": "Introduction",
-  "interactv1": "Interact v1",
-  "interactv2": "Interact v2",
+  "---Free": {
+    "type": "separator",
+    "title": "Free Resources"
+  },
+  "interact": "Interact",
   "pedmanager": "Ped Manager",
   "waypoints": "Waypoints",
   "inventoryaddons": "Inventory Addons",
+  "---Paid": {
+    "type": "separator",
+    "title": "Paid Resources"
+  },
+  "crafting": "Crafting",
+  "---Links": {
+    "type": "separator",
+    "title": "Links"
+  },
+  "store": {
+    "title": "Tebex Store ↗",
+    "href": "https://sleeplessdev.tebex.io/",
+    "newWindow": true
+  },
   "support": {
-    "title": "Support Us",
-    "type": "page",
+    "title": "Support Us ↗",
     "href": "https://ko-fi.com/demigod916",
     "newWindow": true
   }

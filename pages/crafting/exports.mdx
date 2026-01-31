@@ -1,0 +1,242 @@
+import { Callout } from 'nextra/components';
+import { Tabs, Tab } from 'nextra-theme-docs';
+
+# Exports & Events
+
+Sleepless Crafting provides exports and events that allow other resources to interact with the crafting system.
+
+## Server Exports
+
+### registerHook
+
+Register a hook to customize behavior when players interact with crafting stations.
+
+```lua
+exports.sleepless_crafting:registerHook(hookName, callback)
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `hookName` | `string` | The hook to register (`"open"`) |
+| `callback` | `function` | The callback function to execute |
+
+#### Available Hooks
+
+##### `open`
+
+Called when a player opens a crafting station. Allows you to customize or cancel the opening.
+
+```lua
+exports.sleepless_crafting:registerHook("open", function(src, bench)
+    -- src: player server ID
+    -- bench: the crafting station data
+    
+    -- Return nil for default behavior
+    -- Return false to cancel opening
+    -- Return table with options to alter behavior
+    
+    return nil
+end)
+```
+
+#### Return Options
+
+When returning a table, you can specify the following options:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `forceTier` | `number` | Override the bench tier for this player |
+
+#### Example: VIP Tier Override
+
+```lua
+exports.sleepless_crafting:registerHook("open", function(src, bench)
+    local isVIP = CheckIfPlayerIsVIP(src) -- Your VIP check function
+    
+    if isVIP then
+        -- VIP players always get max tier access
+        return { forceTier = 4 }
+    end
+    
+    -- Non-VIP players get default behavior
+    return nil
+end)
+```
+
+#### Example: Job-Based Access Control
+
+```lua
+    exports.sleepless_crafting:registerHook("open", function(src, bench)
+        local Player = QBCore.Functions.GetPlayer(src)
+        
+        -- Cancel if player is not on duty
+        if Player.PlayerData.job.name == "police" and not Player.PlayerData.job.onduty then
+            TriggerClientEvent('ox_lib:notify', src, {
+                title = 'Crafting',
+                description = 'You must be on duty to use this station',
+                type = 'error'
+            })
+            return false
+        end
+        
+        return nil
+    end)
+```
+
+<Callout type="warning">
+  Make sure to wrap your `registerHook` call in a `SetTimeout` to ensure the export is registered before you try to use it.
+</Callout>
+
+---
+
+### loadStationsForProperty
+
+Load crafting stations for a specific property. Useful for housing/property systems where stations are tied to specific locations.
+
+```lua
+exports.sleepless_crafting:loadStationsForProperty(src, propertyId)
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `src` | `number` | The player server ID to load stations for |
+| `propertyId` | `string\|number` | The property identifier |
+
+#### Usage
+
+Call this export when a player enters a property to load any crafting stations associated with that property.
+
+```lua
+-- Example: When player enters a property
+AddEventHandler('yourPropertyResource:playerEnteredProperty', function(playerId, propertyId)
+    exports.sleepless_crafting:loadStationsForProperty(playerId, propertyId)
+end)
+```
+
+<Callout type="info">
+  The property integration is optional and requires customization in `bridge/properties/server.lua` to work with your specific property system.
+</Callout>
+
+---
+
+## Client Events
+
+These events are triggered on the client and can be listened to for custom integrations.
+
+### sleepless_crafting:PlayerOpenedStation
+
+Triggered when the local player opens a crafting station.
+
+```lua
+RegisterNetEvent("sleepless_crafting:PlayerOpenedStation", function(benchId)
+    -- benchId: The ID of the crafting station that was opened
+    print("Player opened crafting station:", benchId)
+end)
+```
+
+### sleepless_crafting:PlayerClosedStation
+
+Triggered when the local player closes a crafting station.
+
+```lua
+RegisterNetEvent("sleepless_crafting:PlayerClosedStation", function(benchId)
+    -- benchId: The ID of the crafting station that was closed
+    print("Player closed crafting station:", benchId)
+end)
+```
+
+---
+
+## Server Events
+
+These events are triggered on the server and can be listened to for logging, rewards, or other custom functionality.
+
+### sleepless_crafting:FinishedCraft
+
+Triggered when a player successfully finishes crafting an item.
+
+```lua
+RegisterNetEvent("sleepless_crafting:FinishedCraft", function(identifier, itemName)
+    -- identifier: The player's character identifier
+    -- itemName: The name of the crafted item
+    print(identifier .. " crafted: " .. itemName)
+end)
+```
+
+#### Example: Crafting Logs
+
+```lua
+RegisterNetEvent("sleepless_crafting:FinishedCraft", function(identifier, itemName)
+    -- Log to Discord
+    local embed = {
+        title = "Item Crafted",
+        description = string.format("**Player:** %s\n**Item:** %s", identifier, itemName),
+        color = 3066993
+    }
+    exports.yourLoggingResource:sendEmbed("crafting", embed)
+end)
+```
+
+#### Example: Crafting XP System
+
+```lua
+RegisterNetEvent("sleepless_crafting:FinishedCraft", function(identifier, itemName)
+    local src = source
+    
+    -- Award XP based on item crafted
+    local xpRewards = {
+        ["bandage"] = 5,
+        ["WEAPON_PISTOL"] = 25,
+        ["WEAPON_SMG"] = 50,
+        ["WEAPON_ASSAULTRIFLE"] = 100,
+    }
+    
+    local xp = xpRewards[itemName] or 10
+    exports.yourXPResource:addXP(src, "crafting", xp)
+end)
+```
+
+---
+
+## Property Integration
+
+The crafting system includes optional property integration for housing/property systems. To customize this integration, edit `bridge/properties/server.lua`.
+
+### Default Implementation
+
+```lua
+local properties = {}
+
+function properties.init()
+    store = Modules.require('store')
+end
+
+function properties.getPropertyId(src)
+    -- Return the property ID the player is currently in
+    -- Return nil if not in a property
+    return nil
+end
+
+Modules.register('properties', properties)
+```
+
+### Custom Implementation Example
+
+```lua
+function properties.getPropertyId(src)
+    -- Example integration with a housing resource
+    local property = exports.yourHousingResource:getPlayerCurrentProperty(src)
+    if property then
+        return property.id
+    end
+    return nil
+end
+```
+
+<Callout type="info">
+  When a crafting station is placed inside a property, it will be associated with that property. The `loadStationsForProperty` export can then be used to load those stations when players enter the property.
+</Callout>

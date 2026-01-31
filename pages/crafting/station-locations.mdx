@@ -1,0 +1,205 @@
+import { Callout } from 'nextra/components';
+
+# Station Locations
+
+Static station locations allow you to pre-place crafting stations in your world that exist permanently. These stations are loaded on server start, are not stored in the database, and cannot be picked up by players.
+
+The configuration file is located at `config/stationLocations.lua`.
+
+## Configuration
+
+The `stationLocations` table contains an array of station definitions:
+
+```lua
+local stationLocations = {
+    {
+        id = "general_1",
+        type = 'general',
+        origin = vector3(200.5908, -925.1364, 29.6919),
+        heading = 336.9814,
+        upgrade = 1,
+        groups = {
+            ['police'] = 1,
+        }
+    },
+    -- Add more static stations here
+}
+
+Modules.register('stationLocations', stationLocations)
+```
+
+## Station Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `id` | `string` | Yes | A unique identifier for this static station |
+| `type` | `string` | Yes | The station type ID from `stationTypes.lua` |
+| `origin` | `vector3` | Yes | The world coordinates for the station |
+| `heading` | `number` | Yes | The rotation/heading of the station (0-360) |
+| `upgrade` | `number` | No | The upgrade level of the station (defaults to 1) |
+| `groups` | `table` | No | Job/gang restrictions for the station |
+
+### `id`
+
+A unique string identifier for this static station. This is used internally to track the station and should be unique across all static stations.
+
+```lua
+id = "police_armory_1"
+```
+
+### `type`
+
+Must match a key defined in your `stationTypes.lua` configuration. For example, if you have a station type called `"general"`, use that as the type.
+
+### `origin`
+
+The world coordinates where the station will be placed. Use `vector3(x, y, z)` format.
+
+<Callout type="tip">
+  You can use the in-game coordinates from your player position to find good placement locations. Many FiveM resources and tools can display your current coordinates.
+</Callout>
+
+### `heading`
+
+The rotation of the station in degrees (0-360). This determines which direction the station faces.
+
+### `upgrade`
+
+The upgrade level of the station. This determines:
+- Which props are displayed (from `sceneObjects` in the station type)
+- Which recipes are available (recipes from this level and below)
+- The storage capacity (from `stashSizes` in the station type)
+
+If not specified, defaults to level 1.
+
+### `groups`
+
+Restricts who can use the station based on job or gang. The format supports three styles:
+
+#### Single Group (String)
+
+```lua
+groups = 'police'  -- Any police member can use
+```
+
+#### Multiple Groups (Array)
+
+```lua
+groups = { 'police', 'ambulance' }  -- Police or ambulance can use
+```
+
+#### Groups with Grade Requirements (Table)
+
+```lua
+groups = {
+    ['police'] = 2,      -- Police grade 2 or higher
+    ['ambulance'] = 1,   -- Ambulance grade 1 or higher
+}
+```
+
+<Callout type="info">
+  If `groups` is not specified or is an empty table, the station is accessible to everyone.
+</Callout>
+
+## Examples
+
+### Public Crafting Station
+
+A basic crafting station anyone can use:
+
+```lua
+{
+    id = "public_bench_1",
+    type = 'general',
+    origin = vector3(200.5908, -925.1364, 29.6919),
+    heading = 336.9814,
+}
+```
+
+### Police Armory
+
+A max-level station only accessible to police rank 3 and above:
+
+```lua
+{
+    id = "police_armory",
+    type = 'general',
+    origin = vector3(452.1234, -982.5678, 30.6789),
+    heading = 180.0,
+    upgrade = 4,
+    groups = {
+        ['police'] = 3,
+    }
+}
+```
+
+### Gang Hideout Station
+
+A station accessible to multiple gangs:
+
+```lua
+{
+    id = "gang_hideout_bench",
+    type = 'general',
+    origin = vector3(-1234.5678, 2345.6789, 45.1234),
+    heading = 90.0,
+    upgrade = 2,
+    groups = { 'ballas', 'vagos', 'families' }
+}
+```
+
+### Multiple Stations
+
+You can define as many static stations as needed:
+
+```lua
+local stationLocations = {
+    -- Public station in the city
+    {
+        id = "city_public_1",
+        type = 'general',
+        origin = vector3(200.5908, -925.1364, 29.6919),
+        heading = 336.9814,
+        upgrade = 1,
+    },
+    -- Police armory
+    {
+        id = "police_armory",
+        type = 'general',
+        origin = vector3(452.1234, -982.5678, 30.6789),
+        heading = 180.0,
+        upgrade = 4,
+        groups = {
+            ['police'] = 3,
+        }
+    },
+    -- Mechanic shop station
+    {
+        id = "mechanic_bench",
+        type = 'general',
+        origin = vector3(-339.1234, -136.5678, 39.1234),
+        heading = 270.0,
+        upgrade = 2,
+        groups = {
+            ['mechanic'] = 1,
+        }
+    },
+}
+
+Modules.register('stationLocations', stationLocations)
+```
+
+## Static vs Player-Placed Stations
+
+| Feature | Static Stations | Player-Placed Stations |
+|---------|-----------------|------------------------|
+| Defined in | `stationLocations.lua` | Placed in-game |
+| Stored in database | No | Yes |
+| Can be picked up | No | Yes (by owner) |
+| Persist after restart | Always | Yes (from database) |
+| Upgradable by players | No | Yes |
+| Group restrictions | Config-defined | Not supported |
+
+<Callout type="warning">
+  Static stations are loaded fresh from the config file on every server restart. Any changes to the configuration will take effect after a server restart or resource restart.
+</Callout>

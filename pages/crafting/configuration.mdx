@@ -1,0 +1,114 @@
+import { Callout } from 'nextra/components';
+
+# Configuration
+
+The main configuration file is located at `config/config.lua`. This file controls general settings for the crafting system.
+
+## General Settings
+
+```lua
+local config = {}
+
+config.DEBUG = false              -- Enable debug mode for development
+
+config.inventory = 'ox'           -- Options: 'ox', 'qb'
+
+config.interact = 'drawtext'      -- Options: 'ox_target', 'qb-target', 'sleepless_interact', 'drawtext'
+
+config.UIColor = {                -- RGB colors for UI theme
+    primary = { 49, 164, 252 },   -- blue
+    secondary = { 218, 165, 32 }, -- gold
+    error = { 200, 0, 0 },        -- red
+}
+
+config.blockCraftStationStorageTransfer = true -- Prevent players from moving items into crafting station storage
+
+config.versionCheck = true        -- Enable version checking on resource start
+```
+
+## Options Explained
+
+### `config.DEBUG`
+
+When set to `true`, enables debug mode which provides additional console output for troubleshooting. Keep this `false` in production.
+
+### `config.inventory`
+
+Specifies which inventory system your server uses:
+
+| Value | Inventory System |
+|-------|-----------------|
+| `'ox'` | ox_inventory |
+| `'qb'` | qb-inventory |
+
+### `config.interact`
+
+Specifies which interaction system to use for interacting with crafting stations:
+
+| Value | Interaction System |
+|-------|-------------------|
+| `'ox_target'` | ox_target |
+| `'qb-target'` | qb-target |
+| `'sleepless_interact'` | sleepless_interact |
+| `'drawtext'` | Simple drawtext prompt |
+
+### `config.UIColor`
+
+Customize the colors used in the crafting UI. Each color is defined as an RGB array `{ R, G, B }`:
+
+- `primary` - Main accent color used throughout the UI
+- `secondary` - Secondary accent color for highlights
+- `error` - Color used for error states and messages
+
+### `config.blockCraftStationStorageTransfer`
+
+When set to `true`, players can only take items out of a crafting station's storage, but cannot put items in. This prevents players from using crafting stations as general storage.
+
+### `config.versionCheck`
+
+When enabled, the resource will check for updates on start and notify the server console if a newer version is available.
+
+## Localization
+
+Locale files are stored in the `locales/` folder. The default locale is `en.json`.
+
+```json
+{
+  "craft_station": "Crafting Station",
+  "swap_error": "Cannot put items inside of Crafting Station",
+  "queue_full": "The crafting queue is full",
+  "invalid_item": "Invalid item selected for crafting",
+  "missing_required_items": "You do not have the required items to craft this",
+  "failed_to_remove_required_items": "Failed to remove required items from inventory",
+  "queue_empty": "The crafting queue is empty",
+  "item_not_found_in_queue": "%s was not found in the crafting queue",
+  "item_removed_from_queue": "%s removed from crafting queue",
+  "item_added_to_queue": "%s added to crafting queue",
+  "not_allowed": "You are not allowed to use this crafting station",
+  "crafting_station_storage": "Crafting Station Storage",
+  "in_use": "This crafting station is currently in use",
+  "open_crafting": "Open Crafting",
+  "storage": "Storage",
+  "pickup": "Pickup",
+  "upgrade_tier_2": "Upgrade tier 2",
+  "upgrade_tier_3": "Upgrade tier 3",
+  "upgrade_tier_4": "Upgrade tier 4",
+  "placement_instructions": "Use [Scroll] to rotate the craft station.  \nHold [Shift] to rotate faster.  \nPress [Left Click] to place the craft station.  \nPress [ESC] to cancel placement.",
+  "nui_select_amount": "Select Amount",
+  "nui_confirm": "Craft",
+  "nui_cancel": "Cancel",
+  "nui_materials": "Materials",
+  "nui_required": "Required",
+  "nui_queue": "QUEUE",
+  "nui_recipes": "RECIPES",
+  "nui_storage": "STORAGE",
+  "nui_storage_full": "Storage Full",
+  "nui_max": "Max",
+  "nui_craft_amount": "Craft Amount",
+  "nui_craft": "Craft"
+}
+```
+
+<Callout type="info">
+  To add a new language, create a new JSON file in the `locales/` folder (e.g., `es.json` for Spanish) with the same keys translated to your language.
+</Callout>
