@@ -48,22 +48,3 @@ config.defaultShowKeyBind = 'LMENU'
 config.showKeyBindBehavior = 'toggle'
 
 ```
-
-## Usage
-
-To enable the library inside of your resource just add `@sleepless_interact/init.lua` as a client_script in your `fxmanifest.lua` file.
-
-```lua
-client_scripts {
-    '@sleepless_interact/init.lua',
-}
-```
-
-When sleepless_interact has been imported into your script, it will make a new global:
-- `interact` for calling sleepless_interact functions into your script.
-
-<Callout type="info">
-    all of the functions can also be called via exports. example: `exports.sleepless_interact:addEntity(netId, options)`
-</Callout>
-
-You can now use the interact functions inside of your resource.

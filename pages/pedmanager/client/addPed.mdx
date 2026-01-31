@@ -18,7 +18,7 @@ add a new ped to be handled by the manager. allows for target options, animation
     - `pos?` (`vec3`): position of the prop relative to the bone its attached to
     - `rot?` (`vec3`): rotation of the prop relative to the bone its attached to
   - `targetOptions?` (`table`): an array of `ox_target` [options](https://overextended.dev/ox_target/Options)
-  - `interactOptions?` (`table`): a `sleepless_interact` [local entity interaction](https://sleeplessdevelopment.dev/interact/client/addLocalEntity)
+  - `interactOptions?` (`table`): a `sleepless_interact` [Option or array of Options](/interactv2/client/interactOptions)
   - `renderDistance?` (`number`): distance from the player at which the ped spawns
   - `onSpawn?` (`function(ped?: number)`): a function that gets called right *AFTER* the ped is spawned
   - `onDespawn?` (`function(ped?: number)`): a function that gets called right *BEFORE* the ped is despawned
@@ -53,23 +53,29 @@ local pedPoint = exports.sleepless_pedmanager:addPed({
                 serverEvent = "some event"
             },
         },
-        interactOptions = {
-            id = "uniqueID",
-            options = {
-                {
-                    label = "Local Interact Option",
-                    icon = "hand", -- Example simple FA icon name
-                    -- groups = {['police'] = 1},
-                    -- items = {['money'] = 100},
-                    onSelect =function(data) print("Local entity action triggered") end,
-                    canInteract = function(entity, distance, coords, id)
-                        return distance < 2.0 -- Example condition based on distance
-                    end
-                }
+        interactOptions = { -- sleepless_interact v2 options
+            {
+                label = "Talk to Ped",
+                name = "talk_to_ped",
+                icon = "comments",
+                distance = 2.0,
+                onSelect = function(data)
+                    print("Talking to ped")
+                end,
+                canInteract = function(entity, distance, coords, name)
+                    return distance < 2.0
+                end
             },
-            renderDistance = 10.0,
-            activeDistance = 2.0,
-            cooldown = 1500
+            {
+                label = "Trade with Ped",
+                name = "trade_with_ped",
+                icon = "hand-holding-dollar",
+                distance = 2.0,
+                cooldown = 1500,
+                onSelect = function(data)
+                    print("Trading with ped")
+                end
+            }
         },
         onSpawn = function(ped)
             GiveWeaponToPed(ped, `WEAPON_RPG`, 100, false, true)
