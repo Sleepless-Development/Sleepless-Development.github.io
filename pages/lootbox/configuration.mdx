@@ -1,0 +1,231 @@
+import { Callout } from 'nextra/components';
+
+# Configuration
+
+The main configuration file is located at `config.lua`. This file controls general settings, rarity definitions, and lootbox contents.
+
+## General Settings
+
+```lua
+config.debug = true
+
+-- Image file extension for item icons
+config.imageExtension = 'webp'
+
+-- Whether to automatically register lootboxes as usable items
+config.registerUsableItems = true
+```
+
+### Options Explained
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `debug` | `boolean` | Enable debug mode for development. Enables test commands. |
+| `imageExtension` | `string` | File extension for item images in the UI (e.g., `'webp'`, `'png'`) |
+| `registerUsableItems` | `boolean` | When `true`, lootboxes defined in config are automatically registered as usable items |
+
+## Rarity Configuration
+
+Define rarity tiers and their colors for UI display. Items can optionally specify a rarity, or it can be auto-calculated from weight.
+
+```lua
+config.rarities = {
+    common = {
+        label = 'Common',
+        color = '#94999a',
+        minWeight = 17,
+    },
+    uncommon = {
+        label = 'Uncommon',
+        color = '#26c057',
+        minWeight = 4,
+    },
+    rare = {
+        label = 'Rare',
+        color = '#0aa7e6',
+        minWeight = 1,
+    },
+    epic = {
+        label = 'Epic',
+        color = '#d02e9b',
+        minWeight = 0.3,
+    },
+    legendary = {
+        label = 'Legendary',
+        color = '#ffc500',
+        minWeight = 0,
+    },
+}
+
+-- Order of rarities from most common to least common
+config.rarityOrder = { 'common', 'uncommon', 'rare', 'epic', 'legendary' }
+```
+
+### Rarity Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `label` | `string` | Display name shown in the UI |
+| `color` | `string` | Hex color code for the rarity tier |
+| `minWeight` | `number` | Minimum weight threshold for auto-calculation |
+
+<Callout type="info">
+  The `minWeight` determines auto-rarity assignment. An item with weight `5` would be classified as "uncommon" because `5 >= 4` but `5 < 17`.
+</Callout>
+
+## Lootbox Definitions
+
+Lootboxes are defined in the `config.lootboxes` table. Each lootbox has a unique key (item name) and contains a label, description, and items list.
+
+### Basic Structure
+
+```lua
+config.lootboxes = {
+    ['lootbox_item_name'] = {
+        label = 'Display Name',
+        description = 'Description shown in UI',
+        image = 'nui://ox_inventory/web/images/lootbox_item_name.webp', -- Optional custom image
+        items = {
+            -- { weight, { name = 'item_name', amount = 1 } },
+        },
+    },
+}
+```
+
+### Lootbox Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `label` | `string` | Yes | Display name shown in the UI |
+| `description` | `string` | No | Description text shown in the preview UI |
+| `image` | `string` | No | Custom image URL for the lootbox (defaults to item image) |
+| `items` | `table` | Yes | Array of weighted loot items |
+| `rarityThresholds` | `table` | No | Override global rarity thresholds for this lootbox |
+
+### Item Format
+
+Each item in the `items` array follows this format:
+
+```lua
+{ weight, { name = 'item_name', amount = 1, metadata = {}, rarity = 'optional' } }
+```
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `weight` | `number` | Yes | Drop weight (higher = more common) |
+| `name` | `string` | Yes | Item name to give to player |
+| `amount` | `number` | Yes | Quantity of item to give |
+| `metadata` | `table` | No | Custom metadata to attach to item |
+| `rarity` | `string` | No | Override auto-calculated rarity |
+
+### Complete Example
+
+```lua
+config.lootboxes = {
+    ['gun_case'] = {
+        label = 'Gun Case',
+        description = 'Contains various firearms',
+        items = {
+            -- Common weapons (~80% total)
+            { 40, { name = 'WEAPON_PISTOL', amount = 1 } },
+            { 40, { name = 'WEAPON_SNSPISTOL', amount = 1 } },
+
+            -- Uncommon weapons (~16% total)
+            { 8, { name = 'WEAPON_VINTAGEPISTOL', amount = 1 } },
+            { 8, { name = 'WEAPON_COMBATPISTOL', amount = 1 } },
+
+            -- Rare weapons (~3.1% total)
+            { 1.5, { name = 'WEAPON_HEAVYPISTOL', amount = 1 } },
+            { 1.6, { name = 'WEAPON_PISTOLXM3', amount = 1 } },
+
+            -- Epic weapons (~0.64% total)
+            { 0.34, { name = 'WEAPON_APPISTOL', amount = 1 } },
+            { 0.3, { name = 'WEAPON_MACHINEPISTOL', amount = 1 } },
+
+            -- Legendary weapons (~0.26% total)
+            { 0.13, { name = 'WEAPON_COMBATPDW', amount = 1 } },
+            { 0.1, { name = 'WEAPON_CARBINERIFLE', amount = 1 } },
+            { 0.03, { name = 'WEAPON_RPG', amount = 1 } },
+        },
+    },
+}
+```
+
+### Per-Lootbox Rarity Thresholds
+
+You can override the global rarity thresholds for a specific lootbox:
+
+```lua
+['custom_case'] = {
+    label = 'Custom Case',
+    description = 'Has custom rarity thresholds',
+    rarityThresholds = {
+        common = 50,
+        uncommon = 20,
+        rare = 5,
+        epic = 1,
+        legendary = 0,
+    },
+    items = {
+        -- items here...
+    },
+},
+```
+
+### Item with Metadata
+
+Include custom metadata that will be attached to the item when given:
+
+```lua
+{ 1, { 
+    name = 'weapon_pistol', 
+    amount = 1, 
+    rarity = 'legendary',
+    metadata = {
+        serial = 'GOLD-001',
+        durability = 100,
+        registered = true,
+    }
+} }
+```
+
+<Callout type="warning">
+  When using metadata, ensure your inventory system supports the metadata fields you're using.
+</Callout>
+
+## Server Settings
+
+```lua
+config.server = {
+    -- Enable version checking on server start
+    versionCheckEnabled = true,
+}
+```
+
+## Understanding Weight Distribution
+
+The weight system is flexible and doesn't require weights to sum to 100. The probability of each item is calculated as:
+
+```
+probability = item_weight / total_weight_of_all_items
+```
+
+### Example Calculation
+
+If you have items with weights: 80, 15, 4, 1 (total: 100)
+- Item with weight 80: 80/100 = 80% chance
+- Item with weight 15: 15/100 = 15% chance
+- Item with weight 4: 4/100 = 4% chance
+- Item with weight 1: 1/100 = 1% chance
+
+### Default Rarity Distribution
+
+The default configuration provides these approximate drop rates:
+
+| Rarity | Drop Rate | Weight Range |
+|--------|-----------|--------------|
+| Common | ~80% | 17+ |
+| Uncommon | ~16% | 4 - 16.99 |
+| Rare | ~3.1% | 1 - 3.99 |
+| Epic | ~0.64% | 0.3 - 0.99 |
+| Legendary | ~0.26% | < 0.3 |

@@ -1,0 +1,129 @@
+import { Callout } from 'nextra/components';
+import { Tabs, Tab, Steps } from 'nextra-theme-docs';
+import ResourceLinks from '@components/resource-links';
+
+# Sleepless Lootbox
+
+A CS:GO-style lootbox/case opening system for FiveM with a polished React UI, weight-based loot pools, and framework-agnostic design.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_lootbox" />
+
+## Features
+
+- 🎰 **CS:GO-style roller animation** - Smooth spinning animation with tension and excitement
+- ⚖️ **Weight-based loot system** - Uses `ox_lib` selector for flexible drop rates
+- 👀 **Preview system** - Players can view case contents and drop chances before opening
+- 🎨 **Rarity system** - Visual rarity tiers (Common, Uncommon, Rare, Epic, Legendary)
+- 🔧 **Framework agnostic** - Supports ESX, QBCore, and Qbox out of the box
+- 📦 **Multiple inventory support** - Works with ox_inventory, qb-inventory, and ESX inventory
+- 🎁 **Metadata support** - Items can include custom metadata
+- 📝 **Config + Runtime API** - Define lootboxes in config or register them dynamically via exports
+
+## Dependencies
+
+- [ox_lib](https://github.com/communityox/ox_lib) (required)
+- A supported framework (ESX, QBCore, or Qbox)
+- A supported inventory system
+
+## Installation
+
+<Steps>
+
+### Download the Resource
+
+Download or clone the repository from GitHub.
+
+```bash
+git clone https://github.com/Sleepless-Development/sleepless_lootbox.git
+```
+
+### Build the UI
+
+Navigate to the `web` folder and build the React UI:
+
+```bash
+cd sleepless_lootbox/web
+npm install
+npm run build
+```
+
+### Add to Server
+
+Place the `sleepless_lootbox` folder in your server's resources directory.
+
+### Configure Your Server
+
+Add the following to your `server.cfg` (after ox_lib and your framework):
+
+```cfg
+ensure ox_lib
+ensure sleepless_lootbox
+```
+
+### Configure Lootboxes
+
+Edit `config.lua` to define your lootboxes and customize settings. See the [Configuration](/lootbox/configuration) page for details.
+
+</Steps>
+
+## Quick Start
+
+### Basic Lootbox Definition
+
+```lua
+config.lootboxes = {
+    ['gun_case'] = {
+        label = 'Gun Case',
+        description = 'Contains various firearms',
+        items = {
+            -- Format: { weight, { name, amount, metadata?, rarity? } }
+            { 80, { name = 'WEAPON_PISTOL', amount = 1 } },
+            { 15, { name = 'WEAPON_SMG', amount = 1 } },
+            { 4, { name = 'WEAPON_RIFLE', amount = 1 } },
+            { 1, { name = 'WEAPON_RPG', amount = 1 } },
+        },
+    },
+}
+```
+
+### Weight System
+
+Weights determine the relative drop chance of each item:
+- Higher weight = more common drops
+- Example: Items with weights 80, 15, 4, 1 (total 100) have 80%, 15%, 4%, and 1% chances respectively
+
+<Callout type="info">
+  Weights don't need to add up to 100 - they're calculated relative to the total weight of all items in the lootbox.
+</Callout>
+
+### Rarity Auto-Calculation
+
+If you don't specify a `rarity` on an item, it's automatically calculated based on the weight:
+
+| Rarity | Weight Threshold |
+|--------|-----------------|
+| Common | weight >= 17 |
+| Uncommon | weight >= 4 |
+| Rare | weight >= 1 |
+| Epic | weight >= 0.3 |
+| Legendary | weight < 0.3 |
+
+You can customize these thresholds in `config.lua`.
+
+## Debug Commands
+
+When `config.debug = true`, the following commands are available:
+
+| Command | Description |
+|---------|-------------|
+| `/lootbox_test [caseName]` | Test open a case without removing the item |
+| `/lootbox_preview [caseName]` | Print preview data to console |
+| `/lootbox_list` | List all registered lootboxes |
+| `/lootbox_test_ui` | Test the UI with dummy data (client) |
+| `/lootbox_test_preview` | Test the preview UI with dummy data (client) |
+
+## Support
+
+If you need help or have questions:
+- [Discord](https://discord.gg/A2bDPbfgNP)
+- [GitHub Issues](https://github.com/Sleepless-Development/sleepless_lootbox/issues)
