@@ -25,8 +25,7 @@ exports.ox_target:addGlobalObject({
 -- Server side
 RegisterNetEvent('lootbox:openCrate', function()
     local src = source
-    if exports.ox_inventory:GetItem(src, 'mystery_crate_item', false, true) then
-        exports.ox_inventory:RemoveItem(src, 'mystery_crate_item', 1)
+    if exports.ox_inventory:RemoveItem(src, 'mystery_crate_item', 1) then
         exports.sleepless_lootbox:open(src, 'mystery_crate_item', true)
     end
 end)
@@ -69,12 +68,6 @@ Dynamically register a lootbox at runtime from a separate resource, for example 
 
 ```lua
 -- Server side
-CreateThread(function()
-    -- Wait for sleepless_lootbox to be ready
-    while GetResourceState('sleepless_lootbox') ~= 'started' do
-        Wait(100)
-    end
-
     exports.sleepless_lootbox:registerLootbox('event_box', {
         label = 'Holiday Event Box',
         description = 'Limited-time holiday rewards!',
@@ -87,11 +80,10 @@ CreateThread(function()
             { 1, { name = 'WEAPON_PISTOL_MK2', amount = 1, rarity = 'legendary' } },
         },
     })
-end)
 ```
 
 <Callout type="warning">
-  Make sure `sleepless_lootbox` is fully started before calling `registerLootbox`. Use a polling loop or `SetTimeout` to avoid race conditions.
+  Make sure `sleepless_lootbox` is fully started before calling `registerLootbox`.
 </Callout>
 
 ## Safe Open with Rolling Check

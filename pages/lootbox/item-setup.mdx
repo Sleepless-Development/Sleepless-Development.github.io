@@ -1,0 +1,270 @@
+import { Callout } from 'nextra/components';
+import { Tabs, Tab } from 'nextra-theme-docs';
+
+# Item Setup
+
+This page provides complete item definitions for lootbox cases, including the optional **preview button** feature that allows players to see case contents before opening.
+
+<Callout type="info">
+  These item definitions should be added to your inventory system's item configuration file. The preview button feature is only available with **ox_inventory**.
+</Callout>
+
+## ox_inventory Setup
+
+When using ox_inventory, you can add a `buttons` array to your item definitions to provide additional actions. This is perfect for adding a "Preview Case" button that lets players see what's inside before they open it.
+
+### Full Item Definition with Preview Button
+
+```lua
+-- ox_inventory/data/items.lua
+
+["gun_case"] = {
+    label = "Gun Case",
+    description = "Contains various firearms",
+    weight = 500,
+    stack = true,
+    close = false,
+    consume = 0,
+    server = {
+        export = "sleepless_lootbox.gun_case",
+    },
+    buttons = {
+        {
+            label = 'Preview Case',
+            action = function(slot)
+                exports.ox_inventory:closeInventory()
+                exports.sleepless_lootbox:preview('gun_case')
+            end
+        },
+    },
+},
+
+["supply_crate"] = {
+    label = "Supply Crate",
+    description = "Contains useful supplies and materials",
+    weight = 1000,
+    stack = true,
+    close = false,
+    consume = 0,
+    server = {
+        export = "sleepless_lootbox.supply_crate",
+    },
+    buttons = {
+        {
+            label = 'Preview Case',
+            action = function(slot)
+                exports.ox_inventory:closeInventory()
+                exports.sleepless_lootbox:preview('supply_crate')
+            end
+        },
+    },
+},
+
+["vip_case"] = {
+    label = "VIP Case",
+    description = "Premium rewards for VIP members",
+    weight = 500,
+    stack = true,
+    close = false,
+    consume = 0,
+    server = {
+        export = "sleepless_lootbox.vip_case",
+    },
+    buttons = {
+        {
+            label = 'Preview Case',
+            action = function(slot)
+                exports.ox_inventory:closeInventory()
+                exports.sleepless_lootbox:preview('vip_case')
+            end
+        },
+    },
+},
+```
+
+### Preview Button Breakdown
+
+```lua
+buttons = {
+    {
+        label = 'Preview Case',           -- Button text shown in UI
+        action = function(slot)           -- Function called when clicked
+            exports.ox_inventory:closeInventory()           -- Close inventory first
+            exports.sleepless_lootbox:preview('case_name')  -- Open preview UI
+        end
+    },
+},
+```
+
+<Callout type="warning">
+  The case name passed to `exports.sleepless_lootbox:preview()` must match the lootbox key defined in your `config.lua` or registered via exports.
+</Callout>
+
+## qb-inventory Setup
+
+qb-inventory does not support the `buttons` feature natively. However, you can still provide preview functionality through other means (commands, keybinds, or custom UI).
+
+### Basic Item Definitions
+
+```lua
+-- qb-core/shared/items.lua
+
+["gun_case"] = {
+    name = "gun_case",
+    label = "Gun Case",
+    weight = 500,
+    type = "item",
+    image = "gun_case.png",
+    unique = false,
+    useable = true,
+    shouldClose = true,
+    combinable = nil,
+    description = "Contains various firearms",
+},
+
+["supply_crate"] = {
+    name = "supply_crate",
+    label = "Supply Crate",
+    weight = 1000,
+    type = "item",
+    image = "supply_crate.png",
+    unique = false,
+    useable = true,
+    shouldClose = true,
+    combinable = nil,
+    description = "Contains useful supplies and materials",
+},
+
+["vip_case"] = {
+    name = "vip_case",
+    label = "VIP Case",
+    weight = 500,
+    type = "item",
+    image = "vip_case.png",
+    unique = false,
+    useable = true,
+    shouldClose = true,
+    combinable = nil,
+    description = "Premium rewards for VIP members",
+},
+```
+
+### Adding Preview for qb-inventory
+
+Since qb-inventory doesn't support item buttons, you can add preview functionality using a command or radial menu:
+
+<Tabs items={['Command', 'Radial Menu']}>
+<Tab>
+```lua
+-- Client side
+RegisterCommand('previewcase', function(source, args)
+    local caseName = args[1]
+    if caseName then
+        exports.sleepless_lootbox:preview(caseName)
+    end
+end, false)
+```
+</Tab>
+<Tab>
+```lua
+-- Client side using ox_lib radial menu
+lib.registerRadial({
+    id = 'lootbox_preview',
+    items = {
+        {
+            label = 'Preview Gun Case',
+            icon = 'eye',
+            onSelect = function()
+                exports.sleepless_lootbox:preview('gun_case')
+            end
+        },
+        {
+            label = 'Preview Supply Crate',
+            icon = 'eye',
+            onSelect = function()
+                exports.sleepless_lootbox:preview('supply_crate')
+            end
+        },
+        {
+            label = 'Preview VIP Case',
+            icon = 'eye',
+            onSelect = function()
+                exports.sleepless_lootbox:preview('vip_case')
+            end
+        },
+    }
+})
+```
+</Tab>
+</Tabs>
+
+## Adding Custom Lootbox Items
+
+When you create a new lootbox in `config.lua`, you need to add a matching item definition. Here's the template:
+
+<Tabs items={['ox_inventory', 'qb-inventory']}>
+<Tab>
+```lua
+["my_custom_case"] = {
+    label = "My Custom Case",
+    description = "Description of what's inside",
+    weight = 500,
+    stack = true,
+    close = false,
+    consume = 0,
+    server = {
+        export = "sleepless_lootbox.my_custom_case",
+    },
+    buttons = {
+        {
+            label = 'Preview Case',
+            action = function(slot)
+                exports.ox_inventory:closeInventory()
+                exports.sleepless_lootbox:preview('my_custom_case')
+            end
+        },
+    },
+},
+```
+</Tab>
+<Tab>
+```lua
+["my_custom_case"] = {
+    name = "my_custom_case",
+    label = "My Custom Case",
+    weight = 500,
+    type = "item",
+    image = "my_custom_case.png",
+    unique = false,
+    useable = true,
+    shouldClose = true,
+    combinable = nil,
+    description = "Description of what's inside",
+},
+```
+</Tab>
+</Tabs>
+
+## Reference File
+
+The resource includes a `_items.lua` reference file in its root directory containing example item definitions for both ox_inventory and qb-inventory. This file is **not loaded at runtime** — it's purely for reference.
+
+## Troubleshooting
+
+### Preview button doesn't appear
+
+- Ensure you're using ox_inventory (buttons are an ox_inventory feature)
+- Verify the `buttons` array is properly formatted in your item definition
+- Restart ox_inventory after making changes to item definitions
+
+### Preview shows empty or wrong items
+
+- Verify the case name in the `preview()` call matches the lootbox key exactly
+- Check that the lootbox is defined in `config.lua` or registered via exports
+- Ensure sleepless_lootbox is started and running
+
+### Item doesn't open when used
+
+- For ox_inventory: Ensure `server.export` is set to `"sleepless_lootbox.<item_name>"`
+- For qb-inventory: Ensure `useable = true` in the item definition
+- See the [Framework Setup](/lootbox/framework-setup) page for detailed troubleshooting
