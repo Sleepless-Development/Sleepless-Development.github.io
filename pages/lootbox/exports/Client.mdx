@@ -1,0 +1,68 @@
+import { Callout } from 'nextra/components';
+
+# Client Exports
+
+## preview
+
+Request to show the preview modal for a lootbox, allowing players to view contents before opening.
+
+```lua
+exports.sleepless_lootbox:preview(caseName)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `caseName` | `string` | The lootbox identifier to preview |
+
+### Example
+
+```lua
+-- Show preview when player uses an item
+RegisterNetEvent('myresource:previewCase', function(caseName)
+    exports.sleepless_lootbox:preview(caseName)
+end)
+```
+
+---
+
+## isRolling
+
+Check if a lootbox roll animation is currently in progress.
+
+```lua
+local rolling = exports.sleepless_lootbox:isRolling()
+```
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `boolean` | `true` if a roll is in progress, `false` otherwise |
+
+### Example
+
+```lua
+if not exports.sleepless_lootbox:isRolling() then
+    -- Safe to open another lootbox
+    TriggerServerEvent('myresource:openCase', 'gun_case')
+end
+```
+
+---
+
+## close
+
+Close the lootbox UI.
+
+```lua
+exports.sleepless_lootbox:close()
+```
+
+### Example
+
+```lua
+-- Force close the UI
+exports.sleepless_lootbox:close()
+```

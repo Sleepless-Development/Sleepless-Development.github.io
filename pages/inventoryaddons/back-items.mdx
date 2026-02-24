@@ -1,0 +1,173 @@
+import { Callout } from 'nextra/components';
+
+# Back Items
+
+Attach items to player models with customizable bone positions and rotations. Supports weapons, backpacks, and custom items with priority-based slot management.
+
+You can find the configuration in `backitems/config.lua`.
+
+## Configuration Overview
+
+The Back Items module has two main configuration sections:
+
+1. **Default Slots** (`Config.defaultSlots`) — Defines available attachment slots with bone positions and rotations
+2. **Back Items** (`Config.BackItems`) — Defines which items can be attached and how they display
+
+---
+
+## Default Slots
+
+Default slots define the available positions for item attachment, each linked to a specific bone, position, and rotation.
+
+```lua
+Config.defaultSlots = {
+    ['back'] = {
+        { bone = 24818, pos = vec3(0.09, -0.16, 0.12), rot = vec3(0.0, 180.0, 0.0) },
+        -- Add more slots to allow multiple items on the back
+    }
+}
+```
+
+### Slot Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `bone` | `number` | The bone ID where the slot is attached |
+| `pos` | `vec3` | Position offset relative to the bone |
+| `rot` | `vec3` | Rotation offset relative to the bone |
+
+<Callout type="info">
+  Each slot group (e.g., `'back'`) can contain multiple slots, allowing multiple items to be displayed simultaneously based on priority.
+</Callout>
+
+---
+
+## Back Items
+
+Back items define which inventory items can be attached to the player model and how they are displayed. The **index** for each entry should match the **item name** in your inventory system.
+
+```lua
+Config.BackItems = {
+    ['WEAPON_CARBINERIFLE'] = {
+        prio = 3,
+        group = 'back',
+    },
+}
+```
+
+### BackItem Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `prio` | `number` | Yes | Display priority of the item (lower = higher priority) |
+| `group` | `string` | No | Slot group for the item (defaults to `'back'`) |
+| `model` | `number` | No | Model hash for non-weapon items or alternative weapon models |
+| `customPos` | `table` | No | Custom position override (see below) |
+| `ignoreLimits` | `boolean` | No | When `true`, the item attaches regardless of available slots |
+
+### Custom Position Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `bone` | `number` | No* | Bone ID for custom attachment |
+| `pos` | `vec3` | No* | Custom position offset |
+| `rot` | `vec3` | No* | Custom rotation offset |
+
+<Callout type="warning">
+  When using `ignoreLimits = true`, a complete `customPos` with `bone`, `pos`, and `rot` is **required**.
+</Callout>
+
+---
+
+## Examples
+
+### Normal Weapon Back Item
+
+Standard weapon that uses the default slot group and positioning:
+
+```lua
+Config.BackItems = {
+    ['WEAPON_CARBINERIFLE'] = {
+        prio = 3,
+        group = 'back',
+    },
+}
+```
+
+### Non-Weapon Back Item
+
+Non-weapon items require a `model` property since they don't have an inherent weapon model:
+
+```lua
+Config.BackItems = {
+    ['cone'] = {
+        prio = 3,
+        model = `prop_roadcone02a`,
+        group = 'back',
+    },
+}
+```
+
+### Weapon with Alternative Model
+
+Use a custom model instead of the default weapon model:
+
+```lua
+Config.BackItems = {
+    ['katana'] = {
+        prio = 3,
+        model = `sheathed_katana`,
+        group = 'back',
+    },
+}
+```
+
+### Weapon with Custom Position
+
+Override the default slot position with partial custom offsets:
+
+```lua
+Config.BackItems = {
+    ['WEAPON_BAT'] = {
+        prio = 3,
+        group = 'back',
+        customPos = {
+            pos = { x = 0.4, y = -0.15 },
+            rot = { y = 270.0 },
+        },
+    },
+}
+```
+
+### Item with `ignoreLimits`
+
+Items with `ignoreLimits` will **always** equip when in the inventory, regardless of available slots. A complete `customPos` is required.
+
+This example places a cone on the player's head:
+
+```lua
+Config.BackItems = {
+    ['cone'] = {
+        ignoreLimits = true,
+        model = `prop_roadcone02a`,
+        customPos = {
+            bone = 12844,
+            pos = vec3(0.06, 0.0, 0.0),
+            rot = vec3(0.0, 90.0, 0.0),
+        },
+    },
+}
+```
+
+<Callout type="info">
+  Items with `ignoreLimits` don't use a slot group or priority — they bypass the slot system entirely.
+</Callout>
+
+---
+
+## Customization Tips
+
+- Ensure correct bone IDs, positions, and rotations for desired item placements
+- Use `ignoreLimits` only with a complete `customPos` (bone, pos, and rot)
+- The `model` field is **required** for non-weapon items or when using an alternative weapon model
+- Lower `prio` values take precedence when multiple items compete for the same slot

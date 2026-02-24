@@ -1,4 +1,6 @@
 {
   "configuration": "Configuration",
-  "exports": "Exports"
+  "framework-setup": "Framework Setup",
+  "exports": "Exports",
+  "examples": "Examples"
 }

@@ -1,0 +1,116 @@
+import { Callout } from 'nextra/components';
+
+# Examples
+
+Practical examples showing how to integrate sleepless_lootbox with other resources and systems.
+
+## Integration with ox_target
+
+Use ox_target to let players open a lootbox by interacting with an object in the world.
+
+```lua
+-- Client side
+exports.ox_target:addGlobalObject({
+    {
+        name = 'open_lootbox_crate',
+        icon = 'fas fa-box-open',
+        label = 'Open Crate',
+        items = 'mystery_crate_item',
+        onSelect = function(data)
+            TriggerServerEvent('lootbox:openCrate')
+        end,
+    }
+})
+
+-- Server side
+RegisterNetEvent('lootbox:openCrate', function()
+    local src = source
+    if exports.ox_inventory:GetItem(src, 'mystery_crate_item', false, true) then
+        exports.ox_inventory:RemoveItem(src, 'mystery_crate_item', 1)
+        exports.sleepless_lootbox:open(src, 'mystery_crate_item', true)
+    end
+end)
+```
+
+<Callout type="info">
+  When handling item removal yourself, always pass `skipItemRemoval = true` to the `open` export to prevent double-removal.
+</Callout>
+
+## Dynamic Event Rewards
+
+Give players a random lootbox as a reward for completing an event, without requiring them to have the item in their inventory.
+
+```lua
+-- Server side: Give random lootbox as event reward
+RegisterNetEvent('myevent:claimReward', function()
+    local src = source
+    local lootboxes = { 'gun_case', 'supply_crate', 'vip_case' }
+    local randomBox = lootboxes[math.random(#lootboxes)]
+
+    -- Open directly without requiring the item
+    exports.sleepless_lootbox:open(src, randomBox, true)
+end)
+```
+
+## Preview Before Purchase
+
+Show players what a lootbox contains before they decide to buy it from a shop.
+
+```lua
+-- Client side: Show preview in a shop
+RegisterNetEvent('shop:previewLootbox', function(caseName)
+    exports.sleepless_lootbox:preview(caseName)
+end)
+```
+
+## Register Lootboxes from Another Resource
+
+Dynamically register a lootbox at runtime from a separate resource, for example during a server event or seasonal content.
+
+```lua
+-- Server side
+CreateThread(function()
+    -- Wait for sleepless_lootbox to be ready
+    while GetResourceState('sleepless_lootbox') ~= 'started' do
+        Wait(100)
+    end
+
+    exports.sleepless_lootbox:registerLootbox('event_box', {
+        label = 'Holiday Event Box',
+        description = 'Limited-time holiday rewards!',
+        registerItem = true,
+        items = {
+            { 50, { name = 'bread', amount = 10 } },
+            { 30, { name = 'water', amount = 10 } },
+            { 15, { name = 'medkit', amount = 3 } },
+            { 4, { name = 'armour', amount = 2, rarity = 'rare' } },
+            { 1, { name = 'WEAPON_PISTOL_MK2', amount = 1, rarity = 'legendary' } },
+        },
+    })
+end)
+```
+
+<Callout type="warning">
+  Make sure `sleepless_lootbox` is fully started before calling `registerLootbox`. Use a polling loop or `SetTimeout` to avoid race conditions.
+</Callout>
+
+## Safe Open with Rolling Check
+
+Prevent players from opening a lootbox while another roll is still in progress.
+
+```lua
+-- Client side
+local function tryOpenCase(caseName)
+    if exports.sleepless_lootbox:isRolling() then
+        -- Notify player they need to wait
+        lib.notify({
+            title = 'Lootbox',
+            description = 'Please wait for the current roll to finish',
+            type = 'error',
+        })
+        return
+    end
+
+    TriggerServerEvent('myresource:openCase', caseName)
+end
+```

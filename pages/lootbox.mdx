@@ -14,16 +14,16 @@ A CS:GO-style lootbox/case opening system for FiveM with a polished React UI, we
 - ⚖️ **Weight-based loot system** - Uses `ox_lib` selector for flexible drop rates
 - 👀 **Preview system** - Players can view case contents and drop chances before opening
 - 🎨 **Rarity system** - Visual rarity tiers (Common, Uncommon, Rare, Epic, Legendary)
-- 🔧 **Framework agnostic** - Supports ESX, QBCore, and Qbox out of the box
+- 🔧 **Framework agnostic** - Supports ESX, QBCore, Qbox, and ox_core out of the box
 - 📦 **Multiple inventory support** - Works with ox_inventory, qb-inventory, and ESX inventory
 - 🎁 **Metadata support** - Items can include custom metadata
 - 📝 **Config + Runtime API** - Define lootboxes in config or register them dynamically via exports
 
 ## Dependencies
 
-- [ox_lib](https://github.com/communityox/ox_lib) (required)
-- A supported framework (ESX, QBCore, or Qbox)
-- A supported inventory system
+- [ox_lib](https://github.com/overextended/ox_lib) (required)
+- A supported framework (ESX, QBCore, Qbox, or ox_core)
+- A supported inventory system (ox_inventory, qb-inventory, or ESX inventory)
 
 ## Installation
 
@@ -53,12 +53,18 @@ Place the `sleepless_lootbox` folder in your server's resources directory.
 
 ### Configure Your Server
 
-Add the following to your `server.cfg` (after ox_lib and your framework):
+Add the following to your `server.cfg` (after ox_lib, your framework, and your inventory):
 
 ```cfg
 ensure ox_lib
+ensure es_extended  # or qb-core, qbx_core, ox_core
+ensure ox_inventory # or qb-inventory, esx_inventory
 ensure sleepless_lootbox
 ```
+
+### Configure Framework Items
+
+Depending on your framework, you may need to configure your item definitions. See the [Framework Setup](/lootbox/framework-setup) page for details.
 
 ### Configure Lootboxes
 

@@ -10,16 +10,24 @@ A 3D DUI waypoint and marker system for FiveM. Create customizable waypoints wit
 
 ## Features
 
-- **Two Waypoint Types**: Small markers and checkpoint-style beacons
-- **Customizable Appearance**: Colors, icons, labels, and sizes
-- **Distance Display**: Automatic distance tracking to waypoints
-- **Map Waypoint Sync**: Automatically creates a 3D marker at the player's map waypoint
-- **Server-side Support**: Create waypoints for specific players or globally from the server
-- **Performance Optimized**: Efficient rendering with distance-based culling
+- 📍 **Two Waypoint Types** - Small markers and checkpoint-style beacons
+- 🎨 **Customizable Appearance** - Colors, icons, labels, and sizes
+- 📏 **Distance Display** - Automatic distance tracking to waypoints
+- 🗺️ **Map Waypoint Sync** - Automatically creates a 3D marker at the player's map waypoint
+- 🖥️ **Server-side Support** - Create waypoints for specific players or globally from the server
+- ⚡ **Performance Optimized** - Efficient rendering with distance-based culling
+
+## Dependencies
+
+- [ox_lib](https://github.com/overextended/ox_lib) (required)
 
 ## Installation
 
-### Download a [release](https://github.com/Sleepless-Development/sleepless_waypoints/releases) or build the source code.
+<Steps>
+
+### Download the Resource
+
+Download a [release](https://github.com/Sleepless-Development/sleepless_waypoints/releases) or build from source:
 
 ```bash
 git clone https://github.com/Sleepless-Development/sleepless_waypoints.git
@@ -28,101 +36,75 @@ pnpm i
 pnpm build
 ```
 
-## Usage
+### Add to Server
 
-Add to your resource folder and ensure `sleepless_waypoints` in your server.cfg
+Place the `sleepless_waypoints` folder in your server's resources directory.
+
+### Configure Your Server
+
+Add the following to your `server.cfg`:
 
 ```cfg
+ensure ox_lib
 ensure sleepless_waypoints
 ```
 
-You can now use the waypoints exports inside of your resources.
+### Configure the Resource
 
-## Configuration
+Edit `config.lua` to customize waypoint defaults, DUI settings, and rendering options. See the [Configuration](/waypoints/configuration) page for details.
 
-Configure the resource in `config.lua`:
+</Steps>
+
+## Quick Start
+
+### Create a Small Waypoint (Client)
 
 ```lua
-local config = {}
-
--------------------------------------------------
--- Map Waypoint Sync
--------------------------------------------------
--- When enabled, a waypoint marker will be created at the player's map waypoint
-config.syncToWayPoint = true
-
--- Settings for the auto-created map waypoint marker
-config.mapWaypoint = {
-    type = 'checkpoint',
-    label = 'WAYPOINT',
-    color = '#f500fc',
-    size = 1.0,
-    drawDistance = 1000.0,
-}
-
--------------------------------------------------
--- Default Waypoint Settings
--------------------------------------------------
-config.defaults = {
-    drawDistance = 500.0,     -- Maximum distance to render the waypoint
-    fadeDistance = 400.0,     -- Distance at which waypoint starts fading
-    size = 1.0,               -- Base size multiplier
-    minHeight = 0.5,          -- Minimum marker height (checkpoint type)
-    maxHeight = 50.0,         -- Maximum marker height (checkpoint type)
-    groundZOffset = -2.0,     -- Offset from coords.z for ground position
-    color = '#f5a623',        -- Default marker color (hex)
-    label = 'CHECKPOINT',     -- Default label text
-    displayDistance = true,   -- Show distance on marker by default
-}
-
--------------------------------------------------
--- DUI Settings
--------------------------------------------------
-config.dui = {
-    width = 512,     -- DUI texture width in pixels
-    height = 1024,   -- DUI texture height in pixels
-}
-
--------------------------------------------------
--- Rendering Settings
--------------------------------------------------
-config.rendering = {
-    updateInterval = 100,           -- Main loop update interval (ms)
-    perspectiveDivisor = 20.0,      -- Camera distance divisor for perspective scale
-    checkpointBaseMultiplier = 4.0, -- Multiplier for checkpoint base size
-    checkpointMinScale = 0.1,       -- Minimum perspective scale for checkpoints
-    checkpointAspectRatio = 2.0,    -- Height to width ratio for checkpoint quads
-    smallMinScale = 1.0,            -- Minimum perspective scale for small markers
-    smallAspectRatio = 2.0,         -- Height to width ratio for small marker quads
-}
-
--------------------------------------------------
--- Server Settings
--------------------------------------------------
-config.server = {
-    cleanupInterval = 60000,  -- Cleanup interval for disconnected players (ms)
-}
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(100.0, 200.0, 30.0),
+    type = 'small',
+    color = '#ff6b6b',
+    icon = 'hand',
+    size = 0.15,
+    drawDistance = 100.0,
+})
 ```
 
-## Waypoint Data
+### Create a Checkpoint Waypoint (Client)
 
-All waypoint creation functions accept a `WaypointData` table with the following properties:
+```lua
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(200.0, 300.0, 30.0),
+    type = 'checkpoint',
+    color = '#f5a623',
+    label = 'DESTINATION',
+    size = 1.0,
+    drawDistance = 500.0,
+    groundZ = 28.0,
+})
+```
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `coords` | `vector3` | *required* | The 3D position of the waypoint |
-| `type` | `'small'` \| `'checkpoint'` | `'small'` | Waypoint style type |
-| `color` | `string` | `'#f5a623'` | Hex color for the waypoint |
-| `label` | `string` | `'CHECKPOINT'` | Text label (mainly for checkpoint type) |
-| `icon` | `string` | `nil` | Icon name for the waypoint |
-| `image` | `string` | `nil` | Image URL for the waypoint |
-| `size` | `number` | `1.0` | Size multiplier |
-| `displayDistance` | `boolean` | `true` | Whether to show distance text |
-| `drawDistance` | `number` | `500.0` | Maximum distance to render |
-| `fadeDistance` | `number` | `400.0` | Distance to start fading |
-| `minHeight` | `number` | `0.5` | Minimum height for checkpoint line |
-| `maxHeight` | `number` | `50.0` | Maximum height for checkpoint line |
-| `groundZ` | `number` | `coords.z - 2` | Ground Z coordinate for the line |
+### Create a Server-side Waypoint
+
+```lua
+-- Send a waypoint to a specific player
+local id = exports.sleepless_waypoints:create(targetPlayerId, {
+    coords = vector3(200, 300, 30),
+    type = 'checkpoint',
+    color = '#4ecdc4',
+    label = 'GO HERE',
+    drawDistance = 500.0,
+})
+
+-- Create a global waypoint visible to all players
+local id = exports.sleepless_waypoints:create(-1, {
+    coords = vector3(0, 0, 72),
+    type = 'checkpoint',
+    color = '#9b59b6',
+    label = 'EVENT LOCATION',
+    drawDistance = 5000.0,
+})
+```
 
 ## Waypoint Types
 
@@ -131,3 +113,13 @@ A compact marker suitable for nearby points of interest. Displays an icon or ima
 
 ### Checkpoint
 A tall beacon-style marker visible from far distances. Features a vertical line extending from the ground with a label and distance display at the top.
+
+<Callout type="info">
+  See the [Configuration](/waypoints/configuration) page for the full `WaypointData` properties reference and default settings. See [Client Exports](/waypoints/exports/Client) and [Server Exports](/waypoints/exports/Server) for the complete API.
+</Callout>
+
+## Support
+
+If you need help or have questions:
+- [Discord](https://discord.gg/A2bDPbfgNP)
+- [GitHub Issues](https://github.com/Sleepless-Development/sleepless_waypoints/issues)

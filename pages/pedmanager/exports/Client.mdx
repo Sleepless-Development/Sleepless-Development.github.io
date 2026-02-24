@@ -1,0 +1,159 @@
+import { Callout } from 'nextra/components';
+
+# Client Exports
+
+## addPed
+
+Add a new ped to be handled by the manager. Supports target options, interact options, animations, props, scenarios, and lifecycle callbacks.
+
+```lua
+local pedPoint = exports.sleepless_pedmanager:addPed(data)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `data` | `PedConfig` | A table containing the ped configuration data |
+
+### PedConfig Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `model` | `string \| number` | Yes | A hash or string for the ped model |
+| `coords` | `vec4 \| vec4[]` | Yes | The coordinates/heading where the ped(s) will be located |
+| `scenario` | `string` | No | The name of a scenario for the ped to play when spawned |
+| `animation` | `table` | No | Animation data (see below) |
+| `prop` | `table` | No | Prop attachment data (see below) |
+| `targetOptions` | `table` | No | An array of [ox_target options](https://overextended.dev/ox_target) |
+| `interactOptions` | `table` | No | A [sleepless_interact Option or array of Options](/interact/interact-options) |
+| `renderDistance` | `number` | No | Distance from the player at which the ped spawns |
+| `onSpawn` | `function(ped?: number)` | No | Callback called right **after** the ped is spawned |
+| `onDespawn` | `function(ped?: number)` | No | Callback called right **before** the ped is despawned |
+
+### Animation Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `dict` | `string` | Yes | Animation dictionary |
+| `anim` | `string` | Yes | Animation name |
+| `flag` | `number` | No | Animation flag |
+
+### Prop Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `propModel` | `string \| number` | Yes | Model hash or string for the prop |
+| `bone` | `string \| number` | Yes | Bone name or index of the ped to attach the prop to |
+| `pos` | `vec3` | No | Position offset of the prop relative to the bone |
+| `rot` | `vec3` | No | Rotation of the prop relative to the bone |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `ox_lib point \| ox_lib point[]` | Returns a single `ox_lib` point if one coordinate was provided, or an array of points if multiple coordinates were provided |
+
+<Callout type="info">
+  Use either `scenario` **or** `animation` — not both. If both are provided, the scenario will be used.
+</Callout>
+
+### Example: Basic Ped with Target Options
+
+```lua
+local pedPoint = exports.sleepless_pedmanager:addPed({
+    model = "a_m_m_business_01",
+    coords = vec4(200.0, -900.0, 30.0, 180.0),
+    scenario = "WORLD_HUMAN_CLIPBOARD",
+    renderDistance = 15.0,
+    targetOptions = {
+        {
+            icon = "fas fa-comments",
+            label = "Talk",
+            serverEvent = "myresource:talkToNpc",
+        },
+    },
+})
+```
+
+### Example: Multiple Locations
+
+```lua
+local pedPoints = exports.sleepless_pedmanager:addPed({
+    model = "a_m_m_business_01",
+    coords = {
+        vec4(-1665.45, -3143.31, 13.99, 281.13),
+        vec4(-1664.45, -3142.31, 13.99, 181.13),
+    },
+    scenario = "WORLD_HUMAN_STAND_IMPATIENT",
+    renderDistance = 10.0,
+})
+
+-- pedPoints is an array of ox_lib points when multiple coords are provided
+```
+
+### Example: Animation with Prop and Interact Options
+
+```lua
+local pedPoints = exports.sleepless_pedmanager:addPed({
+    model = "u_m_y_zombie_01",
+    coords = {
+        vec4(-1665.4545, -3143.3169, 13.9914, 281.1344),
+        vec4(-1664.4545, -3142.3169, 13.9914, 181.1344),
+    },
+    renderDistance = 8.0,
+    animation = {
+        dict = "amb@code_human_in_bus_passenger_idles@female@tablet@idle_a",
+        anim = "idle_a",
+        flag = 63,
+    },
+    prop = {
+        propModel = "prop_cs_tablet",
+        bone = 28422,
+        rot = vec3(0.0, 0.0, 0.03),
+        pos = vec3(0.0, 0.0, 0.03),
+    },
+    targetOptions = {
+        {
+            icon = "fas fa-money-bill-alt",
+            label = "Something",
+            serverEvent = "some_event",
+        },
+    },
+    interactOptions = {
+        {
+            label = "Talk to Ped",
+            name = "talk_to_ped",
+            icon = "comments",
+            distance = 2.0,
+            onSelect = function(data)
+                print("Talking to ped")
+            end,
+            canInteract = function(entity, distance, coords, name)
+                return distance < 2.0
+            end,
+        },
+        {
+            label = "Trade with Ped",
+            name = "trade_with_ped",
+            icon = "hand-holding-dollar",
+            distance = 2.0,
+            cooldown = 1500,
+            onSelect = function(data)
+                print("Trading with ped")
+            end,
+        },
+    },
+    onSpawn = function(ped)
+        GiveWeaponToPed(ped, `WEAPON_RPG`, 100, false, true)
+        SetCurrentPedWeapon(ped, `WEAPON_RPG`, true)
+    end,
+    onDespawn = function(ped)
+        -- cleanup logic here
+    end,
+})
+```
+
+<Callout type="warning">
+  Make sure ped models are valid and streamable. If a model fails to load, the ped will not spawn and no error may be thrown.
+</Callout>

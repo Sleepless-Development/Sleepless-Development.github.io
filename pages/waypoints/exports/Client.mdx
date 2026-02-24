@@ -1,0 +1,350 @@
+import { Callout } from 'nextra/components';
+
+# Client Exports
+
+All client-side exports for creating and managing waypoints locally on the player's client.
+
+---
+
+## create
+
+Creates a new 3D waypoint at the specified coordinates with customizable appearance and behavior.
+
+```lua
+local id = exports.sleepless_waypoints:create(data)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `data` | `WaypointData` | A table containing the [waypoint configuration](/waypoints/configuration#waypoint-data) |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `number` | The unique identifier for the created waypoint |
+
+### Example: Small Waypoint
+
+```lua
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(100.0, 200.0, 30.0),
+    type = 'small',
+    color = '#ff6b6b',
+    icon = 'hand',
+    size = 0.15,
+    drawDistance = 100.0,
+})
+
+print('Created waypoint:', id)
+```
+
+### Example: Checkpoint Waypoint
+
+```lua
+local playerPos = GetEntityCoords(cache.ped)
+local targetPos = vec3(200.0, 300.0, 30.0)
+
+local id = exports.sleepless_waypoints:create({
+    coords = targetPos,
+    type = 'checkpoint',
+    color = '#f5a623',
+    label = 'DESTINATION',
+    size = 1.0,
+    drawDistance = 500.0,
+    groundZ = playerPos.z - 1,
+    minHeight = 5.0,
+    maxHeight = 80.0,
+})
+```
+
+### Example: Waypoint with Image
+
+```lua
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(150.0, 250.0, 30.0),
+    type = 'checkpoint',
+    color = '#4ecdc4',
+    label = 'COLLECT',
+    image = 'nui://ox_inventory/web/images/copper_ore.webp',
+    size = 1.0,
+    drawDistance = 300.0,
+    displayDistance = true,
+})
+```
+
+<Callout type="info">
+  The `groundZ` property determines where the vertical line of checkpoint-style waypoints begins. Set this to the ground level for the best visual effect.
+</Callout>
+
+---
+
+## update
+
+Updates an existing waypoint's properties. Only the properties you specify will be changed.
+
+```lua
+exports.sleepless_waypoints:update(id, data)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | `number` | The waypoint ID returned from `create` |
+| `data` | `WaypointData` | A table containing the properties to update |
+
+### Updatable Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `coords` | `vector3` | New position for the waypoint |
+| `color` | `string` | New hex color |
+| `label` | `string` | New label text |
+| `icon` | `string` | New icon |
+| `size` | `number` | New size multiplier |
+| `drawDistance` | `number` | New maximum render distance |
+| `fadeDistance` | `number` | New fade distance |
+| `minHeight` | `number` | New minimum height |
+| `maxHeight` | `number` | New maximum height |
+| `groundZ` | `number` | New ground Z coordinate |
+
+### Example: Update Position
+
+```lua
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(100.0, 200.0, 30.0),
+    type = 'checkpoint',
+    label = 'TARGET',
+})
+
+-- Move the waypoint to a new position
+exports.sleepless_waypoints:update(id, {
+    coords = vec3(150.0, 250.0, 35.0),
+})
+```
+
+### Example: Update Appearance
+
+```lua
+-- Change the color and label
+exports.sleepless_waypoints:update(id, {
+    color = '#e74c3c',
+    label = 'DANGER ZONE',
+})
+```
+
+### Example: Dynamic Waypoint
+
+```lua
+-- Create a waypoint that follows an entity
+local targetEntity = GetClosestPed(GetEntityCoords(cache.ped), 50.0, true, true, true, true)
+
+local id = exports.sleepless_waypoints:create({
+    coords = GetEntityCoords(targetEntity),
+    type = 'small',
+    color = '#3498db',
+    icon = 'user',
+    size = 0.2,
+})
+
+-- Update the waypoint position periodically
+CreateThread(function()
+    while DoesEntityExist(targetEntity) do
+        exports.sleepless_waypoints:update(id, {
+            coords = GetEntityCoords(targetEntity),
+        })
+        Wait(100)
+    end
+    exports.sleepless_waypoints:remove(id)
+end)
+```
+
+<Callout type="warning">
+  If you need to update multiple properties at once, pass them all in a single `update` call for better performance.
+</Callout>
+
+---
+
+## remove
+
+Removes a waypoint by its ID. The waypoint will be destroyed and its DUI resources freed.
+
+```lua
+exports.sleepless_waypoints:remove(id)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | `number` | The waypoint ID returned from `create` |
+
+### Example: Timed Removal
+
+```lua
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(100.0, 200.0, 30.0),
+    type = 'checkpoint',
+    label = 'TEMPORARY',
+})
+
+-- Remove the waypoint after 30 seconds
+SetTimeout(30000, function()
+    exports.sleepless_waypoints:remove(id)
+    print('Removed waypoint:', id)
+end)
+```
+
+### Example: Conditional Removal
+
+```lua
+local waypointId = nil
+
+-- Create waypoint when player starts a mission
+RegisterNetEvent('mission:start', function(targetCoords)
+    waypointId = exports.sleepless_waypoints:create({
+        coords = targetCoords,
+        type = 'checkpoint',
+        color = '#2ecc71',
+        label = 'OBJECTIVE',
+        drawDistance = 500.0,
+    })
+end)
+
+-- Remove waypoint when mission ends
+RegisterNetEvent('mission:complete', function()
+    if waypointId then
+        exports.sleepless_waypoints:remove(waypointId)
+        waypointId = nil
+    end
+end)
+```
+
+---
+
+## removeAll
+
+Removes all active waypoints created by the client. Useful for cleanup operations.
+
+```lua
+exports.sleepless_waypoints:removeAll()
+```
+
+### Example: Mission Cleanup
+
+```lua
+local waypointIds = {}
+
+-- Create multiple waypoints for a mission route
+local checkpoints = {
+    { coords = vec3(100, 200, 30), label = 'CHECKPOINT 1' },
+    { coords = vec3(150, 250, 30), label = 'CHECKPOINT 2' },
+    { coords = vec3(200, 300, 30), label = 'CHECKPOINT 3' },
+}
+
+for i, checkpoint in ipairs(checkpoints) do
+    waypointIds[i] = exports.sleepless_waypoints:create({
+        coords = checkpoint.coords,
+        type = 'checkpoint',
+        color = '#f5a623',
+        label = checkpoint.label,
+    })
+end
+
+-- Clean up all waypoints when player cancels mission
+RegisterNetEvent('mission:cancel', function()
+    exports.sleepless_waypoints:removeAll()
+    waypointIds = {}
+end)
+```
+
+### Example: Resource Cleanup
+
+```lua
+-- Clean up waypoints when resource stops
+AddEventHandler('onResourceStop', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        exports.sleepless_waypoints:removeAll()
+    end
+end)
+```
+
+---
+
+## get
+
+Retrieves a waypoint instance by its ID. Returns the waypoint data and DUI reference if the waypoint exists.
+
+```lua
+local waypoint = exports.sleepless_waypoints:get(id)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | `number` | The waypoint ID returned from `create` |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `WaypointInstance?` | The waypoint instance, or `nil` if not found |
+
+### WaypointInstance Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `number` | The waypoint's unique identifier |
+| `data` | `WaypointData` | The waypoint's configuration data |
+| `dui` | `Dui` | The DUI instance used for rendering |
+| `active` | `boolean` | Whether the waypoint is currently active |
+
+### Example: Check Waypoint Exists
+
+```lua
+local id = exports.sleepless_waypoints:create({
+    coords = vec3(100.0, 200.0, 30.0),
+    type = 'checkpoint',
+    label = 'TARGET',
+})
+
+-- Check if waypoint still exists
+local waypoint = exports.sleepless_waypoints:get(id)
+
+if waypoint then
+    print('Waypoint exists at:', waypoint.data.coords)
+    print('Active:', waypoint.active)
+else
+    print('Waypoint not found')
+end
+```
+
+### Example: Calculate Distance to Waypoint
+
+```lua
+local waypoint = exports.sleepless_waypoints:get(waypointId)
+
+if waypoint then
+    local playerPos = GetEntityCoords(cache.ped)
+    local distance = #(playerPos - waypoint.data.coords)
+    print('Distance to waypoint:', distance)
+end
+```
+
+### Example: Get Waypoint Properties
+
+```lua
+local waypoint = exports.sleepless_waypoints:get(waypointId)
+
+if waypoint and waypoint.active then
+    local data = waypoint.data
+    print('Type:', data.type)
+    print('Color:', data.color)
+    print('Label:', data.label)
+    print('Draw Distance:', data.drawDistance)
+end
+```

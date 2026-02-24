@@ -1,0 +1,49 @@
+import { Callout } from 'nextra/components';
+
+# Configuration
+
+The configuration file is located at `imports/config.lua`. This file controls general settings for the interaction system.
+
+## General Settings
+
+```lua
+local config = {}
+
+-- Maximum distance that interacts will render the indicator sprite
+-- Recommend keeping this pretty low for optimization
+config.maxInteractDistance = 5.0
+
+-- Theme color for interaction indicators {R, G, B, A} (0-255)
+config.themeColor = { 28, 100, 184, 200 }
+
+-- Texture dictionary and texture name for the sprite used to show non-active interactions
+config.IndicatorSprite = { dict = 'shared', txt = 'emptydot_32' }
+
+-- Use a keybind to show and hide the interactions
+config.useShowKeyBind = true
+
+-- Default key mapping for the show interactions keybind
+config.defaultShowKeyBind = 'LMENU'
+
+-- Sets the behavior of the show interactions keybind: "hold" or "toggle"
+config.showKeyBindBehavior = 'toggle'
+```
+
+## Options Explained
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `maxInteractDistance` | `number` | `5.0` | Maximum distance at which interact indicator sprites are rendered. Keep low for performance. |
+| `themeColor` | `number[]` | `{ 28, 100, 184, 200 }` | RGBA color values (0–255) used for the interaction UI theme. |
+| `IndicatorSprite` | `table` | `{ dict = 'shared', txt = 'emptydot_32' }` | Texture dictionary and name for the non-active interaction sprite. |
+| `useShowKeyBind` | `boolean` | `true` | Whether a keybind is required to show/hide interactions. |
+| `defaultShowKeyBind` | `string` | `'LMENU'` | The default key mapping for toggling interaction visibility. |
+| `showKeyBindBehavior` | `string` | `'toggle'` | `"hold"` requires holding the key; `"toggle"` switches on/off per press. |
+
+<Callout type="info">
+  The `maxInteractDistance` directly affects performance. A lower value means fewer interactions are checked and rendered each frame.
+</Callout>
+
+<Callout type="info">
+  For details on how to define interaction options (the `Option` type used in exports), see the [Interact Options](/interact/interact-options) reference page.
+</Callout>

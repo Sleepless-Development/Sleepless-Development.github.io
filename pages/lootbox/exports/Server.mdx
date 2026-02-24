@@ -1,0 +1,213 @@
+import { Callout } from 'nextra/components';
+
+# Server Exports
+
+## registerLootbox
+
+Register a new lootbox at runtime from another resource.
+
+```lua
+exports.sleepless_lootbox:registerLootbox(name, data)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `string` | Unique identifier for the lootbox (typically the item name) |
+| `data` | `table` | Lootbox configuration data |
+
+### Data Structure
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `label` | `string` | Yes | Display name shown in UI |
+| `description` | `string` | No | Description shown in UI |
+| `image` | `string` | No | Custom image URL for the lootbox |
+| `registerItem` | `boolean` | No | Auto-register as usable item (default: `true`) |
+| `items` | `table` | Yes | Array of weighted loot items |
+| `rarityThresholds` | `table` | No | Override global rarity weight thresholds for this lootbox |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `boolean` | `true` if registration was successful, `false` if lootbox already exists or has no items |
+
+### Example
+
+```lua
+exports.sleepless_lootbox:registerLootbox('mystery_box', {
+    label = 'Mystery Box',
+    description = 'Who knows what\'s inside?',
+    registerItem = true,
+    items = {
+        { 50, { name = 'bread', amount = 5 } },
+        { 30, { name = 'water', amount = 3 } },
+        { 15, { name = 'bandage', amount = 2 } },
+        { 5, { name = 'medkit', amount = 1, rarity = 'rare' } },
+    },
+})
+```
+
+<Callout type="info">
+  Wrap your `registerLootbox` call in a `SetTimeout` or wait for the resource to be fully loaded to ensure the export is available.
+</Callout>
+
+---
+
+## unregisterLootbox
+
+Remove a previously registered lootbox.
+
+```lua
+exports.sleepless_lootbox:unregisterLootbox(name)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `string` | The lootbox identifier to remove |
+
+### Example
+
+```lua
+exports.sleepless_lootbox:unregisterLootbox('mystery_box')
+```
+
+---
+
+## getLootbox
+
+Get the configuration data for a specific lootbox.
+
+```lua
+local data = exports.sleepless_lootbox:getLootbox(name)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `string` | The lootbox identifier |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `table\|nil` | Lootbox data or `nil` if not found |
+
+### Example
+
+```lua
+local gunCase = exports.sleepless_lootbox:getLootbox('gun_case')
+if gunCase then
+    print('Found lootbox:', gunCase.label)
+end
+```
+
+---
+
+## getAllLootboxes
+
+Get all registered lootboxes.
+
+```lua
+local lootboxes = exports.sleepless_lootbox:getAllLootboxes()
+```
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `table` | Table of all lootbox configurations keyed by name |
+
+### Example
+
+```lua
+local allBoxes = exports.sleepless_lootbox:getAllLootboxes()
+for name, data in pairs(allBoxes) do
+    print(name, data.label)
+end
+```
+
+---
+
+## open
+
+Open a lootbox for a player, triggering the roll animation and giving the reward.
+
+```lua
+exports.sleepless_lootbox:open(source, caseName, skipItemRemoval)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `source` | `number` | Player server ID |
+| `caseName` | `string` | The lootbox identifier to open |
+| `skipItemRemoval` | `boolean` | If `true`, the lootbox item won't be removed from inventory |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `boolean` | `true` if the lootbox was opened successfully, `false` otherwise |
+
+<Callout type="warning">
+  Set `skipItemRemoval` to `true` if you handle item removal yourself (e.g., via ox_target or custom triggers).
+</Callout>
+
+### Example: Custom Trigger
+
+```lua
+RegisterNetEvent('myresource:openCase', function(caseName)
+    local src = source
+    -- Remove the item manually first
+    exports.ox_inventory:RemoveItem(src, caseName, 1)
+    -- Open with skipItemRemoval = true
+    exports.sleepless_lootbox:open(src, caseName, true)
+end)
+```
+
+### Example: Standard Usage
+
+```lua
+-- Let sleepless_lootbox handle item removal
+exports.sleepless_lootbox:open(source, 'gun_case', false)
+```
+
+---
+
+## getPreview
+
+Get preview data for a lootbox, including all items with their calculated drop chances.
+
+```lua
+local preview = exports.sleepless_lootbox:getPreview(caseName)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `caseName` | `string` | The lootbox identifier |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `RollItem[]\|nil` | Array of items with calculated chances, or `nil` if lootbox not found |
+
+### Example
+
+```lua
+local items = exports.sleepless_lootbox:getPreview('gun_case')
+if items then
+    for _, item in ipairs(items) do
+        print(item.name, item.chance .. '%', item.rarity)
+    end
+end
+```

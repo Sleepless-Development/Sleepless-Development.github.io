@@ -1,0 +1,132 @@
+import { Callout } from 'nextra/components';
+
+# Server Exports
+
+## registerHook
+
+Register a hook to customize behavior when players interact with crafting stations.
+
+```lua
+exports.sleepless_crafting:registerHook(hookName, callback)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `hookName` | `string` | The hook to register (`"open"`) |
+| `callback` | `function` | The callback function to execute |
+
+### Available Hooks
+
+#### `open`
+
+Called when a player opens a crafting station. Allows you to customize or cancel the opening.
+
+```lua
+exports.sleepless_crafting:registerHook("open", function(src, bench)
+    -- src: player server ID
+    -- bench: the crafting station data
+
+    -- Return nil for default behavior
+    -- Return false to cancel opening
+    -- Return table with options to alter behavior
+
+    return nil
+end)
+```
+
+### Return Options
+
+When returning a table, you can specify the following options:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `forceTier` | `number` | Override the bench tier for this player |
+
+### Example: VIP Tier Override
+
+```lua
+exports.sleepless_crafting:registerHook("open", function(src, bench)
+    local isVIP = CheckIfPlayerIsVIP(src) -- Your VIP check function
+
+    if isVIP then
+        -- VIP players always get max tier access
+        return { forceTier = 4 }
+    end
+
+    -- Non-VIP players get default behavior
+    return nil
+end)
+```
+
+### Example: Job-Based Access Control
+
+```lua
+exports.sleepless_crafting:registerHook("open", function(src, bench)
+    local Player = QBCore.Functions.GetPlayer(src)
+
+    -- Cancel if player is not on duty
+    if Player.PlayerData.job.name == "police" and not Player.PlayerData.job.onduty then
+        TriggerClientEvent('ox_lib:notify', src, {
+            title = 'Crafting',
+            description = 'You must be on duty to use this station',
+            type = 'error'
+        })
+        return false
+    end
+
+    return nil
+end)
+```
+
+<Callout type="warning">
+  Make sure to wrap your `registerHook` call in a `SetTimeout` to ensure the export is registered before you try to use it.
+</Callout>
+
+---
+
+## loadStationsForProperty
+
+Load crafting stations for a specific property. Useful for housing/property systems where stations are tied to specific locations.
+
+```lua
+exports.sleepless_crafting:loadStationsForProperty(src, propertyId)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `src` | `number` | The player server ID to load stations for |
+| `propertyId` | `string\|number` | The property identifier |
+
+### Example
+
+Call this export when a player enters a property to load any crafting stations associated with that property.
+
+```lua
+-- Example: When player enters a property
+AddEventHandler('yourPropertyResource:playerEnteredProperty', function(playerId, propertyId)
+    exports.sleepless_crafting:loadStationsForProperty(playerId, propertyId)
+end)
+```
+
+<Callout type="info">
+  The property integration is optional and requires customization in `bridge/properties/server.lua` to work with your specific property system.
+</Callout>
+
+### Custom Property Bridge
+
+To integrate with your property system, edit `bridge/properties/server.lua`:
+
+```lua
+function properties.getPropertyId(src)
+    -- Example integration with a housing resource
+    local property = exports.yourHousingResource:getPlayerCurrentProperty(src)
+    if property then
+        return property.id
+    end
+    return nil
+end
+```

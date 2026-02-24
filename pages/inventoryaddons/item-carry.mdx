@@ -1,0 +1,127 @@
+import { Callout } from 'nextra/components';
+
+# Item Carry
+
+Automatically attach props and play animations when players receive specific items using `ox_inventory`. Includes vehicle blocking and walk-only options for realistic item carrying.
+
+## Configuration
+
+The configuration file is located at `itemcarry/config.lua`. Each entry in the config table maps an inventory item name to its carry behavior.
+
+### Config Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `walkOnly` | `boolean` | No | Whether the player can only walk while carrying this item |
+| `blockVehicle` | `boolean` | No | Whether the player is blocked from entering vehicles while carrying this item |
+| `anim` | `table` | Yes | Animation data for the carrying animation |
+| `prop` | `table` | Yes | Prop attachment data for the carried item |
+
+### Animation Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `dict` | `string` | Yes | Animation dictionary name |
+| `clip` | `string` | Yes | Animation clip name |
+| `flag` | `number` | No | Animation flag (controls looping, movement, etc.) |
+
+### Prop Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `bone` | `number` | Yes | Bone index to attach the prop to |
+| `model` | `number \| string` | Yes | Model hash or string for the prop |
+| `placement` | `table` | Yes | Position and rotation of the prop relative to the bone |
+| `placement.pos` | `vec3` | Yes | Position offset relative to the bone |
+| `placement.rot` | `vec3` | Yes | Rotation offset relative to the bone |
+
+## Examples
+
+### Box Carry (Walk Only, No Vehicles)
+
+```lua
+['box'] = {
+    walkOnly = true,
+    blockVehicle = true,
+    anim = {
+        dict = 'anim@heists@box_carry@',
+        clip = 'idle',
+        flag = 51,
+    },
+    prop = {
+        bone = 60309,
+        model = joaat('hei_prop_heist_box'),
+        placement = {
+            pos = vec3(0.025000, 0.080000, 0.255000),
+            rot = vec3(-145.000000, 290.000000, 0.000000),
+        },
+    },
+},
+```
+
+### Briefcase Carry (Free Movement)
+
+```lua
+['briefcase'] = {
+    anim = {
+        dict = 'anim@heists@briefcase@',
+        clip = 'idle',
+        flag = 52,
+    },
+    prop = {
+        bone = 60310,
+        model = 'prop_briefcase_02',
+        placement = {
+            pos = vec3(0.035000, 0.070000, 0.240000),
+            rot = vec3(-135.000000, 280.000000, 0.000000),
+        },
+    },
+},
+```
+
+## Complete Config Example
+
+```lua
+local config = {
+    ['box'] = {
+        walkOnly = true,
+        blockVehicle = true,
+        anim = {
+            dict = 'anim@heists@box_carry@',
+            clip = 'idle',
+            flag = 51,
+        },
+        prop = {
+            bone = 60309,
+            model = joaat('hei_prop_heist_box'),
+            placement = {
+                pos = vec3(0.025000, 0.080000, 0.255000),
+                rot = vec3(-145.000000, 290.000000, 0.000000),
+            },
+        },
+    },
+    ['briefcase'] = {
+        anim = {
+            dict = 'anim@heists@briefcase@',
+            clip = 'idle',
+            flag = 52,
+        },
+        prop = {
+            bone = 60310,
+            model = 'prop_briefcase_02',
+            placement = {
+                pos = vec3(0.035000, 0.070000, 0.240000),
+                rot = vec3(-135.000000, 280.000000, 0.000000),
+            },
+        },
+    },
+}
+```
+
+<Callout type="info">
+  The config key (e.g., `'box'`, `'briefcase'`) must match the item name in your `ox_inventory` item definitions. When a player receives the item, the carry behavior activates automatically.
+</Callout>
+
+<Callout type="warning">
+  Ensure the animation dictionaries and prop models you reference are valid and available in the game. Invalid references will result in the carry behavior not displaying correctly.
+</Callout>

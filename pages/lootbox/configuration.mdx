@@ -12,6 +12,9 @@ config.debug = true
 -- Image file extension for item icons
 config.imageExtension = 'webp'
 
+-- Image path for item icons
+config.imagePath = 'nui://ox_inventory/web/images'
+
 -- Whether to automatically register lootboxes as usable items
 config.registerUsableItems = true
 ```
@@ -22,6 +25,7 @@ config.registerUsableItems = true
 |--------|------|-------------|
 | `debug` | `boolean` | Enable debug mode for development. Enables test commands. |
 | `imageExtension` | `string` | File extension for item images in the UI (e.g., `'webp'`, `'png'`) |
+| `imagePath` | `string` | Base path for item icon images. Defaults to `'nui://ox_inventory/web/images'`. Adjust this if your inventory stores images elsewhere. |
 | `registerUsableItems` | `boolean` | When `true`, lootboxes defined in config are automatically registered as usable items |
 
 ## Rarity Configuration

@@ -1,0 +1,111 @@
+import { Callout } from 'nextra/components';
+
+# Interact Options
+
+All interact actions are formatted as an array containing objects with the following properties.
+
+## Option Type Definition
+
+```lua
+---@class InteractOption
+---@field label string The display label for the option.
+---@field icon? string The icon associated with the option.
+---@field iconColor? string The CSS color for the icon.
+---@field distance? number The maximum distance at which the option is available.
+---@field holdTime? number Makes the option a press and hold and sets how long it should be held for (milliseconds).
+---@field canInteract? fun(entity: number, distance: number, coords: vector3, name: string): boolean? A function to determine if the option can be interacted with.
+---@field name? string A unique identifier for the option.
+---@field resource? string The resource that registered the option.
+---@field offset? vector3 A relative offset from the entity's position.
+---@field offsetAbsolute? vector3 An absolute offset in world coordinates.
+---@field color? number[] 4 numbers in an array used for RGBA, overwriting the theme color for that option.
+---@field bones? string | string[] An array of bone IDs associated with the option.
+---@field allowInVehicle? boolean Marks the option as being usable inside a vehicle.
+---@field onSelect? fun(data: InteractResponse) A function to execute when the option is selected.
+---@field cooldown? number Number of milliseconds the interact system should cooldown for after this option is selected. Prevents spam.
+---@field export? string Optional export function name.
+---@field event? string Client-side event to trigger.
+---@field serverEvent? string Server-side event to trigger.
+---@field command? string Command to execute.
+---@field onActive? fun(data: InteractResponse) A function to execute when the option is active.
+---@field onInactive? fun(data: InteractResponse) A function to execute when the option was active and is now inactive.
+---@field whileActive? fun(data: InteractResponse) A function to execute while the option is active on a loop.
+```
+
+### Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `label` | `string` | Yes | The display label for the option |
+| `icon` | `string` | No | FontAwesome icon name |
+| `iconColor` | `string` | No | CSS color for the icon |
+| `distance` | `number` | No | Maximum distance at which the option is available |
+| `holdTime` | `number` | No | Press-and-hold duration in milliseconds |
+| `canInteract` | `function` | No | Function to determine if the option can be interacted with |
+| `name` | `string` | No | A unique identifier for the option |
+| `resource` | `string` | No | The resource that registered the option |
+| `offset` | `vector3` | No | Relative offset from the entity's position |
+| `offsetAbsolute` | `vector3` | No | Absolute offset in world coordinates |
+| `color` | `number[]` | No | RGBA array `{r, g, b, a}` overriding the theme color |
+| `bones` | `string \| string[]` | No | Bone ID(s) associated with the option |
+| `allowInVehicle` | `boolean` | No | Allow usage inside a vehicle |
+| `onSelect` | `function` | No | Callback when the option is selected |
+| `cooldown` | `number` | No | Cooldown in milliseconds after selection |
+| `export` | `string` | No | Export function name to call |
+| `event` | `string` | No | Client-side event to trigger |
+| `serverEvent` | `string` | No | Server-side event to trigger |
+| `command` | `string` | No | Command to execute |
+| `onActive` | `function` | No | Callback when the option becomes active |
+| `onInactive` | `function` | No | Callback when the option becomes inactive |
+| `whileActive` | `function` | No | Callback that runs in a loop while the option is active |
+
+## Callback Response
+
+When a player selects an option, a single action is triggered in the following priority order:
+
+1. `onSelect`
+2. `export`
+3. `event`
+4. `serverEvent`
+5. `command`
+
+The callback or event receives an `InteractResponse` table:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `entity` | `number` | The entity ID hit by the shape test. If triggering a server event, this is the network ID instead. |
+| `coords` | `vector3` | The resulting coordinates where the shape test hit a collision |
+| `distance` | `number` | The player's distance from the coords |
+| `zone` | `number?` | The ID of the selected zone, if applicable |
+
+<Callout type="info">
+  When using `serverEvent`, the `entity` value is automatically converted to a network ID so it can be resolved on the server.
+</Callout>
+
+## Example
+
+```lua
+local options = {
+    {
+        label = "Talk to Ped",
+        name = "talk_to_ped",
+        icon = "comments",
+        distance = 2.0,
+        cooldown = 1500,
+        onSelect = function(data)
+            print("Talking to ped", data.entity)
+        end,
+        canInteract = function(entity, distance, coords, name)
+            return distance < 2.0
+        end,
+    },
+    {
+        label = "Rob Ped",
+        name = "rob_ped",
+        icon = "hand-holding-dollar",
+        distance = 1.5,
+        holdTime = 3000,
+        serverEvent = "myresource:robPed",
+    },
+}
+```

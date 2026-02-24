@@ -1,0 +1,153 @@
+import { Callout } from 'nextra/components';
+
+# Configuration
+
+The configuration file is located at `config.lua`. This file controls general settings for the waypoint system including map sync, default appearance, DUI rendering, and server-side cleanup.
+
+## Map Waypoint Sync
+
+When enabled, a 3D waypoint marker will be automatically created at the player's map waypoint position.
+
+```lua
+config.syncToWayPoint = true
+
+config.mapWaypoint = {
+    type = 'checkpoint',
+    label = 'WAYPOINT',
+    color = '#f500fc',
+    size = 1.0,
+    drawDistance = 1000.0,
+}
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `syncToWayPoint` | `boolean` | `true` | Enable automatic 3D marker at the player's map waypoint |
+| `mapWaypoint.type` | `string` | `'checkpoint'` | Waypoint style type (`'small'` or `'checkpoint'`) |
+| `mapWaypoint.label` | `string` | `'WAYPOINT'` | Text label displayed on the marker |
+| `mapWaypoint.color` | `string` | `'#f500fc'` | Hex color for the marker |
+| `mapWaypoint.size` | `number` | `1.0` | Size multiplier for the marker |
+| `mapWaypoint.drawDistance` | `number` | `1000.0` | Maximum distance to render the marker |
+
+## Default Waypoint Settings
+
+Default values applied to all waypoints unless overridden per-waypoint.
+
+```lua
+config.defaults = {
+    drawDistance = 500.0,
+    fadeDistance = 400.0,
+    size = 1.0,
+    minHeight = 0.5,
+    maxHeight = 50.0,
+    groundZOffset = -2.0,
+    color = '#f5a623',
+    label = 'CHECKPOINT',
+    displayDistance = true,
+}
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `drawDistance` | `number` | `500.0` | Maximum distance to render the waypoint |
+| `fadeDistance` | `number` | `400.0` | Distance at which the waypoint starts fading |
+| `size` | `number` | `1.0` | Base size multiplier |
+| `minHeight` | `number` | `0.5` | Minimum marker height (checkpoint type) |
+| `maxHeight` | `number` | `50.0` | Maximum marker height (checkpoint type) |
+| `groundZOffset` | `number` | `-2.0` | Offset from `coords.z` for ground position |
+| `color` | `string` | `'#f5a623'` | Default marker color (hex) |
+| `label` | `string` | `'CHECKPOINT'` | Default label text |
+| `displayDistance` | `boolean` | `true` | Show distance on marker by default |
+
+## DUI Settings
+
+Controls the resolution of the DUI texture used for rendering waypoint visuals.
+
+```lua
+config.dui = {
+    width = 512,
+    height = 1024,
+}
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `width` | `number` | `512` | DUI texture width in pixels |
+| `height` | `number` | `1024` | DUI texture height in pixels |
+
+<Callout type="warning">
+  Increasing DUI resolution improves visual quality but uses more VRAM. The default values provide a good balance for most setups.
+</Callout>
+
+## Rendering Settings
+
+Fine-tune how waypoints are rendered in the game world.
+
+```lua
+config.rendering = {
+    updateInterval = 100,
+    perspectiveDivisor = 20.0,
+    checkpointBaseMultiplier = 4.0,
+    checkpointMinScale = 0.1,
+    checkpointAspectRatio = 2.0,
+    smallMinScale = 1.0,
+    smallAspectRatio = 2.0,
+}
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `updateInterval` | `number` | `100` | Main loop update interval in milliseconds |
+| `perspectiveDivisor` | `number` | `20.0` | Camera distance divisor for perspective scaling |
+| `checkpointBaseMultiplier` | `number` | `4.0` | Multiplier for checkpoint base size |
+| `checkpointMinScale` | `number` | `0.1` | Minimum perspective scale for checkpoints |
+| `checkpointAspectRatio` | `number` | `2.0` | Height-to-width ratio for checkpoint quads |
+| `smallMinScale` | `number` | `1.0` | Minimum perspective scale for small markers |
+| `smallAspectRatio` | `number` | `2.0` | Height-to-width ratio for small marker quads |
+
+## Server Settings
+
+```lua
+config.server = {
+    cleanupInterval = 60000,
+}
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `cleanupInterval` | `number` | `60000` | Interval in milliseconds for cleaning up waypoints belonging to disconnected players |
+
+## Waypoint Data
+
+All waypoint creation functions accept a `WaypointData` table with the following properties:
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `coords` | `vector3` | *required* | The 3D position of the waypoint |
+| `type` | `'small' \| 'checkpoint'` | `'small'` | Waypoint style type |
+| `color` | `string` | `'#f5a623'` | Hex color for the waypoint |
+| `label` | `string` | `'CHECKPOINT'` | Text label (mainly for checkpoint type) |
+| `icon` | `string` | `nil` | Icon name for the waypoint |
+| `image` | `string` | `nil` | Image URL for the waypoint |
+| `size` | `number` | `1.0` | Size multiplier |
+| `displayDistance` | `boolean` | `true` | Whether to show distance text |
+| `drawDistance` | `number` | `500.0` | Maximum distance to render |
+| `fadeDistance` | `number` | `400.0` | Distance to start fading |
+| `minHeight` | `number` | `0.5` | Minimum height for checkpoint line |
+| `maxHeight` | `number` | `50.0` | Maximum height for checkpoint line |
+| `groundZ` | `number` | `coords.z - 2` | Ground Z coordinate for the line |
+| `removeDistance` | `number` | `nil` | Distance to player for auto-removal (client only) |
+
+## Waypoint Types
+
+### Small
+
+A compact marker suitable for nearby points of interest. Displays an icon or image at the specified coordinates. Best used for short-range markers like interaction points, pickups, or nearby objectives.
+
+### Checkpoint
+
+A tall beacon-style marker visible from far distances. Features a vertical line extending from the ground with a label and distance display at the top. Ideal for navigation, mission objectives, and event locations.
+
+<Callout type="info">
+  The `checkpoint` type uses `minHeight`, `maxHeight`, and `groundZ` to control the vertical beam. The `small` type ignores these properties.
+</Callout>

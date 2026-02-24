@@ -4,17 +4,37 @@ import ResourceLinks from '@components/resource-links';
 
 # Sleepless Interact
 
-A 3D DUI interaction library for interacting with various entities and points in the world.
+A 3D DUI interaction library for interacting with various entities and points in the world. Provides a modern, performant alternative to traditional targeting systems with full ox_target API compatibility.
 
 <ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_interact" />
 
-## ox_target
+## Features
 
-Sleepless Interact fully provides support for ox_target and will handle all of the exports for ox_target if you want it to.
+- 🎯 **3D DUI Rendering** - Beautiful interaction indicators rendered in 3D world space
+- 🔄 **ox_target Compatibility** - Full drop-in support for ox_target exports
+- 📍 **Multiple Target Types** - Coordinates, entities, models, and global types (objects, peds, players, vehicles)
+- 🎨 **Customizable Theme** - Configurable colors, sprites, and keybinds
+- ⚡ **Performance Optimized** - Distance-based culling with configurable render distance
+- 🚗 **Vehicle Support** - Options can be configured to work inside vehicles
+- ⏱️ **Hold Actions** - Support for press-and-hold interactions with configurable durations
+- 🧊 **Cooldown System** - Prevent interaction spam with per-option cooldowns
+- 🔁 **Active Callbacks** - `onActive`, `onInactive`, and `whileActive` callbacks for advanced use cases
+
+## Dependencies
+
+- [ox_lib](https://github.com/overextended/ox_lib) (required)
+
+## ox_target Compatibility
+
+Sleepless Interact fully supports the ox_target API. If you enable the ox_target bridge, the resource will handle all ox_target exports, allowing you to use it as a drop-in replacement without modifying other resources.
 
 ## Installation
 
-### Download a [release](https://github.com/Sleepless-Development/sleepless_interact/releases) or build the source code.
+<Steps>
+
+### Download the Resource
+
+Download a [release](https://github.com/Sleepless-Development/sleepless_interact/releases) or build from source:
 
 ```bash
 git clone https://github.com/Sleepless-Development/sleepless_interact.git
@@ -23,28 +43,60 @@ pnpm i
 pnpm build
 ```
 
-## Configure
+### Add to Server
 
-To changed the config settings, look inside `imports/config.lua`
+Place the `sleepless_interact` folder in your server's resources directory.
+
+### Configure Your Server
+
+Add the following to your `server.cfg`:
+
+```cfg
+ensure ox_lib
+ensure sleepless_interact
+```
+
+### Configure the Resource
+
+Edit the configuration in `imports/config.lua` to customize keybinds, theme colors, and render distance. See the [Configuration](/interact/configuration) page for details.
+
+</Steps>
+
+## Quick Start
+
+### Adding a Coordinate Interaction
 
 ```lua
--- this is the maximum distance that interacts will render the indicator sprite (little cirlce)
--- recommend keeping this pretty low for optimization
-config.maxInteractDistance = 5.0
-
--- {0-255, 0-255, 0-255, 0-255}
-config.themeColor = { 28, 100, 184, 200 } --- r, g, b, a
-
---- texture dictionary and texture name for the sprite used to show non active interactions.
-config.IndicatorSprite = { dict = 'shared', txt = 'emptydot_32' }
-
--- boolean true/false use a keybind to show and hide the interactions
-config.useShowKeyBind = true
-
--- string default key mapping for the show interactions keybind
-config.defaultShowKeyBind = 'LMENU'
-
--- "hold" | "toggle" sets the behavior of the show interactions key bind
-config.showKeyBindBehavior = 'toggle'
-
+local id = exports.sleepless_interact:addCoords(vec3(100.0, 200.0, 30.0), {
+    label = "Interact Here",
+    icon = "hand",
+    distance = 2.0,
+    onSelect = function(data)
+        print("Selected at", data.coords)
+    end,
+})
 ```
+
+### Adding a Global Ped Interaction
+
+```lua
+exports.sleepless_interact:addGlobalPed({
+    label = "Talk to Ped",
+    name = "talk_to_ped",
+    icon = "comment",
+    distance = 2.0,
+    onSelect = function(data)
+        print("Talking to ped", data.entity)
+    end,
+})
+```
+
+<Callout type="info">
+  See the [Client Exports](/interact/exports/Client) page for the full API reference.
+</Callout>
+
+## Support
+
+If you need help or have questions:
+- [Discord](https://discord.gg/A2bDPbfgNP)
+- [GitHub Issues](https://github.com/Sleepless-Development/sleepless_interact/issues)
