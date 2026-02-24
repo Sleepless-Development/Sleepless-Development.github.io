@@ -250,21 +250,6 @@ When you register a new lootbox (either in `config.lua` or via the `registerLoot
 </Tab>
 </Tabs>
 
-## ESX Setup
-
-ESX handles usable items through `ESX.RegisterUsableItem` on the server side. When `config.registerUsableItems = true`, the bridge registers the callbacks automatically. You just need to make sure the items exist in your database's `items` table:
-
-```sql
-INSERT INTO `items` (`name`, `label`, `weight`) VALUES
-  ('gun_case', 'Gun Case', 500),
-  ('supply_crate', 'Supply Crate', 1000),
-  ('vip_case', 'VIP Case', 500);
-```
-
-<Callout type="info">
-  If you are using **ox_inventory** with ESX (instead of the default ESX inventory), follow the ox_inventory setup instructions above instead — you'll need the `server.export` entries.
-</Callout>
-
 ## Troubleshooting
 
 ### Item does nothing when used
