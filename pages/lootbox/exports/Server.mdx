@@ -211,3 +211,117 @@ if items then
     end
 end
 ```
+
+---
+
+## registerRewardHook
+
+Register a custom reward handler for a specific reward type. This allows external resources to handle non-item rewards like vehicles, bank deposits, or any custom reward logic.
+
+```lua
+exports.sleepless_lootbox:registerRewardHook(rewardType, hook)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `rewardType` | `string` | The reward type to handle (e.g., `'vehicle'`, `'bank'`) |
+| `hook` | `function` | Handler function that receives `(source, reward, caseName)` |
+
+### Hook Function
+
+The hook function receives three parameters:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `source` | `number` | Player server ID |
+| `reward` | `RollItem` | The reward data including `rewardType` and `rewardData` |
+| `caseName` | `string` | The lootbox identifier |
+
+### Hook Return Value
+
+| Return | Behavior |
+|--------|----------|
+| `true` | Reward was handled by the hook, skip default item logic |
+| `false` or `nil` | Hook did not handle the reward, fall back to default item logic |
+
+<Callout type="info">
+  If a reward has a `rewardType` set but no hook is registered for it, the system will log a warning and fall back to default item behavior to prevent reward loss.
+</Callout>
+
+### Example: Vehicle Reward Hook
+
+```lua
+-- Register a handler for 'vehicle' reward types
+exports.sleepless_lootbox:registerRewardHook('vehicle', function(source, reward, caseName)
+    local data = reward.rewardData
+    -- data contains whatever you put in rewardData in your config
+    -- e.g., { model = 'adder', garage = 'legion' }
+    
+    -- Example with qbx_vehicles
+    local success = exports.qbx_vehicles:CreatePlayerVehicle({
+        source = source,
+        model = data.model,
+        garage = data.garage or 'legion',
+    })
+    
+    if success then
+        -- Notify the player
+        TriggerClientEvent('ox_lib:notify', source, {
+            title = 'Vehicle Won!',
+            description = 'Your ' .. reward.label .. ' has been added to your garage',
+            type = 'success',
+        })
+        return true -- We handled this reward
+    end
+    
+    return false -- Something went wrong, fall back to default behavior
+end)
+```
+
+### Example: Bank Money Hook
+
+```lua
+-- Register a handler for 'bank' reward types
+exports.sleepless_lootbox:registerRewardHook('bank', function(source, reward, caseName)
+    local data = reward.rewardData
+    -- data contains: { amount = 50000 }
+    
+    -- Example with QBCore
+    local Player = exports.qbx_core:GetPlayer(source)
+    if Player then
+        Player.Functions.AddMoney('bank', data.amount, 'lootbox-reward')
+        return true
+    end
+    
+    return false
+end)
+```
+
+---
+
+## removeRewardHook
+
+Remove a previously registered reward hook.
+
+```lua
+exports.sleepless_lootbox:removeRewardHook(rewardType)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `rewardType` | `string` | The reward type to remove the handler for |
+
+### Example
+
+```lua
+-- Remove the vehicle hook (e.g., when your resource stops)
+exports.sleepless_lootbox:removeRewardHook('vehicle')
+```
+
+<Callout type="warning">
+  If you register hooks from another resource, consider removing them in that resource's `onResourceStop` handler to prevent errors if the resource restarts.
+</Callout>

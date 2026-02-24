@@ -121,6 +121,11 @@ Each item in the `items` array follows this format:
 | `amount` | `number` | Yes | Quantity of item to give |
 | `metadata` | `table` | No | Custom metadata to attach to item |
 | `rarity` | `string` | No | Override auto-calculated rarity |
+| `label` | `string` | No | Custom display label (auto-fetched from inventory if not provided) |
+| `image` | `string` | No | Custom image URL (auto-fetched from inventory if not provided) |
+| `bonusItems` | `table` | No | Additional items to award alongside the main reward (not shown in UI) |
+| `rewardType` | `string` | No | Custom reward type for non-item rewards (e.g., `'vehicle'`, `'bank'`) |
+| `rewardData` | `table` | No | Custom data passed to reward hooks (e.g., vehicle model, garage) |
 
 ### Complete Example
 
@@ -196,6 +201,186 @@ Include custom metadata that will be attached to the item when given:
 <Callout type="warning">
   When using metadata, ensure your inventory system supports the metadata fields you're using.
 </Callout>
+
+### Bonus Items
+
+Award additional items alongside the main reward. Bonus items are **not displayed in the UI** - players only see the main item during the roll animation, but receive all bonus items when the reward is claimed.
+
+```lua
+{ 40, {
+    name = 'WEAPON_PISTOL',
+    amount = 1,
+    bonusItems = {
+        { name = 'ammo-9', amount = 50 },
+        { name = 'armour', amount = 1 },
+    }
+} }
+```
+
+Each bonus item has the following properties:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `name` | `string` | Yes | Item spawn name |
+| `amount` | `number` | Yes | Quantity to give |
+| `metadata` | `table` | No | Optional item metadata |
+
+<Callout type="info">
+  Bonus items are great for giving ammo with weapons, or adding extra consumables as a surprise bonus without cluttering the UI.
+</Callout>
+
+### Custom Reward Types
+
+For rewards that aren't standard inventory items (vehicles, bank deposits, etc.), use the `rewardType` and `rewardData` fields along with the reward hook system.
+
+<Callout type="info">
+  For custom reward types, the `name` field is just a **unique identifier** used for internal tracking and logging - it doesn't need to be an actual item in your inventory. Since custom rewards aren't real items, you must also provide `label` and `image` explicitly.
+</Callout>
+
+```lua
+{ 0.26, {
+    name = 'vehicle_adder', -- Unique identifier, not an actual item
+    label = 'Adder', -- Required: display label
+    amount = 1,
+    image = 'nui://ox_inventory/web/images/vehicle_crate.webp', -- Required: custom image
+    rarity = 'legendary',
+    rewardType = 'vehicle',
+    rewardData = { model = 'adder', garage = 'legion' },
+} }
+```
+
+<Callout type="warning">
+  Custom reward types require a registered reward hook to handle them. If no hook is registered, the system will fall back to default item behavior and log a warning.
+</Callout>
+
+#### How Custom Rewards Work
+
+1. When a player wins an item with a custom `rewardType`, the system looks for a registered hook for that type
+2. If a hook exists and returns `true`, the hook handled the reward
+3. If a hook returns `false`/`nil`, the system falls back to default item behavior
+4. If no hook exists, a warning is logged and the system falls back to default item behavior
+
+This ensures rewards are never silently lost - if something isn't configured correctly, players still receive items.
+
+#### Registering Reward Hooks
+
+Register hooks from your own resource to handle custom reward types:
+
+```lua
+-- In your server script (e.g., a vehicle management resource)
+exports.sleepless_lootbox:registerRewardHook('vehicle', function(source, reward, caseName)
+    local data = reward.rewardData
+    -- Your vehicle spawning logic here
+    -- e.g., exports['qbx_vehicles']:CreatePlayerVehicle(source, data.model, data.garage)
+    
+    -- Notify the player
+    TriggerClientEvent('ox_lib:notify', source, {
+        title = 'Vehicle Won!',
+        description = 'Your ' .. reward.label .. ' has been added to your garage.',
+        type = 'success'
+    })
+    
+    return true -- Return true to indicate we handled this reward
+end)
+
+-- You can also register a 'bank' hook for bank money rewards
+exports.sleepless_lootbox:registerRewardHook('bank', function(source, reward, caseName)
+    local data = reward.rewardData
+    -- Your bank deposit logic here
+    -- e.g., exports['qbx_core']:AddMoney(source, 'bank', data.amount)
+    return true
+end)
+```
+
+See the [Server Exports](/lootbox/exports/Server) page for full API documentation.
+
+### Complete Vehicle Crate Example
+
+Here's a complete example of a lootbox that awards vehicles using custom reward types:
+
+```lua
+['vehicle_crate'] = {
+    label = 'Vehicle Crate',
+    description = 'Win a brand new vehicle!',
+    items = {
+        -- Common vehicles (~80% total)
+        { 40, {
+            name = 'vehicle_blista', -- Unique identifier (not an actual item, just for internal tracking/logging)
+            label = 'Blista', -- Required: display label since this isn't a real item
+            amount = 1,
+            image = 'nui://ox_inventory/web/images/vehicle_crate.webp', -- Required: custom image
+            rewardType = 'vehicle',
+            rewardData = { model = 'blista', garage = 'legion' },
+        } },
+        { 40, {
+            name = 'vehicle_prairie', -- Unique identifier
+            label = 'Prairie',
+            amount = 1,
+            image = 'nui://ox_inventory/web/images/vehicle_crate.webp',
+            rewardType = 'vehicle',
+            rewardData = { model = 'prairie', garage = 'legion' },
+        } },
+
+        -- Uncommon vehicles (~16% total)
+        { 8, {
+            name = 'vehicle_buffalo',
+            label = 'Buffalo',
+            amount = 1,
+            image = 'nui://ox_inventory/web/images/vehicle_crate.webp',
+            rewardType = 'vehicle',
+            rewardData = { model = 'buffalo', garage = 'legion' },
+        } },
+        { 8, {
+            name = 'vehicle_sultan',
+            label = 'Sultan',
+            amount = 1,
+            image = 'nui://ox_inventory/web/images/vehicle_crate.webp',
+            rewardType = 'vehicle',
+            rewardData = { model = 'sultan', garage = 'legion' },
+        } },
+
+        -- Rare vehicles (~3.1% total)
+        { 1.6, {
+            name = 'vehicle_elegy2',
+            label = 'Elegy RH8',
+            amount = 1,
+            image = 'nui://ox_inventory/web/images/vehicle_crate.webp',
+            rewardType = 'vehicle',
+            rewardData = { model = 'elegy2', garage = 'legion' },
+        } },
+        { 1.5, {
+            name = 'vehicle_comet2',
+            label = 'Comet',
+            amount = 1,
+            image = 'nui://ox_inventory/web/images/vehicle_crate.webp',
+            rewardType = 'vehicle',
+            rewardData = { model = 'comet2', garage = 'legion' },
+        } },
+
+        -- Epic vehicles (~0.64% total)
+        { 0.64, {
+            name = 'vehicle_zentorno',
+            label = 'Zentorno',
+            amount = 1,
+            image = 'nui://ox_inventory/web/images/vehicle_crate.webp',
+            rarity = 'epic',
+            rewardType = 'vehicle',
+            rewardData = { model = 'zentorno', garage = 'legion' },
+        } },
+
+        -- Legendary vehicles (~0.26% total)
+        { 0.26, {
+            name = 'vehicle_adder',
+            label = 'Adder',
+            amount = 1,
+            image = 'nui://ox_inventory/web/images/vehicle_crate.webp',
+            rarity = 'legendary',
+            rewardType = 'vehicle',
+            rewardData = { model = 'adder', garage = 'legion' },
+        } },
+    },
+},
+```
 
 ## Server Settings
 

@@ -106,3 +106,156 @@ local function tryOpenCase(caseName)
     TriggerServerEvent('myresource:openCase', caseName)
 end
 ```
+
+## Bonus Items (Hidden Rewards)
+
+Award additional items alongside the main reward without showing them in the UI. Useful for giving ammo with weapons.
+
+```lua
+-- In config.lua
+config.lootboxes = {
+    ['gun_case'] = {
+        label = 'Gun Case',
+        description = 'Contains various firearms with ammo',
+        items = {
+            { 40, {
+                name = 'WEAPON_PISTOL',
+                amount = 1,
+                -- Bonus items are awarded but NOT shown in the UI
+                bonusItems = {
+                    { name = 'ammo-9', amount = 50 },
+                }
+            } },
+            { 0.1, {
+                name = 'WEAPON_CARBINERIFLE',
+                amount = 1,
+                bonusItems = {
+                    { name = 'ammo-rifle', amount = 250 },
+                    { name = 'armour', amount = 2 },
+                    { name = 'money', amount = 5000 },
+                }
+            } },
+        },
+    },
+}
+```
+
+<Callout type="info">
+  Bonus items are given server-side when the reward is claimed. Players will see them appear in their inventory but won't see them during the roll animation.
+</Callout>
+
+## Custom Reward Types with Hooks
+
+Use custom reward types to handle non-item rewards like vehicles or bank deposits. Register hooks in your own resource to handle these reward types.
+
+### Vehicle Reward Hook
+
+```lua
+-- Server side
+exports.sleepless_lootbox:registerRewardHook('vehicle', function(source, reward, caseName)
+    local data = reward.rewardData
+    
+    if not data or not data.model then
+        print('Vehicle reward missing model data')
+        return false -- Return false to fall back to default item behavior
+    end
+    
+    lib.notify(source, {
+        title = 'Vehicle Won!',
+        description = ('You won a %s! Check your garage.'):format(reward.label),
+        type = 'success',
+    })
+    
+    return true -- Fall back to default if something went wrong
+end)
+```
+
+### Bank Money Reward Hook
+
+```lua
+-- Server side
+exports.sleepless_lootbox:registerRewardHook('bank', function(source, reward, caseName)
+    local data = reward.rewardData
+    
+    if not data or not data.amount then
+        return false
+    end
+    
+    lib.notify(source, {
+        title = 'Bank Deposit',
+        description = ('$%s has been deposited to your bank!'):format(data.amount),
+        type = 'success',
+    })
+    
+    return true
+end)
+```
+
+### Lootbox Config with Custom Rewards
+
+```lua
+-- In config.lua
+config.lootboxes = {
+    ['vehicle_crate'] = {
+        label = 'Vehicle Crate',
+        description = 'Win a brand new vehicle!',
+        items = {
+            { 40, {
+                name = 'vehicle_blista', -- Unique identifier (not an actual item, just for internal tracking/logging)
+                label = 'Blista', -- Display label in UI (required for custom reward types)
+                amount = 1,
+                image = 'nui://ox_inventory/web/images/vehicle_crate.webp',
+                rewardType = 'vehicle', -- Custom reward type
+                rewardData = { model = 'blista', garage = 'legion' }, -- Data passed to hook
+            } },
+            { 0.26, {
+                name = 'vehicle_adder',
+                label = 'Adder',
+                amount = 1,
+                image = 'nui://ox_inventory/web/images/vehicle_crate.webp',
+                rarity = 'legendary', -- Can still specify rarity
+                rewardType = 'vehicle',
+                rewardData = { model = 'adder', garage = 'legion' },
+            } },
+        },
+    },
+
+    ['vip_rewards'] = {
+        label = 'VIP Rewards',
+        description = 'Premium rewards including bank deposits',
+        items = {
+            { 50, { name = 'armour', amount = 5 } }, -- Regular item reward
+            { 30, {
+                name = 'bank_deposit_10k', -- Unique identifier (used for logging, not an actual item)
+                label = '$10,000 Bank Deposit', -- Required: display label since this isn't a real item
+                amount = 1,
+                image = 'nui://ox_inventory/web/images/money.webp',
+                rewardType = 'bank',
+                rewardData = { amount = 10000 },
+            } },
+            { 1, {
+                name = 'bank_deposit_100k', -- Unique identifier
+                label = '$100,000 Bank Deposit', -- Display label
+                amount = 1,
+                image = 'nui://ox_inventory/web/images/money.webp',
+                rarity = 'legendary',
+                rewardType = 'bank',
+                rewardData = { amount = 100000 },
+            } },
+        },
+    },
+}
+```
+
+<Callout type="warning">
+  If a custom `rewardType` is set but no hook is registered, the system will log a warning and fall back to treating it as a regular item. This prevents rewards from being lost but may not give the intended reward.
+</Callout>
+
+### Removing a Hook
+
+You can remove a previously registered hook if needed:
+
+```lua
+-- Server side
+exports.sleepless_lootbox:removeRewardHook('vehicle')
+```
