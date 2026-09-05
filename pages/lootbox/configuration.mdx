@@ -118,7 +118,7 @@ Each item in the `items` array follows this format:
 |----------|------|----------|-------------|
 | `weight` | `number` | Yes | Drop weight (higher = more common) |
 | `name` | `string` | Yes | Item name to give to player |
-| `amount` | `number` | Yes | Quantity of item to give |
+| `amount` | `number` or `{min, max}` | Yes | Quantity of item to give (can be a range for random values) |
 | `metadata` | `table` | No | Custom metadata to attach to item |
 | `rarity` | `string` | No | Override auto-calculated rarity |
 | `label` | `string` | No | Custom display label (auto-fetched from inventory if not provided) |
@@ -222,11 +222,39 @@ Each bonus item has the following properties:
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `name` | `string` | Yes | Item spawn name |
-| `amount` | `number` | Yes | Quantity to give |
+| `amount` | `number` or `{min, max}` | Yes | Quantity to give (can be a range for random values) |
 | `metadata` | `table` | No | Optional item metadata |
 
 <Callout type="info">
   Bonus items are great for giving ammo with weapons, or adding extra consumables as a surprise bonus without cluttering the UI.
+</Callout>
+
+### Random Amount Ranges
+
+The `amount` field supports both fixed values and random ranges. To specify a range, use a table with two numbers: `{min, max}`.
+
+```lua
+-- Fixed amount: always gives exactly 5
+{ 40, { name = 'bread', amount = 5 } }
+
+-- Random range: gives between 3-7 (inclusive)
+{ 40, { name = 'bread', amount = { 3, 7 } } }
+
+-- Works great for money rewards
+{ 8, { name = 'money', amount = { 10000, 25000 } } }
+
+-- Also works for bonus items
+{ 40, {
+    name = 'WEAPON_PISTOL',
+    amount = 1,
+    bonusItems = {
+        { name = 'ammo-9', amount = { 40, 60 } }, -- Random ammo between 40-60
+    }
+} }
+```
+
+<Callout type="info">
+  When using random ranges, the preview UI will display the minimum value, but players will receive a random amount within the range when they actually open the lootbox.
 </Callout>
 
 ### Custom Reward Types
