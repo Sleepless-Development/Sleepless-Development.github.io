@@ -15,7 +15,7 @@ Recipes are defined in `dragcraft/config.lua`. Each recipe key is a pair of item
 |----------|------|----------|-------------|
 | `duration` | `number` | Yes | Duration in milliseconds for the craft to complete |
 | `client` | `table` | No | Client-side callbacks (`before` and `after`) |
-| `server` | `table` | No | Server-side callbacks (`before` and `after`) |
+| `server` | `table` | No | Server-side callbacks (`before`, `after`, and optional `metadata`) |
 | `costs` | `table` | Yes | Items required and whether they are consumed |
 | `result` | `table` | Yes | Array of resulting items from the craft |
 
@@ -25,11 +25,15 @@ Each entry in the `costs` table is keyed by item name:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `need` | `number` | Quantity required. If between `0.0` and `1.0`, removes that percentage of durability instead. |
+| `need` | `number` | Quantity required in the dragged slot. If between `0.0` and `1.0`, removes that percentage of durability instead. |
 | `remove` | `boolean` | Whether the item should be removed/consumed upon completion |
 
 <Callout type="info">
   A `need` value of `0.1` with `remove = true` removes 10% durability per craft, allowing up to 10 uses before the item breaks.
+</Callout>
+
+<Callout type="warning">
+  Ingredient counts are checked against the **dragged slots**, not the player's total item count. The items are also removed from those slots on success.
 </Callout>
 
 ### Result Properties
@@ -45,15 +49,16 @@ Each entry in the `result` array:
 
 ### Callback Functions
 
-Both `client` and `server` tables support `before` and `after` callbacks:
+The `client` table supports `before` and `after`. The `server` table supports `before`, `after`, and `metadata`:
 
-| Callback | Description |
-|----------|-------------|
-| `before(recipeData)` | Runs before crafting starts. Return `false` to cancel the craft. Returning `true` or `nil` continues normally. |
-| `after(recipeData)` | Runs after crafting completes successfully. |
+| Callback | Context | Description |
+|----------|---------|-------------|
+| `before(recipeData)` | Client / Server | Runs before crafting starts. Return `false` to cancel the craft. Returning `true` or `nil` continues normally. |
+| `after(recipeData)` | Client / Server | Runs after crafting completes successfully. |
+| `metadata(resultName, fromSlot, toSlot)` | Server | Optional. Return a metadata table applied to that result item. |
 
 <Callout type="warning">
-  The `recipeData` parameter passed to callbacks contains all the properties defined for that specific recipe.
+  The `recipeData` parameter passed to `before` / `after` contains all the properties defined for that specific recipe.
 </Callout>
 
 ### Complete Example
@@ -79,6 +84,10 @@ RECIPES = {
             after = function(recipeData)
                 -- Server logic after successfully crafting
             end,
+            metadata = function(resultName, fromSlot, toSlot)
+                -- Optional metadata for the resulting item
+                -- return { quality = 100 }
+            end,
         },
         costs = {
             ['garbage'] = { need = 1, remove = true },
@@ -95,36 +104,63 @@ RECIPES = {
 
 ### addRecipe
 
-Register a recipe externally from another resource. Available on both the client and server.
+Register a recipe externally from another resource.
+
+Craftable recipes (**`costs`**, **`result`**, **`duration`**, and server callbacks) must be registered on the **server**. The client export only stores client callbacks and cannot create a working craft.
 
 ```lua
-exports.ox_inventory_addons:addRecipe(key, data)
+-- server
+local success = exports.sleepless_inventory_addons:addRecipe(key, data, target?)
+
+-- client (callbacks only)
+exports.sleepless_inventory_addons:addRecipe(key, data)
 ```
 
-#### Parameters
+#### Server Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `key` | `string` | The recipe key — two item names separated by a space (e.g., `'garbage scrapmetal'`) |
-| `data` | `table` | The recipe data (same structure as config recipes) |
+| `data` | `table` | The recipe data. Must include `costs` and `result` |
+| `target` | `number?` | Optional player id to sync the recipe UI to. Omit (or pass `nil`) to sync all players |
 
-<Callout type="warning">
-  When using this export, you may only register callbacks for the context you call it in. A client-side call can only register `client` callbacks, and a server-side call can only register `server` callbacks.
+#### Server Returns
+
+| Type | Description |
+|------|-------------|
+| `boolean` | `true` if the recipe was registered |
+
+#### Client Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `key` | `string` | The same recipe key used on the server |
+| `data` | `table` | Client-side data. Only `client` callbacks are used from this call |
+
+<Callout type="error">
+  A client-only `addRecipe` call does **not** register the recipe on the server. Players will not be able to craft it unless the same key is also registered from a server resource.
 </Callout>
 
-<Tabs items={['Client', 'Server']}>
+<Callout type="warning">
+  Callbacks only work in the context you register them. A client-side call can only register `client` callbacks, and a server-side call can only register `server` callbacks. Functions cannot be sent over the network.
+</Callout>
+
+<Tabs items={['Server', 'Client']}>
 <Tab>
 
 ```lua
-exports.ox_inventory_addons:addRecipe('garbage scrapmetal', {
+local success = exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
     duration = 2000,
-    client = {
+    server = {
         before = function(recipeData)
-            -- Client logic before crafting
+            -- Server logic before crafting
             -- Return false to cancel
         end,
         after = function(recipeData)
-            -- Client logic after crafting
+            -- Server logic after crafting
+        end,
+        metadata = function(resultName, fromSlot, toSlot)
+            -- Optional metadata for the resulting item
         end,
     },
     costs = {
@@ -141,23 +177,17 @@ exports.ox_inventory_addons:addRecipe('garbage scrapmetal', {
 <Tab>
 
 ```lua
-exports.ox_inventory_addons:addRecipe('garbage scrapmetal', {
-    duration = 2000,
-    server = {
+-- Only registers client callbacks. The craftable recipe must already
+-- exist in config or be registered from the server export.
+exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
+    client = {
         before = function(recipeData)
-            -- Server logic before crafting
+            -- Client logic before crafting
             -- Return false to cancel
         end,
         after = function(recipeData)
-            -- Server logic after crafting
+            -- Client logic after crafting
         end,
-    },
-    costs = {
-        ['garbage'] = { need = 1, remove = true },
-        ['scrapmetal'] = { need = 0.1, remove = true },
-    },
-    result = {
-        { name = 'lockpick', amount = 1 },
     },
 })
 ```
