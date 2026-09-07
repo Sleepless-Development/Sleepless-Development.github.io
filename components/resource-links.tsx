@@ -1,5 +1,5 @@
-import React from 'react';
-import { GhButton, DocButton, ReleaseButton, TebexButton } from './button';
+import React from "react";
+import { GhButton, DocButton, ReleaseButton, TebexButton } from "./button";
 
 interface Props {
   children?: React.ReactNode;
@@ -15,7 +15,7 @@ interface PaidProps {
 
 const ResourceLinks = ({ repo, docs }: Props) => {
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-2">
       <GhButton link={repo} />
       <ReleaseButton link={`${repo}/releases`} />
       {docs && <DocButton link={docs} />}
@@ -25,7 +25,7 @@ const ResourceLinks = ({ repo, docs }: Props) => {
 
 export const PaidResourceLinks = ({ tebex, docs }: PaidProps) => {
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-2">
       <TebexButton link={tebex} />
       {docs && <DocButton link={docs} />}
     </div>

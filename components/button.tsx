@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   IconBrandGithub,
   IconTag,
@@ -6,24 +6,24 @@ import {
   IconDownload,
   IconBrandNpm,
   IconShoppingCart,
-} from '@tabler/icons-react';
+} from "@tabler/icons-react";
 
 interface Props {
   icon?: React.ReactNode;
   children?: React.ReactNode;
-  side?: 'left' | 'right';
+  side?: "left" | "right";
   link?: string;
   label?: string;
 }
 
-const Button: React.FC<Props> = ({ side = 'left', children, icon, link }: Props) => {
+const Button = ({ side = "left", children, icon, link }: Props) => {
   return (
     <div className="h-fit w-fit">
       <a href={link}>
-        <div className="w-26 mt-2 flex items-center justify-center gap-1.5 rounded-sm border border-black p-1.5 text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black">
-          {side === 'left' && <div>{icon}</div>}
+        <div className="inline-flex items-center justify-center gap-2 rounded-md border bg-fd-secondary px-2.5 py-2 text-xs font-medium text-fd-secondary-foreground shadow-sm transition-colors duration-100 hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground">
+          {side === "left" && <div>{icon}</div>}
           {children}
-          {side === 'right' && <div>{icon}</div>}
+          {side === "right" && <div>{icon}</div>}
         </div>
       </a>
     </div>
@@ -35,7 +35,7 @@ export default Button;
 export function GhButton(props: Props) {
   return (
     <Button icon={<IconBrandGithub />} side={props.side} link={props.link}>
-      {props.label || 'Github'}
+      {props.label || "Github"}
     </Button>
   );
 }
@@ -43,7 +43,7 @@ export function GhButton(props: Props) {
 export function DocButton(props: Props) {
   return (
     <Button icon={<IconFileText />} side={props.side} link={props.link}>
-      {props.label || 'Documentation'}
+      {props.label || "Documentation"}
     </Button>
   );
 }
@@ -51,7 +51,7 @@ export function DocButton(props: Props) {
 export function DownloadButton(props: Props) {
   return (
     <Button icon={<IconDownload />} side={props.side} link={props.link}>
-      {props.label || 'Download'}
+      {props.label || "Download"}
     </Button>
   );
 }
@@ -59,7 +59,7 @@ export function DownloadButton(props: Props) {
 export function ReleaseButton(props: Props) {
   return (
     <Button icon={<IconTag />} side={props.side} link={props.link}>
-      {props.label || 'Releases'}
+      {props.label || "Releases"}
     </Button>
   );
 }
@@ -67,7 +67,7 @@ export function ReleaseButton(props: Props) {
 export function NpmButton(props: Props) {
   return (
     <Button icon={<IconBrandNpm />} side={props.side} link={props.link}>
-      {props.label || 'Package'}
+      {props.label || "Package"}
     </Button>
   );
 }
@@ -75,7 +75,7 @@ export function NpmButton(props: Props) {
 export function TebexButton(props: Props) {
   return (
     <Button icon={<IconShoppingCart />} side={props.side} link={props.link}>
-      {props.label || 'Purchase'}
+      {props.label || "Purchase"}
     </Button>
   );
 }
