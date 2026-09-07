@@ -1,0 +1,53 @@
+# Docs
+
+- [Introduction](/docs)
+
+- **Free Resources**
+- Interact
+  - [Sleepless Interact](/docs/interact)
+  - [Configuration](/docs/interact/configuration)
+  - [Custom Themes](/docs/interact/custom-themes)
+  - [Interact Options](/docs/interact/interact-options)
+  - Exports
+    - [Client Exports](/docs/interact/exports/Client)
+- Lootbox
+  - [Sleepless Lootbox](/docs/lootbox)
+  - [Configuration](/docs/lootbox/configuration)
+  - [Framework Setup](/docs/lootbox/framework-setup)
+  - [Item Setup](/docs/lootbox/item-setup)
+  - Exports
+    - [Server Exports](/docs/lootbox/exports/Server)
+    - [Client Exports](/docs/lootbox/exports/Client)
+  - [Examples](/docs/lootbox/examples)
+- Ped Manager
+  - [Sleepless Ped Manager](/docs/pedmanager)
+  - Exports
+    - [Client Exports](/docs/pedmanager/exports/Client)
+- Waypoints
+  - [Sleepless Waypoints](/docs/waypoints)
+  - [Configuration](/docs/waypoints/configuration)
+  - Exports
+    - [Client Exports](/docs/waypoints/exports/Client)
+    - [Server Exports](/docs/waypoints/exports/Server)
+- Inventory Addons
+  - [Sleepless Inventory Addons](/docs/inventoryaddons)
+  - [Back Items](/docs/inventoryaddons/back-items)
+  - [Drag Craft](/docs/inventoryaddons/drag-craft)
+  - [Item Carry](/docs/inventoryaddons/item-carry)
+
+- **Paid Resources**
+- Crafting
+  - [Sleepless Crafting](/docs/crafting)
+  - [Configuration](/docs/crafting/configuration)
+  - [Station Types](/docs/crafting/station-types)
+  - [Station Locations](/docs/crafting/station-locations)
+  - [Items Setup](/docs/crafting/items)
+  - Exports
+    - [Server Exports](/docs/crafting/exports/Server)
+  - Events
+    - [Client Events](/docs/crafting/Events/Client)
+    - [Server Events](/docs/crafting/Events/Server)
+
+- **Links**
+- [Tebex Store](https://sleeplessdev.tebex.io/)
+- [Support Us](https://ko-fi.com/DemiAutomatic)

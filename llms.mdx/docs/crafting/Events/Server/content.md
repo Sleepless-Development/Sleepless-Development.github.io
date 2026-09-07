@@ -1,0 +1,59 @@
+# Server Events (/docs/crafting/Events/Server)
+
+
+
+## sleepless\_crafting:FinishedCraft [#sleepless_craftingfinishedcraft]
+
+Triggered when a player successfully finishes crafting an item.
+
+```lua
+RegisterNetEvent("sleepless_crafting:FinishedCraft", function(identifier, itemName)
+    -- identifier: The player's character identifier
+    -- itemName: The name of the crafted item
+    print(identifier .. " crafted: " .. itemName)
+end)
+```
+
+### Parameters [#parameters]
+
+| Parameter    | Type     | Description                           |
+| ------------ | -------- | ------------------------------------- |
+| `identifier` | `string` | The player's character identifier     |
+| `itemName`   | `string` | The name of the item that was crafted |
+
+### Example: Discord Logging [#example-discord-logging]
+
+```lua
+RegisterNetEvent("sleepless_crafting:FinishedCraft", function(identifier, itemName)
+    -- Log to Discord
+    local embed = {
+        title = "Item Crafted",
+        description = string.format("**Player:** %s\n**Item:** %s", identifier, itemName),
+        color = 3066993
+    }
+    exports.yourLoggingResource:sendEmbed("crafting", embed)
+end)
+```
+
+### Example: Crafting XP System [#example-crafting-xp-system]
+
+```lua
+RegisterNetEvent("sleepless_crafting:FinishedCraft", function(identifier, itemName)
+    local src = source
+
+    -- Award XP based on item crafted
+    local xpRewards = {
+        ["bandage"] = 5,
+        ["WEAPON_PISTOL"] = 25,
+        ["WEAPON_SMG"] = 50,
+        ["WEAPON_ASSAULTRIFLE"] = 100,
+    }
+
+    local xp = xpRewards[itemName] or 10
+    exports.yourXPResource:addXP(src, "crafting", xp)
+end)
+```
+
+<Callout type="info">
+  This event fires on the server after the crafting process is fully complete and the item has been given to the player.
+</Callout>

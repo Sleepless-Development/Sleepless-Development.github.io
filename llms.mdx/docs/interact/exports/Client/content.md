@@ -1,0 +1,479 @@
+# Client Exports (/docs/interact/exports/Client)
+
+
+
+All exports are available on the client via `exports.sleepless_interact`.
+
+***
+
+## addCoords [#addcoords]
+
+Adds static coordinate-based interactions at specific locations that players can interact with when within range.
+
+```lua
+local id = exports.sleepless_interact:addCoords(coords, options)
+```
+
+### Parameters [#parameters]
+
+| Parameter | Type                   | Description                                                                      |
+| --------- | ---------------------- | -------------------------------------------------------------------------------- |
+| `coords`  | `vector3 \| vector3[]` | Single coordinate or array of coordinates                                        |
+| `options` | `Option \| Option[]`   | Single option or array of interaction [options](/docs/interact/interact-options) |
+
+### Returns [#returns]
+
+| Type     | Description                                                |
+| -------- | ---------------------------------------------------------- |
+| `string` | The unique identifier for the added coordinate interaction |
+
+### Example [#example]
+
+```lua
+-- Single coordinate
+local id = exports.sleepless_interact:addCoords(vec3(100.0, 200.0, 30.0), {
+    label = "Interact Here",
+    icon = "hand",
+    distance = 2.0,
+    onSelect = function(data) print("Selected!") end,
+    canInteract = function(entity, distance, coords, name)
+        return distance < 2.0
+    end
+})
+
+-- Multiple coordinates
+local id = exports.sleepless_interact:addCoords({
+    vec3(100.0, 200.0, 30.0),
+    vec3(150.0, 250.0, 30.0)
+}, {
+    label = "Interact Here",
+    onSelect = function(data) print("Multi-point interaction") end
+})
+```
+
+<Callout type="warn">
+  When using multiple coordinates, each option maintains the same ID but is tracked separately in the system.
+</Callout>
+
+***
+
+## removeCoords [#removecoords]
+
+Removes coordinate-based interactions from the game.
+
+```lua
+exports.sleepless_interact:removeCoords(id, options?, suppressWarning?)
+```
+
+### Parameters [#parameters-1]
+
+| Parameter         | Type                  | Description                                                     |
+| ----------------- | --------------------- | --------------------------------------------------------------- |
+| `id`              | `string`              | The coordinate ID to remove                                     |
+| `options`         | `string \| string[]?` | Specific option names to remove (optional — omit to remove all) |
+| `suppressWarning` | `boolean?`            | Suppress warning if ID doesn't exist                            |
+
+### Example [#example-1]
+
+```lua
+local id = exports.sleepless_interact:addCoords(vec3(100.0, 200.0, 30.0), {
+    label = "Interact Here",
+    icon = "hand",
+    distance = 2.0,
+    onSelect = function(data) print("Selected!") end,
+})
+
+-- Remove specific options by name
+exports.sleepless_interact:removeCoords(id, { "option1" })
+
+-- Remove all options for this coordinate
+exports.sleepless_interact:removeCoords(id)
+```
+
+***
+
+## addLocalEntity [#addlocalentity]
+
+Adds interaction options for specific non-networked local entities.
+
+```lua
+exports.sleepless_interact:addLocalEntity(arr, options)
+```
+
+### Parameters [#parameters-2]
+
+| Parameter | Type                 | Description                                                          |
+| --------- | -------------------- | -------------------------------------------------------------------- |
+| `arr`     | `number \| number[]` | Entity ID or array of entity IDs                                     |
+| `options` | `Option \| Option[]` | Single option or array of [options](/docs/interact/interact-options) |
+
+### Example [#example-2]
+
+```lua
+exports.sleepless_interact:addLocalEntity(entityId, {
+    label = "Local Interaction",
+    name = "local_interaction",
+    onSelect = function(data) print("Local entity interaction") end
+})
+```
+
+***
+
+## removeLocalEntity [#removelocalentity]
+
+Removes interaction options from non-networked local entities.
+
+```lua
+exports.sleepless_interact:removeLocalEntity(arr, options?)
+```
+
+### Parameters [#parameters-3]
+
+| Parameter | Type                  | Description                                              |
+| --------- | --------------------- | -------------------------------------------------------- |
+| `arr`     | `number \| number[]`  | Entity ID or array of entity IDs                         |
+| `options` | `string \| string[]?` | Option name(s) to remove (optional — omit to remove all) |
+
+### Example [#example-3]
+
+```lua
+-- Remove specific options by name
+exports.sleepless_interact:removeLocalEntity(entityId, "local_interaction")
+
+-- Remove all options from the entity
+exports.sleepless_interact:removeLocalEntity(entityId)
+```
+
+***
+
+## addEntity [#addentity]
+
+Adds interaction options for specific networked entities.
+
+```lua
+exports.sleepless_interact:addEntity(arr, options)
+```
+
+### Parameters [#parameters-4]
+
+| Parameter | Type                 | Description                                                          |
+| --------- | -------------------- | -------------------------------------------------------------------- |
+| `arr`     | `number \| number[]` | Network ID or array of network IDs                                   |
+| `options` | `Option \| Option[]` | Single option or array of [options](/docs/interact/interact-options) |
+
+### Example [#example-4]
+
+```lua
+local NetId = NetworkGetNetworkIdFromEntity(entity)
+
+exports.sleepless_interact:addEntity(NetId, {
+    label = "Networked Interaction",
+    name = "networked_interaction",
+    onSelect = function(data) print("Network entity interaction") end
+})
+```
+
+***
+
+## removeEntity [#removeentity]
+
+Removes interaction options from networked entities.
+
+```lua
+exports.sleepless_interact:removeEntity(arr, options?)
+```
+
+### Parameters [#parameters-5]
+
+| Parameter | Type                  | Description                                              |
+| --------- | --------------------- | -------------------------------------------------------- |
+| `arr`     | `number \| number[]`  | Network ID or array of network IDs                       |
+| `options` | `string \| string[]?` | Option name(s) to remove (optional — omit to remove all) |
+
+### Example [#example-5]
+
+```lua
+local NetId = NetworkGetNetworkIdFromEntity(entity)
+
+-- Remove specific options by name
+exports.sleepless_interact:removeEntity(NetId, "networked_interaction")
+
+-- Remove all options from the entity
+exports.sleepless_interact:removeEntity(NetId)
+```
+
+***
+
+## addModel [#addmodel]
+
+Adds interaction options for specific entity models. Any entity matching the model will have these options.
+
+```lua
+exports.sleepless_interact:addModel(arr, options)
+```
+
+### Parameters [#parameters-6]
+
+| Parameter | Type                                       | Description                                                          |
+| --------- | ------------------------------------------ | -------------------------------------------------------------------- |
+| `arr`     | `number \| string \| (number \| string)[]` | Model hash/name or array of models                                   |
+| `options` | `Option \| Option[]`                       | Single option or array of [options](/docs/interact/interact-options) |
+
+### Example [#example-6]
+
+```lua
+exports.sleepless_interact:addModel("prop_boxpile_01a", {
+    label = "Interact with Box",
+    name = "box_interact",
+    onSelect = function(data) print("Box interaction") end
+})
+```
+
+***
+
+## removeModel [#removemodel]
+
+Removes interaction options from specific models.
+
+```lua
+exports.sleepless_interact:removeModel(arr, options?)
+```
+
+### Parameters [#parameters-7]
+
+| Parameter | Type                                       | Description                                              |
+| --------- | ------------------------------------------ | -------------------------------------------------------- |
+| `arr`     | `number \| string \| (number \| string)[]` | Model hash/name or array of models                       |
+| `options` | `string \| string[]?`                      | Option name(s) to remove (optional — omit to remove all) |
+
+### Example [#example-7]
+
+```lua
+-- Remove specific options by name
+exports.sleepless_interact:removeModel("prop_boxpile_01a", "box_interact")
+
+-- Remove all options for this model
+exports.sleepless_interact:removeModel("prop_boxpile_01a")
+```
+
+***
+
+## addGlobalObject [#addglobalobject]
+
+Adds interaction options globally for all objects in the world.
+
+```lua
+exports.sleepless_interact:addGlobalObject(options)
+```
+
+### Parameters [#parameters-8]
+
+| Parameter | Type                 | Description                                                          |
+| --------- | -------------------- | -------------------------------------------------------------------- |
+| `options` | `Option \| Option[]` | Single option or array of [options](/docs/interact/interact-options) |
+
+### Example [#example-8]
+
+```lua
+exports.sleepless_interact:addGlobalObject({
+    label = "Pickup Object",
+    name = "pickup_object",
+    icon = "box",
+    onSelect = function(data) print("Picking up object") end
+})
+```
+
+***
+
+## removeGlobalObject [#removeglobalobject]
+
+Removes global object interaction options.
+
+```lua
+exports.sleepless_interact:removeGlobalObject(options)
+```
+
+### Parameters [#parameters-9]
+
+| Parameter | Type                 | Description              |
+| --------- | -------------------- | ------------------------ |
+| `options` | `string \| string[]` | Option name(s) to remove |
+
+### Example [#example-9]
+
+```lua
+exports.sleepless_interact:removeGlobalObject("pickup_object")
+```
+
+***
+
+## addGlobalPlayer [#addglobalplayer]
+
+Adds interaction options globally for all players.
+
+```lua
+exports.sleepless_interact:addGlobalPlayer(options)
+```
+
+### Parameters [#parameters-10]
+
+| Parameter | Type                 | Description                                                          |
+| --------- | -------------------- | -------------------------------------------------------------------- |
+| `options` | `Option \| Option[]` | Single option or array of [options](/docs/interact/interact-options) |
+
+### Example [#example-10]
+
+```lua
+exports.sleepless_interact:addGlobalPlayer({
+    label = "Trade",
+    name = "player_trade",
+    icon = "exchange",
+    onSelect = function(data) print("Trading with player") end
+})
+```
+
+***
+
+## removeGlobalPlayer [#removeglobalplayer]
+
+Removes global player interaction options.
+
+```lua
+exports.sleepless_interact:removeGlobalPlayer(options)
+```
+
+### Parameters [#parameters-11]
+
+| Parameter | Type                 | Description              |
+| --------- | -------------------- | ------------------------ |
+| `options` | `string \| string[]` | Option name(s) to remove |
+
+### Example [#example-11]
+
+```lua
+exports.sleepless_interact:removeGlobalPlayer("player_trade")
+```
+
+***
+
+## addGlobalPed [#addglobalped]
+
+Adds interaction options globally for all peds.
+
+```lua
+exports.sleepless_interact:addGlobalPed(options)
+```
+
+### Parameters [#parameters-12]
+
+| Parameter | Type                 | Description                                                          |
+| --------- | -------------------- | -------------------------------------------------------------------- |
+| `options` | `Option \| Option[]` | Single option or array of [options](/docs/interact/interact-options) |
+
+### Example [#example-12]
+
+```lua
+exports.sleepless_interact:addGlobalPed({
+    label = "Talk to Ped",
+    name = "talk_to_ped",
+    icon = "comment",
+    onSelect = function(data) print("Talking to ped") end
+})
+```
+
+***
+
+## removeGlobalPed [#removeglobalped]
+
+Removes global ped interaction options.
+
+```lua
+exports.sleepless_interact:removeGlobalPed(options)
+```
+
+### Parameters [#parameters-13]
+
+| Parameter | Type                 | Description              |
+| --------- | -------------------- | ------------------------ |
+| `options` | `string \| string[]` | Option name(s) to remove |
+
+### Example [#example-13]
+
+```lua
+exports.sleepless_interact:removeGlobalPed("talk_to_ped")
+```
+
+***
+
+## addGlobalVehicle [#addglobalvehicle]
+
+Adds interaction options globally for all vehicles.
+
+```lua
+exports.sleepless_interact:addGlobalVehicle(options)
+```
+
+### Parameters [#parameters-14]
+
+| Parameter | Type                 | Description                                                          |
+| --------- | -------------------- | -------------------------------------------------------------------- |
+| `options` | `Option \| Option[]` | Single option or array of [options](/docs/interact/interact-options) |
+
+### Example [#example-14]
+
+```lua
+exports.sleepless_interact:addGlobalVehicle({
+    label = "Enter Vehicle",
+    name = "enter_vehicle",
+    icon = "car",
+    onSelect = function(data) print("Entering vehicle") end
+})
+```
+
+***
+
+## removeGlobalVehicle [#removeglobalvehicle]
+
+Removes global vehicle interaction options.
+
+```lua
+exports.sleepless_interact:removeGlobalVehicle(options)
+```
+
+### Parameters [#parameters-15]
+
+| Parameter | Type                 | Description              |
+| --------- | -------------------- | ------------------------ |
+| `options` | `string \| string[]` | Option name(s) to remove |
+
+### Example [#example-15]
+
+```lua
+exports.sleepless_interact:removeGlobalVehicle("enter_vehicle")
+```
+
+***
+
+## disableInteract [#disableinteract]
+
+Disables or enables the entire interaction system and clears nearby/current options.
+
+```lua
+exports.sleepless_interact:disableInteract(state)
+```
+
+### Parameters [#parameters-16]
+
+| Parameter | Type      | Description                                            |
+| --------- | --------- | ------------------------------------------------------ |
+| `state`   | `boolean` | `true` to disable interactions, `false` to enable them |
+
+### Example [#example-16]
+
+```lua
+-- Disable interactions (e.g., during a cutscene)
+exports.sleepless_interact:disableInteract(true)
+
+-- Re-enable interactions
+exports.sleepless_interact:disableInteract(false)
+```

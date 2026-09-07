@@ -1,9 +1,0 @@
-# *
-User-agent: *
-Allow: /
-
-# Host
-Host: https://sleepless-development.github.io/
-
-# Sitemaps
-Sitemap: https://sleepless-development.github.io/sitemap.xml
