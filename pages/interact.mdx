@@ -1,5 +1,5 @@
 import { Callout } from 'nextra/components';
-import { Tabs, Tab, Steps } from 'nextra-theme-docs';
+import { Steps } from 'nextra-theme-docs';
 import ResourceLinks from '@components/resource-links';
 
 # Sleepless Interact
@@ -13,7 +13,8 @@ A 3D DUI interaction library for interacting with various entities and points in
 - 🎯 **3D DUI Rendering** - Beautiful interaction indicators rendered in 3D world space
 - 🔄 **ox_target Compatibility** - Full drop-in support for ox_target exports
 - 📍 **Multiple Target Types** - Coordinates, entities, models, and global types (objects, peds, players, vehicles)
-- 🎨 **Customizable Theme** - Configurable colors, sprites, and keybinds
+- 🎨 **Visual themes** - Ten built-in looks, per-theme accents, or one global color override
+- ⌨️ **Compact prompt** - Multi-option targets show Interact until E is pressed
 - ⚡ **Performance Optimized** - Distance-based culling with configurable render distance
 - 🚗 **Vehicle Support** - Options can be configured to work inside vehicles
 - ⏱️ **Hold Actions** - Support for press-and-hold interactions with configurable durations
@@ -34,14 +35,7 @@ Sleepless Interact fully supports the ox_target API. If you enable the ox_target
 
 ### Download the Resource
 
-Download a [release](https://github.com/Sleepless-Development/sleepless_interact/releases) or build from source:
-
-```bash
-git clone https://github.com/Sleepless-Development/sleepless_interact.git
-cd sleepless_interact/web
-pnpm i
-pnpm build
-```
+Download a [release](https://github.com/Sleepless-Development/sleepless_interact/releases) or clone the repository. The prompt UI is vanilla HTML, CSS, and JavaScript under `web/` and does not need a build step.
 
 ### Add to Server
 
@@ -58,7 +52,7 @@ ensure sleepless_interact
 
 ### Configure the Resource
 
-Edit the configuration in `imports/config.lua` to customize keybinds, theme colors, and render distance. See the [Configuration](/interact/configuration) page for details.
+Edit `client/modules/config.lua` to choose a theme, accent colors, compact prompt behavior, keybinds, and render distance. See the [Configuration](/interact/configuration) page for details, or [Custom Themes](/interact/custom-themes) to add your own look.
 
 </Steps>
 

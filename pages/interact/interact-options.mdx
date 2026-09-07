@@ -18,7 +18,7 @@ All interact actions are formatted as an array containing objects with the follo
 ---@field resource? string The resource that registered the option.
 ---@field offset? vector3 A relative offset from the entity's position.
 ---@field offsetAbsolute? vector3 An absolute offset in world coordinates.
----@field color? number[] 4 numbers in an array used for RGBA, overwriting the theme color for that option.
+---@field color? number[] 4 numbers in an array used for RGBA, overwriting the theme accent for that option.
 ---@field bones? string | string[] An array of bone IDs associated with the option.
 ---@field allowInVehicle? boolean Marks the option as being usable inside a vehicle.
 ---@field onSelect? fun(data: InteractResponse) A function to execute when the option is selected.
@@ -46,7 +46,7 @@ All interact actions are formatted as an array containing objects with the follo
 | `resource` | `string` | No | The resource that registered the option |
 | `offset` | `vector3` | No | Relative offset from the entity's position |
 | `offsetAbsolute` | `vector3` | No | Absolute offset in world coordinates |
-| `color` | `number[]` | No | RGBA array `{r, g, b, a}` overriding the theme color |
+| `color` | `number[]` | No | RGBA array `{r, g, b, a}` overriding the theme accent for that option |
 | `bones` | `string \| string[]` | No | Bone ID(s) associated with the option |
 | `allowInVehicle` | `boolean` | No | Allow usage inside a vehicle |
 | `onSelect` | `function` | No | Callback when the option is selected |
