@@ -1,0 +1,115 @@
+---
+title: "Configuration"
+---
+
+The configuration file is located at `client/modules/config.lua`.
+
+```lua
+local config = {}
+
+config.debug = false
+
+config.defaultPosition = 'bottom-center'
+config.defaultLayout = 'auto'
+config.separator = 'slash'
+
+config.mode = 'auto'
+config.modeCommand = 'promptmode'
+
+config.keyboardStyle = 'white'
+config.gamepadStyle = 'light'
+config.coloredButtons = false
+
+config.scale = 1.0
+config.iconSize = 2.4
+
+config.versionCheckEnabled = true
+
+-- Built-in: modern | minimal | light | retro | cyber | vice | noir | industrial | fantasy
+config.theme = 'modern'
+
+config.themeColors = {
+    modern = { 49, 164, 252, 255 },
+    minimal = { 168, 186, 204, 255 },
+    light = { 37, 99, 235, 255 },
+    retro = { 255, 176, 32, 255 },
+    cyber = { 0, 229, 255, 255 },
+    vice = { 255, 64, 180, 255 },
+    noir = { 240, 240, 236, 255 },
+    industrial = { 212, 168, 48, 255 },
+    fantasy = { 212, 175, 110, 255 },
+}
+
+config.themeColor = nil
+
+return config
+```
+
+## Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `debug` | `boolean` | `false` | Enables the `/prompts` test command |
+| `defaultPosition` | `string` | `'bottom-center'` | Slot used when `show()` omits `position` |
+| `defaultLayout` | `'row' \| 'column' \| 'auto'` | `'auto'` | `auto` uses a column on left/right middle slots, otherwise a row |
+| `separator` | `'slash' \| 'line' \| 'dot' \| 'none'` | `'slash'` | Divider between prompts in a group |
+| `mode` | `'auto' \| 'keyboard' \| 'xbox' \| 'playstation'` | `'auto'` | Default icon mode when the player has no saved preference |
+| `modeCommand` | `string` | `'promptmode'` | Chat command that opens the mode dialog |
+| `keyboardStyle` | `string` | `'white'` | Keyboard / mouse art style |
+| `gamepadStyle` | `string` | `'light'` | Xbox / PlayStation art style |
+| `coloredButtons` | `boolean` | `false` | Use colored face-button variants when the pack has them |
+| `scale` | `number` | `1.0` | Overall HUD scale |
+| `iconSize` | `number` | `2.4` | Icon size in `rem` (`1rem` = 1% of viewport height) |
+| `versionCheckEnabled` | `boolean` | `true` | GitHub version check on the server |
+| `theme` | `string` | `'modern'` | Visual look. Must match a file in `web/themes/<id>.css` |
+| `themeColors` | `table` | see above | Per-theme RGBA accent `{ r, g, b, a }` (0–255) |
+| `themeColor` | `number[] \| nil` | `nil` | Optional global accent override. When set, every theme uses this color instead of `themeColors` |
+
+## Icon styles
+
+Keyboard: `white`, `dark`, `alt`, `retro`, `vintage`.
+
+Gamepad: `default`, `light`, `alt`, `alt2`, `retro`.
+
+These can also be changed at runtime with `setStyle`. See [Client Exports](/docs/prompts/exports/Client#setstyle).
+
+## Icon mode
+
+`/promptmode` opens an ox_lib select dialog. The player's pick is stored in KVP and overrides `config.mode` on the next start.
+
+| Mode | Behavior |
+|------|----------|
+| `auto` | Follows last input device. Detects Xbox vs DualSense / DualShock |
+| `keyboard` | Always show keyboard / mouse icons |
+| `xbox` | Always show Xbox icons |
+| `playstation` | Always show DualSense icons |
+
+<Callout type="info">
+  Default positions and aliases are listed on [Prompt Options](/docs/prompts/prompt-options#positions).
+</Callout>
+
+## Locales
+
+ox_lib locales live in `locales/`. English ships as `locales/en.json`. Copy that file to add another language (`fr.json`, `de.json`, and so on). The `hold` string is prefixed on any prompt with `holdTime`.
+
+```json
+{
+  "hold": "Hold"
+}
+```
+
+## Debug command
+
+When `debug` is `true`:
+
+- `/prompts` vehicle example
+- `/prompts positions` one prompt in every slot
+- `/prompts hold` hold-to-complete demo
+- `/prompts keybind` demo bound to `sleepless_prompts_demo` (default `E`)
+- `/prompts style dark`
+- `/prompts theme cyber`
+- `/prompts hide`
+
+<Callout type="info">
+  Built-in looks and how to add your own are on [Custom Themes](/docs/prompts/custom-themes).
+</Callout>
