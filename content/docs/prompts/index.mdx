@@ -18,6 +18,7 @@ An on-screen input prompt HUD for FiveM. Show keyboard and gamepad button icons 
 - Auto Xbox vs DualSense / DualShock detection, or a locked mode
 - Player command `/promptmode` to pick Auto, Keyboard, Xbox, or PlayStation
 - Hold progress, press hooks, and per-prompt disable / hide
+- Interact-style actions: `onSelect`, `export`, `event`, `serverEvent`, `command`
 - Art styles for keyboard and gamepad
 - The same visual themes as Interact (`modern`, `cyber`, `vice`, and more), plus custom CSS looks
 
@@ -71,6 +72,18 @@ prompts.show('vehicle', {
 ```
 
 The same call works through `exports.sleepless_prompts:show(...)`.
+
+### Actions
+
+Same trigger options as Interact. One action runs on press, or when `holdTime` completes:
+
+```lua
+{ id = 'lock', key = 'L', control = 182, label = 'Lock', event = 'myresource:lockVehicle' }
+{ id = 'engine', key = 'F', holdTime = 1500, label = 'Engine', serverEvent = 'myresource:toggleEngine' }
+{ id = 'wave', key = 'G', control = 47, label = 'Wave', command = 'e wave' }
+```
+
+Priority: `onSelect`, `export`, `event`, `serverEvent`, `command`. See [Prompt Options](/docs/prompts/prompt-options#actions).
 
 ### Update while open
 
