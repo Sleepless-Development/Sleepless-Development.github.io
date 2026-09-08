@@ -1,0 +1,204 @@
+# Custom Themes (/docs/prompts/custom-themes)
+
+
+
+Each look is a CSS file. The Lua config only picks an id and an accent. Copy a built-in theme, rename the selector, then restyle the prompt group.
+
+Built-in ids: `modern`, `minimal`, `light`, `retro`, `cyber`, `vice`, `noir`, `industrial`, `fantasy`. Same system as [Interact](/docs/interact/custom-themes).
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Create the stylesheet [#create-the-stylesheet-step]
+
+    Add `web/themes/<id>.css`. The id must be lowercase with no spaces (`ember`, `hospital`, `mytheme`). Every rule is scoped to that id:
+
+    ```css
+    [data-theme="ember"] {
+      --primary: 232, 96, 48;
+      --on-accent: 8, 11, 16;
+      --text: 236, 241, 247;
+    }
+    ```
+
+    Unknown ids are loaded from `web/themes/<id>.css` automatically. If the file is missing, the HUD falls back to `modern`.
+  </div>
+
+  <div className="fd-step">
+    ### Point config at it [#point-config-at-it-step]
+
+    In `client/modules/config.lua`:
+
+    ```lua
+    config.theme = 'ember'
+
+    config.themeColors = {
+        ember = { 232, 96, 48, 255 },
+    }
+    ```
+
+    `themeColors` is the default HUD accent for that look. Leave `config.themeColor = nil` so this color is not forced onto every other theme.
+  </div>
+
+  <div className="fd-step">
+    ### Preview in a browser [#preview-in-a-browser-step]
+
+    Serve the `web/` folder and open:
+
+    ```
+    http://127.0.0.1:8080/?theme=ember
+    ```
+
+    | Query                                    | Effect                           |
+    | ---------------------------------------- | -------------------------------- |
+    | `theme=<id>`                             | Load that theme                  |
+    | `layout=row \| column \| auto`           | Group layout                     |
+    | `separator=slash \| line \| dot \| none` | Divider between prompts          |
+    | `position=<slot>`                        | Named slot for the vehicle group |
+    | `device=keyboard \| xbox \| playstation` | Icon family                      |
+    | `style=<id>`                             | Keyboard or gamepad art style    |
+    | `scale=0.8 \| 1 \| 1.2`                  | HUD scale                        |
+
+    The on-page dock is browser-only. In game, restart the resource after CSS or config changes, or call `setTheme` at runtime.
+  </div>
+</div>
+
+## Markup [#markup]
+
+The HTML does not change. Themes only restyle these nodes:
+
+```
+#hud
+  .slot[data-pos]
+    .group                      prompt bar
+      .item                     one prompt
+        .hold-prefix            localized "Hold" when holdTime is set
+        .icons
+          img.icon
+          .icon-fallback        used when no image is found
+          .icon-plus
+        .label
+        .hold                   only when the prompt has holdTime
+          .hold-fill            width is set in JS (0–100%)
+      .sep                      between items
+```
+
+Custom positions mount `.group` directly on `#hud` with `data-position="custom"`.
+
+### States [#states]
+
+| Selector                                                      | When                                   |
+| ------------------------------------------------------------- | -------------------------------------- |
+| `.item.is-active`                                             | Prompt is currently held / highlighted |
+| `.item.is-disabled`                                           | Dimmed, non-interactive                |
+| `.group.is-leaving`                                           | Hide animation                         |
+| `.group[data-layout="row"]`                                   | Horizontal group                       |
+| `.group[data-layout="column"]`                                | Vertical group                         |
+| `.group[data-separator="slash" \| "line" \| "dot" \| "none"]` | Divider style                          |
+
+Do not add `:hover` or `:active` on items. They are never clicked.
+
+## Tokens [#tokens]
+
+Color tokens are **RGB triplets**, not `rgb()` values, so both `rgb(var(--primary))` and `rgba(var(--primary), 0.2)` work. Server `themeColors` / `setColor` write `--primary` the same way.
+
+| Token          | Example                            | Use                                          |
+| -------------- | ---------------------------------- | -------------------------------------------- |
+| `--primary`    | `49, 164, 252`                     | Active label, hold fill, selected border     |
+| `--on-accent`  | `8, 11, 16`                        | Text sitting on a filled `--primary` surface |
+| `--text`       | `236, 241, 247`                    | Labels                                       |
+| `--text-muted` | `156, 170, 186`                    | Separators, idle accents                     |
+| `--surface`    | `10, 14, 20`                       | Panel fill                                   |
+| `--ink`        | `8, 11, 16`                        | Dark insets, fallback key text               |
+| `--hairline`   | `220, 230, 242`                    | Borders, usually with `--hairline-a`         |
+| `--panel-a`    | `0.72`                             | Panel opacity                                |
+| `--font`       | `"DINPRO", "Segoe UI", sans-serif` | Typeface                                     |
+
+`--on-accent` should contrast with `--primary`. Light accents need a dark `--on-accent`; dark accents need a light one. JS will recompute `--on-accent` when `themeColor` or `setColor` is applied.
+
+Root `font-size` is `1vh`, so `1rem` is 1% of the viewport height. Size the group and icons in `rem`, not `px`.
+
+This HUD is a fullscreen NUI overlay, so `backdrop-filter` blur works. Interact's world sprite cannot blur GTA; Prompts can.
+
+## What to style [#what-to-style]
+
+Copy `web/themes/modern.css` or `web/themes/minimal.css` and rename `[data-theme="..."]`. At minimum, cover:
+
+1. **`.group`** — padding, border, background, radius, shadow
+2. **`.label`** — size, weight, tracking
+3. **`.item.is-active .label`** — put `--primary` here, not on every idle label
+4. **`.hold-fill`** — JS only changes `width`. Leave `.hold` transparent so only the fill shows
+5. **`.icon-fallback`** — the letter key used when an icon image is missing
+
+`.group` layout, slots, and enter/leave animation live in `style.css`. Keep those in the base sheet.
+
+Do not fill `.item.is-active` with a background. Hold state is the progress bar plus the label color.
+
+## Starter [#starter]
+
+```css
+[data-theme="ember"] {
+  --ink: 12, 8, 6;
+  --surface: 22, 14, 12;
+  --text: 255, 236, 228;
+  --text-muted: 196, 150, 132;
+  --hairline: 232, 96, 48;
+  --hairline-a: 0.4;
+  --primary: 232, 96, 48;
+  --on-accent: 12, 8, 6;
+  --font: "DINPRO", "Segoe UI", sans-serif;
+  --panel-a: 0.84;
+}
+
+[data-theme="ember"] body {
+  font-family: var(--font);
+  color: rgb(var(--text));
+}
+
+[data-theme="ember"] .group {
+  padding: 0.85rem 1.05rem;
+  border: 0.12rem solid rgba(var(--hairline), 0.7);
+  border-radius: 0.7rem;
+  background: rgba(var(--surface), var(--panel-a));
+  backdrop-filter: blur(1.2rem);
+  -webkit-backdrop-filter: blur(1.2rem);
+}
+
+[data-theme="ember"] .label {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+[data-theme="ember"] .item.is-active .label {
+  color: rgb(var(--primary));
+}
+
+[data-theme="ember"] .icon-fallback {
+  border: 0.1rem solid rgba(var(--hairline), 0.55);
+  border-radius: 0.4rem;
+  background: rgba(var(--ink), 0.55);
+  color: rgb(var(--text));
+}
+
+[data-theme="ember"] .hold-fill {
+  background: rgb(var(--primary));
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-theme="ember"] {
+    --panel-a: 1;
+  }
+
+  [data-theme="ember"] .group {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+```
+
+DINPRO is self-hosted in `web/fonts/`. To use another face, add an `@font-face` in your theme file and set `--font`.
+
+<Callout type="info">
+  Built-in themes live in `web/themes/`. `modern.css` is the default HUD. `cyber.css`, `vice.css`, and `noir.css` show how far you can push shape without changing the HTML.
+</Callout>

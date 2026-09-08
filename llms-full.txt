@@ -3851,6 +3851,567 @@ If you need help or have questions:
 * [GitHub Issues](https://github.com/Sleepless-Development/sleepless_pedmanager/issues)
 
 
+# Configuration (/docs/prompts/configuration)
+
+
+
+The configuration file is located at `client/modules/config.lua`.
+
+```lua
+local config = {}
+
+config.debug = false
+
+config.defaultPosition = 'bottom-center'
+config.defaultLayout = 'auto'
+config.separator = 'slash'
+
+config.mode = 'auto'
+config.modeCommand = 'promptmode'
+
+config.keyboardStyle = 'white'
+config.gamepadStyle = 'light'
+config.coloredButtons = false
+
+config.scale = 1.0
+config.iconSize = 2.4
+
+config.versionCheckEnabled = true
+
+-- Built-in: modern | minimal | light | retro | cyber | vice | noir | industrial | fantasy
+config.theme = 'modern'
+
+config.themeColors = {
+    modern = { 49, 164, 252, 255 },
+    minimal = { 168, 186, 204, 255 },
+    light = { 37, 99, 235, 255 },
+    retro = { 255, 176, 32, 255 },
+    cyber = { 0, 229, 255, 255 },
+    vice = { 255, 64, 180, 255 },
+    noir = { 240, 240, 236, 255 },
+    industrial = { 212, 168, 48, 255 },
+    fantasy = { 212, 175, 110, 255 },
+}
+
+config.themeColor = nil
+
+return config
+```
+
+## Options [#options]
+
+| Option                | Type                                              | Default           | Description                                                                                     |
+| --------------------- | ------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------- |
+| `debug`               | `boolean`                                         | `false`           | Enables the `/prompts` test command                                                             |
+| `defaultPosition`     | `string`                                          | `'bottom-center'` | Slot used when `show()` omits `position`                                                        |
+| `defaultLayout`       | `'row' \| 'column' \| 'auto'`                     | `'auto'`          | `auto` uses a column on left/right middle slots, otherwise a row                                |
+| `separator`           | `'slash' \| 'line' \| 'dot' \| 'none'`            | `'slash'`         | Divider between prompts in a group                                                              |
+| `mode`                | `'auto' \| 'keyboard' \| 'xbox' \| 'playstation'` | `'auto'`          | Default icon mode when the player has no saved preference                                       |
+| `modeCommand`         | `string`                                          | `'promptmode'`    | Chat command that opens the mode dialog                                                         |
+| `keyboardStyle`       | `string`                                          | `'white'`         | Keyboard / mouse art style                                                                      |
+| `gamepadStyle`        | `string`                                          | `'light'`         | Xbox / PlayStation art style                                                                    |
+| `coloredButtons`      | `boolean`                                         | `false`           | Use colored face-button variants when the pack has them                                         |
+| `scale`               | `number`                                          | `1.0`             | Overall HUD scale                                                                               |
+| `iconSize`            | `number`                                          | `2.4`             | Icon size in `rem` (`1rem` = 1% of viewport height)                                             |
+| `versionCheckEnabled` | `boolean`                                         | `true`            | GitHub version check on the server                                                              |
+| `theme`               | `string`                                          | `'modern'`        | Visual look. Must match a file in `web/themes/<id>.css`                                         |
+| `themeColors`         | `table`                                           | see above         | Per-theme RGBA accent `{ r, g, b, a }` (0–255)                                                  |
+| `themeColor`          | `number[] \| nil`                                 | `nil`             | Optional global accent override. When set, every theme uses this color instead of `themeColors` |
+
+## Icon styles [#icon-styles]
+
+Keyboard: `white`, `dark`, `alt`, `retro`, `vintage`.
+
+Gamepad: `default`, `light`, `alt`, `alt2`, `retro`.
+
+These can also be changed at runtime with `setStyle`. See [Client Exports](/docs/prompts/exports/Client#setstyle).
+
+## Icon mode [#icon-mode]
+
+`/promptmode` opens an ox\_lib select dialog. The player's pick is stored in KVP and overrides `config.mode` on the next start.
+
+| Mode          | Behavior                                                         |
+| ------------- | ---------------------------------------------------------------- |
+| `auto`        | Follows last input device. Detects Xbox vs DualSense / DualShock |
+| `keyboard`    | Always show keyboard / mouse icons                               |
+| `xbox`        | Always show Xbox icons                                           |
+| `playstation` | Always show DualSense icons                                      |
+
+<Callout type="info">
+  Default positions and aliases are listed on [Prompt Options](/docs/prompts/prompt-options#positions).
+</Callout>
+
+## Locales [#locales]
+
+ox\_lib locales live in `locales/`. English ships as `locales/en.json`. Copy that file to add another language (`fr.json`, `de.json`, and so on). The `hold` string is prefixed on any prompt with `holdTime`.
+
+```json
+{
+  "hold": "Hold"
+}
+```
+
+## Debug command [#debug-command]
+
+When `debug` is `true`:
+
+* `/prompts` vehicle example
+* `/prompts positions` one prompt in every slot
+* `/prompts hold` hold-to-complete demo
+* `/prompts keybind` demo bound to `sleepless_prompts_demo` (default `E`)
+* `/prompts style dark`
+* `/prompts theme cyber`
+* `/prompts hide`
+
+<Callout type="info">
+  Built-in looks and how to add your own are on [Custom Themes](/docs/prompts/custom-themes).
+</Callout>
+
+
+# Custom Themes (/docs/prompts/custom-themes)
+
+
+
+Each look is a CSS file. The Lua config only picks an id and an accent. Copy a built-in theme, rename the selector, then restyle the prompt group.
+
+Built-in ids: `modern`, `minimal`, `light`, `retro`, `cyber`, `vice`, `noir`, `industrial`, `fantasy`. Same system as [Interact](/docs/interact/custom-themes).
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Create the stylesheet [#create-the-stylesheet-step]
+
+    Add `web/themes/<id>.css`. The id must be lowercase with no spaces (`ember`, `hospital`, `mytheme`). Every rule is scoped to that id:
+
+    ```css
+    [data-theme="ember"] {
+      --primary: 232, 96, 48;
+      --on-accent: 8, 11, 16;
+      --text: 236, 241, 247;
+    }
+    ```
+
+    Unknown ids are loaded from `web/themes/<id>.css` automatically. If the file is missing, the HUD falls back to `modern`.
+  </div>
+
+  <div className="fd-step">
+    ### Point config at it [#point-config-at-it-step]
+
+    In `client/modules/config.lua`:
+
+    ```lua
+    config.theme = 'ember'
+
+    config.themeColors = {
+        ember = { 232, 96, 48, 255 },
+    }
+    ```
+
+    `themeColors` is the default HUD accent for that look. Leave `config.themeColor = nil` so this color is not forced onto every other theme.
+  </div>
+
+  <div className="fd-step">
+    ### Preview in a browser [#preview-in-a-browser-step]
+
+    Serve the `web/` folder and open:
+
+    ```
+    http://127.0.0.1:8080/?theme=ember
+    ```
+
+    | Query                                    | Effect                           |
+    | ---------------------------------------- | -------------------------------- |
+    | `theme=<id>`                             | Load that theme                  |
+    | `layout=row \| column \| auto`           | Group layout                     |
+    | `separator=slash \| line \| dot \| none` | Divider between prompts          |
+    | `position=<slot>`                        | Named slot for the vehicle group |
+    | `device=keyboard \| xbox \| playstation` | Icon family                      |
+    | `style=<id>`                             | Keyboard or gamepad art style    |
+    | `scale=0.8 \| 1 \| 1.2`                  | HUD scale                        |
+
+    The on-page dock is browser-only. In game, restart the resource after CSS or config changes, or call `setTheme` at runtime.
+  </div>
+</div>
+
+## Markup [#markup]
+
+The HTML does not change. Themes only restyle these nodes:
+
+```
+#hud
+  .slot[data-pos]
+    .group                      prompt bar
+      .item                     one prompt
+        .hold-prefix            localized "Hold" when holdTime is set
+        .icons
+          img.icon
+          .icon-fallback        used when no image is found
+          .icon-plus
+        .label
+        .hold                   only when the prompt has holdTime
+          .hold-fill            width is set in JS (0–100%)
+      .sep                      between items
+```
+
+Custom positions mount `.group` directly on `#hud` with `data-position="custom"`.
+
+### States [#states]
+
+| Selector                                                      | When                                   |
+| ------------------------------------------------------------- | -------------------------------------- |
+| `.item.is-active`                                             | Prompt is currently held / highlighted |
+| `.item.is-disabled`                                           | Dimmed, non-interactive                |
+| `.group.is-leaving`                                           | Hide animation                         |
+| `.group[data-layout="row"]`                                   | Horizontal group                       |
+| `.group[data-layout="column"]`                                | Vertical group                         |
+| `.group[data-separator="slash" \| "line" \| "dot" \| "none"]` | Divider style                          |
+
+Do not add `:hover` or `:active` on items. They are never clicked.
+
+## Tokens [#tokens]
+
+Color tokens are **RGB triplets**, not `rgb()` values, so both `rgb(var(--primary))` and `rgba(var(--primary), 0.2)` work. Server `themeColors` / `setColor` write `--primary` the same way.
+
+| Token          | Example                            | Use                                          |
+| -------------- | ---------------------------------- | -------------------------------------------- |
+| `--primary`    | `49, 164, 252`                     | Active label, hold fill, selected border     |
+| `--on-accent`  | `8, 11, 16`                        | Text sitting on a filled `--primary` surface |
+| `--text`       | `236, 241, 247`                    | Labels                                       |
+| `--text-muted` | `156, 170, 186`                    | Separators, idle accents                     |
+| `--surface`    | `10, 14, 20`                       | Panel fill                                   |
+| `--ink`        | `8, 11, 16`                        | Dark insets, fallback key text               |
+| `--hairline`   | `220, 230, 242`                    | Borders, usually with `--hairline-a`         |
+| `--panel-a`    | `0.72`                             | Panel opacity                                |
+| `--font`       | `"DINPRO", "Segoe UI", sans-serif` | Typeface                                     |
+
+`--on-accent` should contrast with `--primary`. Light accents need a dark `--on-accent`; dark accents need a light one. JS will recompute `--on-accent` when `themeColor` or `setColor` is applied.
+
+Root `font-size` is `1vh`, so `1rem` is 1% of the viewport height. Size the group and icons in `rem`, not `px`.
+
+This HUD is a fullscreen NUI overlay, so `backdrop-filter` blur works. Interact's world sprite cannot blur GTA; Prompts can.
+
+## What to style [#what-to-style]
+
+Copy `web/themes/modern.css` or `web/themes/minimal.css` and rename `[data-theme="..."]`. At minimum, cover:
+
+1. **`.group`** — padding, border, background, radius, shadow
+2. **`.label`** — size, weight, tracking
+3. **`.item.is-active .label`** — put `--primary` here, not on every idle label
+4. **`.hold-fill`** — JS only changes `width`. Leave `.hold` transparent so only the fill shows
+5. **`.icon-fallback`** — the letter key used when an icon image is missing
+
+`.group` layout, slots, and enter/leave animation live in `style.css`. Keep those in the base sheet.
+
+Do not fill `.item.is-active` with a background. Hold state is the progress bar plus the label color.
+
+## Starter [#starter]
+
+```css
+[data-theme="ember"] {
+  --ink: 12, 8, 6;
+  --surface: 22, 14, 12;
+  --text: 255, 236, 228;
+  --text-muted: 196, 150, 132;
+  --hairline: 232, 96, 48;
+  --hairline-a: 0.4;
+  --primary: 232, 96, 48;
+  --on-accent: 12, 8, 6;
+  --font: "DINPRO", "Segoe UI", sans-serif;
+  --panel-a: 0.84;
+}
+
+[data-theme="ember"] body {
+  font-family: var(--font);
+  color: rgb(var(--text));
+}
+
+[data-theme="ember"] .group {
+  padding: 0.85rem 1.05rem;
+  border: 0.12rem solid rgba(var(--hairline), 0.7);
+  border-radius: 0.7rem;
+  background: rgba(var(--surface), var(--panel-a));
+  backdrop-filter: blur(1.2rem);
+  -webkit-backdrop-filter: blur(1.2rem);
+}
+
+[data-theme="ember"] .label {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+[data-theme="ember"] .item.is-active .label {
+  color: rgb(var(--primary));
+}
+
+[data-theme="ember"] .icon-fallback {
+  border: 0.1rem solid rgba(var(--hairline), 0.55);
+  border-radius: 0.4rem;
+  background: rgba(var(--ink), 0.55);
+  color: rgb(var(--text));
+}
+
+[data-theme="ember"] .hold-fill {
+  background: rgb(var(--primary));
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-theme="ember"] {
+    --panel-a: 1;
+  }
+
+  [data-theme="ember"] .group {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+```
+
+DINPRO is self-hosted in `web/fonts/`. To use another face, add an `@font-face` in your theme file and set `--font`.
+
+<Callout type="info">
+  Built-in themes live in `web/themes/`. `modern.css` is the default HUD. `cyber.css`, `vice.css`, and `noir.css` show how far you can push shape without changing the HTML.
+</Callout>
+
+
+# Sleepless Prompts (/docs/prompts)
+
+
+
+
+
+An on-screen input prompt HUD for FiveM. Show keyboard and gamepad button icons with labels, update them while they are open, and place groups in named screen slots.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_prompts" />
+
+## Features [#features]
+
+* Keyboard and gamepad icons from a bundled button pack
+* Live updates while a group is open
+* Named slots (`bottom-center`, `top-right`, `middle-left`, and more) plus custom coordinates
+* ox\_lib keybind tracking that follows player remaps
+* Auto Xbox vs DualSense / DualShock detection, or a locked mode
+* Player command `/promptmode` to pick Auto, Keyboard, Xbox, or PlayStation
+* Hold progress, press hooks, and per-prompt disable / hide
+* Art styles for keyboard and gamepad
+* The same visual themes as Interact (`modern`, `cyber`, `vice`, and more), plus custom CSS looks
+
+## Dependencies [#dependencies]
+
+* [ox\_lib](https://github.com/communityox/ox_lib) (required)
+
+## Installation [#installation]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Download the Resource [#download-the-resource-step]
+
+    Download a [release](https://github.com/Sleepless-Development/sleepless_prompts/releases) or clone the repository. The HUD is vanilla HTML, CSS, and JavaScript under `web/` and does not need a build step.
+  </div>
+
+  <div className="fd-step">
+    ### Add to Server [#add-to-server-step]
+
+    Place the `sleepless_prompts` folder in your server's resources directory.
+  </div>
+
+  <div className="fd-step">
+    ### Configure Your Server [#configure-your-server-step]
+
+    Add the following to your `server.cfg`:
+
+    ```bash
+    ensure ox_lib
+    ensure sleepless_prompts
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Configure the Resource [#configure-the-resource-step]
+
+    Edit `client/modules/config.lua` for default slot, icon mode, styles, and theme. See the [Configuration](/docs/prompts/configuration) page for details.
+  </div>
+</div>
+
+## Quick Start [#quick-start]
+
+Other resources can call exports, or import the global:
+
+```lua
+client_script '@sleepless_prompts/init.lua'
+```
+
+### Show a prompt group [#show-a-prompt-group]
+
+```lua
+prompts.show('vehicle', {
+    position = 'bottom-center',
+    prompts = {
+        { id = 'enter', key = 'E', gamepad = 'A', label = 'Enter', control = 38 },
+        { id = 'lock', key = 'L', gamepad = 'X', label = 'Lock' },
+        { id = 'trunk', key = 'G', gamepad = 'B', label = 'Trunk' },
+        { id = 'engine', key = 'F', gamepad = 'Y', label = 'Engine', control = 23, holdTime = 1500 },
+    },
+})
+```
+
+The same call works through `exports.sleepless_prompts:show(...)`.
+
+### Update while open [#update-while-open]
+
+```lua
+prompts.updatePrompt('vehicle', 'lock', { label = 'Unlock' })
+prompts.setPosition('vehicle', 'top-right')
+prompts.hide('vehicle')
+```
+
+### ox\_lib keybinds [#ox_lib-keybinds]
+
+Pass the keybind `name` from `lib.addKeybind`. The keyboard icon tracks the live mapping and updates if the player remaps it in GTA settings.
+
+```lua
+lib.addKeybind({
+    name = 'vehicle_enter',
+    description = 'Enter vehicle',
+    defaultKey = 'E',
+    onPressed = function() end,
+})
+
+prompts.show('vehicle', {
+    prompts = {
+        { keybind = 'vehicle_enter', gamepad = 'A', label = 'Enter' },
+    },
+})
+```
+
+<Callout type="info">
+  Gamepad names use Xbox layout (A south, B east, X west, Y north). PlayStation faces remap from that. See [Prompt Options](/docs/prompts/prompt-options) for the full property list and [Client Exports](/docs/prompts/exports/Client) for the API.
+</Callout>
+
+## Icon mode [#icon-mode]
+
+Players can run `/promptmode` to pick Auto, Keyboard, Xbox, or PlayStation. The choice is saved per client.
+
+| Mode          | Behavior                                                         |
+| ------------- | ---------------------------------------------------------------- |
+| `auto`        | Follows last input device. Detects Xbox vs DualSense / DualShock |
+| `keyboard`    | Always show keyboard / mouse icons                               |
+| `xbox`        | Always show Xbox icons                                           |
+| `playstation` | Always show DualSense icons                                      |
+
+Steam Input or DS4Windows wrapping a DualSense as Xbox is treated as Xbox, which matches the buttons the player actually presses.
+
+## Support [#support]
+
+If you need help or have questions:
+
+* [Discord](https://discord.gg/A2bDPbfgNP)
+* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_prompts/issues)
+
+
+# Prompt Options (/docs/prompts/prompt-options)
+
+
+
+Each call to `show` takes a group table. Each item in `prompts` is a `PromptEntry`.
+
+## Prompt group [#prompt-group]
+
+| Property    | Type                                   | Default                  | Description                                 |
+| ----------- | -------------------------------------- | ------------------------ | ------------------------------------------- |
+| `id`        | `string`                               | required                 | Group id. `show('id', data)` also sets this |
+| `position`  | `string \| table`                      | `config.defaultPosition` | Named slot or custom `{ x, y, origin? }`    |
+| `offset`    | `{ x, y }`                             | `{ x = 0, y = 0 }`       | Extra offset in `rem`                       |
+| `layout`    | `'row' \| 'column' \| 'auto'`          | `config.defaultLayout`   | Arrangement of prompts in the group         |
+| `separator` | `'slash' \| 'line' \| 'dot' \| 'none'` | `config.separator`       | Divider between prompts                     |
+| `order`     | `number`                               | `0`                      | CSS order when multiple groups share a slot |
+| `prompts`   | `PromptEntry \| PromptEntry[]`         | required                 | One prompt or an array                      |
+
+## Prompt entry [#prompt-entry]
+
+A prompt needs a `label` and at least one of `key`, `keyboard`, `gamepad`, `icon`, or `keybind`.
+
+| Property         | Type                  | Description                                                                                                                 |
+| ---------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `id`             | `string?`             | Unique id within the group. Defaults to the key name                                                                        |
+| `name`           | `string?`             | Alias for `id`                                                                                                              |
+| `label`          | `string`              | Visible label                                                                                                               |
+| `key`            | `string \| string[]?` | Keyboard and/or shared input name (`E`, `LMB`, `LT`)                                                                        |
+| `keyboard`       | `string \| string[]?` | Keyboard-only override                                                                                                      |
+| `gamepad`        | `string \| string[]?` | Gamepad-only override (Xbox layout)                                                                                         |
+| `keybind`        | `string \| table?`    | ox\_lib keybind name, or the table from `lib.addKeybind`                                                                    |
+| `icon`           | `string \| string[]?` | Raw image path. Skips icon lookup                                                                                           |
+| `control`        | `number?`             | GTA control index. When set, presses are tracked and hooks fire                                                             |
+| `disableControl` | `boolean?`            | Disable the GTA control while this prompt is shown                                                                          |
+| `holdTime`       | `number?`             | Hold duration in ms. Shows the localized `hold` string before the button, fills a progress bar, and fires `onHold` / `held` |
+| `cooldown`       | `number?`             | Ignore further presses for this many ms after press or hold                                                                 |
+| `disabled`       | `boolean?`            | Dimmed, non-interactive                                                                                                     |
+| `hidden`         | `boolean?`            | Omitted from the HUD                                                                                                        |
+| `progress`       | `number?`             | `0` to `1` hold fill                                                                                                        |
+| `onPressed`      | `function?`           | Called when `control` is pressed                                                                                            |
+| `onReleased`     | `function?`           | Called when `control` is released                                                                                           |
+| `onHold`         | `function?`           | Called when `holdTime` completes                                                                                            |
+
+```lua
+{
+    id = 'engine',
+    key = 'F',
+    gamepad = 'Y',
+    label = 'Engine',
+    control = 23,
+    holdTime = 1500,
+}
+```
+
+<Callout type="info">
+  `keybind` sets the keyboard icon from the live ox\_lib mapping. Combine it with `gamepad` so pad users still see a face or trigger icon.
+</Callout>
+
+## Positions [#positions]
+
+Named slots:
+
+`top-left`, `top-center`, `top-right`, `middle-left`, `center`, `middle-right`, `bottom-left`, `bottom-center`, `bottom-right`.
+
+Aliases: `top`, `bottom`, `left`, `right`, `center-left`, `center-right`, `center-top`, `center-bottom`.
+
+Custom:
+
+```lua
+prompts.setPosition('vehicle', { x = 82, y = 18, origin = 'top-right' })
+```
+
+`x` and `y` are percents of the screen. `origin` is the transform origin (defaults to `center`).
+
+## Gamepad names [#gamepad-names]
+
+Names follow Xbox layout. PlayStation icons remap automatically.
+
+| Name                                       | Xbox               | PlayStation        |
+| ------------------------------------------ | ------------------ | ------------------ |
+| `a` / `cross`                              | A                  | Cross              |
+| `b` / `circle`                             | B                  | Circle             |
+| `x` / `square`                             | X                  | Square             |
+| `y` / `triangle`                           | Y                  | Triangle           |
+| `lt` / `l2`                                | LT                 | L2                 |
+| `rt` / `r2`                                | RT                 | R2                 |
+| `lb` / `l1`                                | LB                 | L1                 |
+| `rb` / `r1`                                | RB                 | R1                 |
+| `ls` / `rs`                                | Left / right stick | Left / right stick |
+| `lsclick` / `l3`                           | LS click           | L3                 |
+| `dpadup` `dpaddown` `dpadleft` `dpadright` | D-pad              | D-pad              |
+| `start` / `options`                        | Menu               | Options            |
+| `back` / `share`                           | View               | Share              |
+
+Keyboard names include letters, `F1` to `F12`, `Shift`, `Ctrl`, `Alt`, `Enter`, `Space`, `LMB`, `RMB`, and similar aliases.
+
+Arrays draw combo keys:
+
+```lua
+{ keyboard = { 'Ctrl', 'E' }, gamepad = 'A', label = 'Interact' }
+```
+
+
 # Configuration (/docs/waypoints/configuration)
 
 
@@ -5447,6 +6008,317 @@ local pedPoints = exports.sleepless_pedmanager:addPed({
 <Callout type="warn">
   Make sure ped models are valid and streamable. If a model fails to load, the ped will not spawn and no error may be thrown.
 </Callout>
+
+
+# Client Exports (/docs/prompts/exports/Client)
+
+
+
+All client-side exports for showing and updating prompt groups. You can also import the global:
+
+```lua
+client_script '@sleepless_prompts/init.lua'
+```
+
+Then call `prompts.show(...)` instead of `exports.sleepless_prompts:show(...)`.
+
+Prompt table shapes are documented on [Prompt Options](/docs/prompts/prompt-options).
+
+***
+
+## show [#show]
+
+Show or replace a prompt group. Returns the group id.
+
+```lua
+local id = exports.sleepless_prompts:show(id, data)
+local id = exports.sleepless_prompts:show(data)
+```
+
+### Parameters [#parameters]
+
+| Parameter | Type                        | Description                                        |
+| --------- | --------------------------- | -------------------------------------------------- |
+| `id`      | `string \| PromptGroupData` | Group id, or a full group table that includes `id` |
+| `data`    | `PromptGroupData?`          | Group table when `id` is a string                  |
+
+### Returns [#returns]
+
+| Type     | Description  |
+| -------- | ------------ |
+| `string` | The group id |
+
+### Example [#example]
+
+```lua
+exports.sleepless_prompts:show('vehicle', {
+    position = 'bottom-center',
+    prompts = {
+        { id = 'enter', key = 'E', gamepad = 'A', label = 'Enter' },
+        { id = 'lock', key = 'L', gamepad = 'X', label = 'Lock' },
+        { id = 'trunk', key = 'G', gamepad = 'B', label = 'Trunk' },
+        { id = 'engine', key = 'F', gamepad = 'Y', label = 'Engine', holdTime = 1500 },
+    },
+})
+```
+
+***
+
+## update [#update]
+
+Patch an existing group. Omitted fields stay as they are. Passing `prompts` replaces the whole list.
+
+```lua
+exports.sleepless_prompts:update(id, data)
+```
+
+### Example [#example-1]
+
+```lua
+exports.sleepless_prompts:update('vehicle', {
+    position = 'middle-left',
+    layout = 'column',
+})
+```
+
+***
+
+## updatePrompt [#updateprompt]
+
+Patch a single prompt inside a group.
+
+```lua
+exports.sleepless_prompts:updatePrompt(groupId, promptId, patch)
+```
+
+### Example [#example-2]
+
+```lua
+exports.sleepless_prompts:updatePrompt('vehicle', 'lock', {
+    label = 'Unlock',
+    disabled = false,
+})
+```
+
+***
+
+## addPrompt [#addprompt]
+
+Append a prompt to an open group. Returns the prompt id.
+
+```lua
+local promptId = exports.sleepless_prompts:addPrompt(groupId, entry)
+```
+
+### Example [#example-3]
+
+```lua
+exports.sleepless_prompts:addPrompt('vehicle', {
+    key = 'H',
+    gamepad = 'LB',
+    label = 'Horn',
+    control = 86,
+})
+```
+
+***
+
+## removePrompt [#removeprompt]
+
+Remove a prompt from an open group.
+
+```lua
+exports.sleepless_prompts:removePrompt(groupId, promptId)
+```
+
+***
+
+## setPosition [#setposition]
+
+Move an open group.
+
+```lua
+exports.sleepless_prompts:setPosition(id, position, offset?)
+```
+
+### Parameters [#parameters-1]
+
+| Parameter  | Type              | Description                       |
+| ---------- | ----------------- | --------------------------------- |
+| `id`       | `string`          | Group id                          |
+| `position` | `string \| table` | Named slot or `{ x, y, origin? }` |
+| `offset`   | `{ x, y }?`       | Extra offset in `rem`             |
+
+### Example [#example-4]
+
+```lua
+exports.sleepless_prompts:setPosition('vehicle', 'top-right')
+exports.sleepless_prompts:setPosition('vehicle', { x = 82, y = 18, origin = 'top-right' })
+```
+
+***
+
+## hide [#hide]
+
+Hide a group. Omit `id` to hide every group owned by the calling resource.
+
+```lua
+exports.sleepless_prompts:hide(id?)
+```
+
+***
+
+## hideAll [#hideall]
+
+Hide every group.
+
+```lua
+exports.sleepless_prompts:hideAll()
+```
+
+***
+
+## isActive [#isactive]
+
+`true` if the named group is open, or if any group is open when `id` is omitted.
+
+```lua
+local open = exports.sleepless_prompts:isActive(id?)
+```
+
+***
+
+## get / getAll [#get--getall]
+
+```lua
+local group = exports.sleepless_prompts:get(id)
+local groups = exports.sleepless_prompts:getAll()
+```
+
+***
+
+## setMode / getMode [#setmode--getmode]
+
+Lock or auto-detect which icons to show. Player picks from `/promptmode` are saved in KVP and override this on the next start.
+
+```lua
+exports.sleepless_prompts:setMode('auto')
+exports.sleepless_prompts:setMode('keyboard')
+exports.sleepless_prompts:setMode('xbox')
+exports.sleepless_prompts:setMode('playstation')
+
+local mode = exports.sleepless_prompts:getMode()
+```
+
+| Mode          | Behavior                                                         |
+| ------------- | ---------------------------------------------------------------- |
+| `auto`        | Follows last input device. Detects Xbox vs DualSense / DualShock |
+| `keyboard`    | Always show keyboard / mouse icons                               |
+| `xbox`        | Always show Xbox icons                                           |
+| `playstation` | Always show DualSense icons                                      |
+
+`setGamepad('auto' | 'xbox' | 'playstation')` is an alias for `setMode`.
+
+***
+
+## openModeMenu [#openmodemenu]
+
+Opens the ox\_lib select dialog (same as `/promptmode`).
+
+```lua
+exports.sleepless_prompts:openModeMenu()
+```
+
+***
+
+## getGamepad / getDevice [#getgamepad--getdevice]
+
+```lua
+local family = exports.sleepless_prompts:getGamepad() -- 'xbox' | 'playstation'
+local device = exports.sleepless_prompts:getDevice() -- 'keyboard' | 'gamepad'
+```
+
+`getGamepad` never returns `'auto'`. It is the resolved family after detection.
+
+***
+
+## setStyle / getStyle [#setstyle--getstyle]
+
+Change keyboard and gamepad art styles at runtime.
+
+```lua
+exports.sleepless_prompts:setStyle('dark')
+exports.sleepless_prompts:setStyle('light')
+exports.sleepless_prompts:setStyle('retro')
+exports.sleepless_prompts:setStyle('white', 'alt2')
+exports.sleepless_prompts:setStyle({ keyboard = 'vintage', gamepad = 'default' })
+
+local keyboardStyle, gamepadStyle = exports.sleepless_prompts:getStyle()
+```
+
+Keyboard: `white`, `dark`, `alt`, `retro`, `vintage`.
+
+Gamepad: `default`, `light`, `alt`, `alt2`, `retro`.
+
+One string applies to the device that owns that style. `alt` and `retro` apply to both.
+
+***
+
+## getKeybindKey [#getkeybindkey]
+
+Current keyboard key for an ox\_lib keybind name or the table from `lib.addKeybind`.
+
+```lua
+local key = exports.sleepless_prompts:getKeybindKey('vehicle_enter')
+```
+
+***
+
+## setScale / setTheme / setColor [#setscale--settheme--setcolor]
+
+```lua
+exports.sleepless_prompts:setScale(1.1)
+
+exports.sleepless_prompts:setTheme('cyber')
+exports.sleepless_prompts:setTheme('modern', { 255, 64, 180, 255 })
+
+exports.sleepless_prompts:setColor({ 232, 96, 48, 255 })
+exports.sleepless_prompts:setColor(nil)
+```
+
+`setTheme` takes a look id that matches `web/themes/<id>.css`. Built-in: `modern`, `minimal`, `light`, `retro`, `cyber`, `vice`, `noir`, `industrial`, `fantasy`.
+
+The optional second argument, and `setColor`, set the HUD accent as `{ r, g, b, a }` (0–255). `setColor(nil)` restores the current theme's color from `config.themeColors`.
+
+See [Custom Themes](/docs/prompts/custom-themes).
+
+***
+
+## on [#on]
+
+Subscribe to a prompt hook. Returns an unsubscribe function.
+
+```lua
+local remove = exports.sleepless_prompts:on('pressed', function(groupId, promptId, entry)
+    if groupId == 'vehicle' and promptId == 'enter' then
+        -- handle enter
+    end
+end)
+```
+
+| Event           | Arguments                  |
+| --------------- | -------------------------- |
+| `shown`         | `id, group`                |
+| `hidden`        | `id?`                      |
+| `updated`       | `id, group`                |
+| `deviceChanged` | `device, gamepad`          |
+| `pressed`       | `groupId, promptId, entry` |
+| `released`      | `groupId, promptId, entry` |
+| `held`          | `groupId, promptId, entry` |
+
+The same names are also fired as net-local events: `sleepless_prompts:shown`, `sleepless_prompts:pressed`, and so on.
+
+Hold prompts fill while the control is held, then fire `held` / `onHold`.
 
 
 # Client Exports (/docs/waypoints/exports/Client)

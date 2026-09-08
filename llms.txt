@@ -10,6 +10,13 @@
   - [Interact Options](/docs/interact/interact-options)
   - Exports
     - [Client Exports](/docs/interact/exports/Client)
+- Prompts
+  - [Sleepless Prompts](/docs/prompts)
+  - [Configuration](/docs/prompts/configuration)
+  - [Custom Themes](/docs/prompts/custom-themes)
+  - [Prompt Options](/docs/prompts/prompt-options)
+  - Exports
+    - [Client Exports](/docs/prompts/exports/Client)
 - Lootbox
   - [Sleepless Lootbox](/docs/lootbox)
   - [Configuration](/docs/lootbox/configuration)
