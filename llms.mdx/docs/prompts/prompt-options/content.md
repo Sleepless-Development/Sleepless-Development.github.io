@@ -37,9 +37,14 @@ A prompt needs a `label` and at least one of `key`, `keyboard`, `gamepad`, `icon
 | `disabled`       | `boolean?`            | Dimmed, non-interactive                                                                                                     |
 | `hidden`         | `boolean?`            | Omitted from the HUD                                                                                                        |
 | `progress`       | `number?`             | `0` to `1` hold fill                                                                                                        |
-| `onPressed`      | `function?`           | Called when `control` is pressed                                                                                            |
-| `onReleased`     | `function?`           | Called when `control` is released                                                                                           |
-| `onHold`         | `function?`           | Called when `holdTime` completes                                                                                            |
+| `onPressed`      | `function?`           | Hook when `control` is pressed                                                                                              |
+| `onReleased`     | `function?`           | Hook when `control` is released                                                                                             |
+| `onHold`         | `function?`           | Hook when `holdTime` completes                                                                                              |
+| `onSelect`       | `function?`           | Action when the prompt fires (press, or hold complete)                                                                      |
+| `export`         | `string?`             | Export on the registering resource                                                                                          |
+| `event`          | `string?`             | Client event to trigger                                                                                                     |
+| `serverEvent`    | `string?`             | Server event to trigger                                                                                                     |
+| `command`        | `string?`             | Command to execute                                                                                                          |
 
 ```lua
 {
@@ -51,6 +56,59 @@ A prompt needs a `label` and at least one of `key`, `keyboard`, `gamepad`, `icon
     holdTime = 1500,
 }
 ```
+
+## Actions [#actions]
+
+One action runs when the prompt fires, in this order:
+
+1. `onSelect`
+2. `export`
+3. `event`
+4. `serverEvent`
+5. `command`
+
+Press fires the action immediately. `holdTime` waits until the hold completes. `onPressed` / `onHold` / `onReleased` still run as hooks.
+
+```lua
+{
+    id = 'lock',
+    key = 'L',
+    gamepad = 'X',
+    label = 'Lock',
+    control = 182,
+    event = 'myresource:lockVehicle',
+}
+
+{
+    id = 'engine',
+    key = 'F',
+    gamepad = 'Y',
+    label = 'Engine',
+    control = 23,
+    holdTime = 1500,
+    serverEvent = 'myresource:toggleEngine',
+}
+
+{
+    id = 'emote',
+    key = 'G',
+    label = 'Wave',
+    control = 47,
+    command = 'e wave',
+}
+```
+
+The callback or event receives:
+
+| Property   | Type     | Description                    |
+| ---------- | -------- | ------------------------------ |
+| `id`       | `string` | Prompt id                      |
+| `name`     | `string` | Same as `id`                   |
+| `label`    | `string` | Visible label                  |
+| `groupId`  | `string` | Group id                       |
+| `resource` | `string` | Resource that showed the group |
+
+`export` is called as `exports[resource][export](nil, data)` on the resource that called `show`.
 
 <Callout type="info">
   `keybind` sets the keyboard icon from the live ox\_lib mapping. Combine it with `gamepad` so pad users still see a face or trigger icon.
