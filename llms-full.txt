@@ -4215,45 +4215,55 @@ Each call to `show` takes a group table. Each item in `prompts` is a `PromptEntr
 
 ## Prompt group [#prompt-group]
 
-| Property    | Type                                   | Default                  | Description                                 |
-| ----------- | -------------------------------------- | ------------------------ | ------------------------------------------- |
-| `id`        | `string`                               | required                 | Group id. `show('id', data)` also sets this |
-| `position`  | `string \| table`                      | `config.defaultPosition` | Named slot or custom `{ x, y, origin? }`    |
-| `offset`    | `{ x, y }`                             | `{ x = 0, y = 0 }`       | Extra offset in `rem`                       |
-| `layout`    | `'row' \| 'column' \| 'auto'`          | `config.defaultLayout`   | Arrangement of prompts in the group         |
-| `separator` | `'slash' \| 'line' \| 'dot' \| 'none'` | `config.separator`       | Divider between prompts                     |
-| `order`     | `number`                               | `0`                      | CSS order when multiple groups share a slot |
-| `prompts`   | `PromptEntry \| PromptEntry[]`         | required                 | One prompt or an array                      |
+| Property    | Type                                   | Default                                                    | Description                                 |
+| ----------- | -------------------------------------- | ---------------------------------------------------------- | ------------------------------------------- |
+| `id`        | `string`                               | required                                                   | Group id. `show('id', data)` also sets this |
+| `position`  | `string \| table`                      | `config.defaultPosition`                                   | Named slot or custom `{ x, y, origin? }`    |
+| `offset`    | `{ x, y }`                             | `{ x = 0, y = 0 }`                                         | Extra offset in `rem`                       |
+| `layout`    | `'row' \| 'column' \| 'auto'`          | `config.defaultLayout`                                     | Arrangement of prompts in the group         |
+| `separator` | `'slash' \| 'line' \| 'dot' \| 'none'` | `config.separator`                                         | Divider between prompts                     |
+| `order`     | `number`                               | `0`                                                        | CSS order when multiple groups share a slot |
+| `prompts`   | `PromptEntry \| PromptEntry[]`         | required                                                   | One prompt or an array                      |
+| `entity`    | `number?`                              | Default entity for prompt `canInteract` / `distance`       |                                             |
+| `coords`    | `vector3?`                             | Default world coords for prompt `canInteract` / `distance` |                                             |
 
 ## Prompt entry [#prompt-entry]
 
 A prompt needs a `label` and at least one of `key`, `keyboard`, `gamepad`, `icon`, or `keybind`.
 
-| Property         | Type                  | Description                                                                                                                 |
-| ---------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `id`             | `string?`             | Unique id within the group. Defaults to the key name                                                                        |
-| `name`           | `string?`             | Alias for `id`                                                                                                              |
-| `label`          | `string`              | Visible label                                                                                                               |
-| `key`            | `string \| string[]?` | Keyboard and/or shared input name (`E`, `LMB`, `LT`)                                                                        |
-| `keyboard`       | `string \| string[]?` | Keyboard-only override                                                                                                      |
-| `gamepad`        | `string \| string[]?` | Gamepad-only override (Xbox layout)                                                                                         |
-| `keybind`        | `string \| table?`    | ox\_lib keybind name, or the table from `lib.addKeybind`                                                                    |
-| `icon`           | `string \| string[]?` | Raw image path. Skips icon lookup                                                                                           |
-| `control`        | `number?`             | GTA control index. When set, presses are tracked and hooks fire                                                             |
-| `disableControl` | `boolean?`            | Disable the GTA control while this prompt is shown                                                                          |
-| `holdTime`       | `number?`             | Hold duration in ms. Shows the localized `hold` string before the button, fills a progress bar, and fires `onHold` / `held` |
-| `cooldown`       | `number?`             | Ignore further presses for this many ms after press or hold                                                                 |
-| `disabled`       | `boolean?`            | Dimmed, non-interactive                                                                                                     |
-| `hidden`         | `boolean?`            | Omitted from the HUD                                                                                                        |
-| `progress`       | `number?`             | `0` to `1` hold fill                                                                                                        |
-| `onPressed`      | `function?`           | Hook when `control` is pressed                                                                                              |
-| `onReleased`     | `function?`           | Hook when `control` is released                                                                                             |
-| `onHold`         | `function?`           | Hook when `holdTime` completes                                                                                              |
-| `onSelect`       | `function?`           | Action when the prompt fires (press, or hold complete)                                                                      |
-| `export`         | `string?`             | Export on the registering resource                                                                                          |
-| `event`          | `string?`             | Client event to trigger                                                                                                     |
-| `serverEvent`    | `string?`             | Server event to trigger                                                                                                     |
-| `command`        | `string?`             | Command to execute                                                                                                          |
+| Property         | Type                                            | Description                                                                                                                 |
+| ---------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `id`             | `string?`                                       | Unique id within the group. Defaults to the key name                                                                        |
+| `name`           | `string?`                                       | Alias for `id`                                                                                                              |
+| `label`          | `string`                                        | Visible label                                                                                                               |
+| `key`            | `string \| string[]?`                           | Keyboard and/or shared input name (`E`, `LMB`, `LT`)                                                                        |
+| `keyboard`       | `string \| string[]?`                           | Keyboard-only override                                                                                                      |
+| `gamepad`        | `string \| string[]?`                           | Gamepad-only override (Xbox layout)                                                                                         |
+| `keybind`        | `string \| table?`                              | ox\_lib keybind name, or the table from `lib.addKeybind`                                                                    |
+| `icon`           | `string \| string[]?`                           | Raw image path. Skips icon lookup                                                                                           |
+| `control`        | `number?`                                       | GTA control index. When set, presses are tracked and hooks fire                                                             |
+| `disableControl` | `boolean?`                                      | Disable the GTA control while this prompt is shown                                                                          |
+| `holdTime`       | `number?`                                       | Hold duration in ms. Shows the localized `hold` string before the button, fills a progress bar, and fires `onHold` / `held` |
+| `cooldown`       | `number?`                                       | Ignore further presses for this many ms after press or hold                                                                 |
+| `disabled`       | `boolean?`                                      | Dimmed, non-interactive                                                                                                     |
+| `hidden`         | `boolean?`                                      | Omitted from the HUD                                                                                                        |
+| `progress`       | `number?`                                       | `0` to `1` hold fill                                                                                                        |
+| `onPressed`      | `function?`                                     | Hook when `control` is pressed                                                                                              |
+| `onReleased`     | `function?`                                     | Hook when `control` is released                                                                                             |
+| `onHold`         | `function?`                                     | Hook when `holdTime` completes                                                                                              |
+| `onSelect`       | `function?`                                     | Action when the prompt fires (press, or hold complete)                                                                      |
+| `export`         | `string?`                                       | Export on the registering resource                                                                                          |
+| `event`          | `string?`                                       | Client event to trigger                                                                                                     |
+| `serverEvent`    | `string?`                                       | Server event to trigger                                                                                                     |
+| `command`        | `string?`                                       | Command to execute                                                                                                          |
+| `groups`         | `string \| string[] \| table<string, number>?`  | Job / gang / group filter. Same shape as Interact                                                                           |
+| `items`          | `string \| string[] \| table<string, number>?`  | Required items. Hash values are minimum counts                                                                              |
+| `anyItem`        | `boolean?`                                      | If true, any listed item is enough. Default requires all                                                                    |
+| `canInteract`    | `fun(entity, distance, coords, name): boolean?` | Same signature as Interact. Return false to hide                                                                            |
+| `allowInVehicle` | `boolean?`                                      | Keep the prompt while in a vehicle. Default hides it                                                                        |
+| `entity`         | `number?`                                       | Entity passed into `canInteract` and used for distance                                                                      |
+| `coords`         | `vector3?`                                      | World coords passed into `canInteract` and used for distance                                                                |
+| `distance`       | `number?`                                       | Hide when farther than this from `entity` / `coords`                                                                        |
 
 ```lua
 {
@@ -4318,6 +4328,42 @@ The callback or event receives:
 | `resource` | `string` | Resource that showed the group |
 
 `export` is called as `exports[resource][export](nil, data)` on the resource that called `show`.
+
+## Restrictions [#restrictions]
+
+Same filters as [Interact](/docs/interact/interact-options). A prompt is hidden (and cannot fire) until every check passes. Filters re-run while the group is open.
+
+```lua
+{
+    id = 'lockpick',
+    key = 'E',
+    gamepad = 'A',
+    label = 'Lockpick',
+    control = 38,
+    groups = { police = 0, mechanic = 2 },
+    items = { lockpick = 1 },
+    allowInVehicle = true,
+    canInteract = function(entity, distance, coords, name)
+        return distance < 2.0 and not IsPedDeadOrDying(cache.ped, true)
+    end,
+}
+```
+
+| `groups`                       | Meaning                             |
+| ------------------------------ | ----------------------------------- |
+| `'police'`                     | Player has that job, gang, or group |
+| `{ 'police', 'ambulance' }`    | Any of these names                  |
+| `{ police = 2, mechanic = 0 }` | That group at least this grade      |
+
+| `items`                              | Meaning                                   |
+| ------------------------------------ | ----------------------------------------- |
+| `'lockpick'`                         | At least one                              |
+| `{ 'lockpick', 'advancedlockpick' }` | All of these (or any if `anyItem = true`) |
+| `{ lockpick = 1, repairkit = 2 }`    | At least these counts                     |
+
+Jobs and gangs come from the running framework (qbx, qb, esx, ox\_core, ND). Item counts use ox\_inventory when it is started.
+
+`canInteract` is called as `canInteract(entity, distance, coords, name)`, same as Interact. Set `entity` or `coords` on the group or the prompt so `distance` is measured from the player to that point. If neither is set, `entity` is `0` and `coords` is the player.
 
 <Callout type="info">
   `keybind` sets the keyboard icon from the live ox\_lib mapping. Combine it with `gamepad` so pad users still see a face or trigger icon.
