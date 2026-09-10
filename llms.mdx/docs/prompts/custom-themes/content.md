@@ -117,7 +117,7 @@ Color tokens are **RGB triplets**, not `rgb()` values, so both `rgb(var(--primar
 
 Root `font-size` is `1vh`, so `1rem` is 1% of the viewport height. Size the group and icons in `rem`, not `px`.
 
-This HUD is a fullscreen NUI overlay, so `backdrop-filter` blur works. Interact's world sprite cannot blur GTA; Prompts can.
+Do not use `backdrop-filter`. It cannot see GTA and paints black. Panels are black at `--panel-a` with a white hairline.
 
 ## What to style [#what-to-style]
 
@@ -159,8 +159,6 @@ Do not fill `.item.is-active` with a background. Hold state is the progress bar 
   border: 0.12rem solid rgba(var(--hairline), 0.7);
   border-radius: 0.7rem;
   background: rgba(var(--surface), var(--panel-a));
-  backdrop-filter: blur(1.2rem);
-  -webkit-backdrop-filter: blur(1.2rem);
 }
 
 [data-theme="ember"] .label {
@@ -188,11 +186,6 @@ Do not fill `.item.is-active` with a background. Hold state is the progress bar 
 @media (prefers-reduced-transparency: reduce) {
   [data-theme="ember"] {
     --panel-a: 1;
-  }
-
-  [data-theme="ember"] .group {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
   }
 }
 ```

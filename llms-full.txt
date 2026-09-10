@@ -3736,6 +3736,121 @@ The resource includes a `_items.lua` reference file in its root directory contai
 * See the [Framework Setup](/docs/lootbox/framework-setup) page for detailed troubleshooting
 
 
+# Sleepless Ped Manager (/docs/pedmanager)
+
+
+
+
+
+A FiveM ped manager for spawning local peds within distance of players and adding target/interact options to them. Uses `ox_lib` points for efficient distance-based spawning and despawning.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_pedmanager" />
+
+<Callout type="info">
+  This resource is fully compatible with both `ox_target` and `sleepless_interact` for adding interaction options to managed peds.
+</Callout>
+
+## Features [#features]
+
+* 🧍 **Distance-Based Spawning** - Peds spawn and despawn based on player proximity using `ox_lib` points
+* 🎬 **Animations & Scenarios** - Assign animations or scenarios to peds on spawn
+* 🔧 **Prop Attachments** - Attach props to ped bones with configurable offsets
+* 🎯 **Target Integration** - Built-in support for `ox_target` and `sleepless_interact` options
+* 📍 **Multi-Location Support** - Define multiple spawn coordinates for a single ped configuration
+* 🔄 **Lifecycle Callbacks** - `onSpawn` and `onDespawn` callbacks for custom logic
+
+## Dependencies [#dependencies]
+
+* [ox\_lib](https://github.com/overextended/ox_lib) (required)
+* [ox\_target](https://github.com/overextended/ox_target) (optional — for target options)
+* [sleepless\_interact](https://github.com/Sleepless-Development/sleepless_interact) (optional — for interact options)
+
+## Installation [#installation]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Download the Resource [#download-the-resource-step]
+
+    Download a [release](https://github.com/Sleepless-Development/sleepless_pedmanager/releases) from GitHub.
+  </div>
+
+  <div className="fd-step">
+    ### Add to Server [#add-to-server-step]
+
+    Place the `sleepless_pedmanager` folder in your server's resources directory.
+  </div>
+
+  <div className="fd-step">
+    ### Configure Your Server [#configure-your-server-step]
+
+    Add the following to your `server.cfg`:
+
+    ```bash
+    ensure ox_lib
+    ensure sleepless_pedmanager
+    ```
+  </div>
+</div>
+
+## Quick Start [#quick-start]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Basic Ped with Target Options [#basic-ped-with-target-options-step]
+
+    ```lua
+    local pedPoint = exports.sleepless_pedmanager:addPed({
+        model = "a_m_m_business_01",
+        coords = vec4(200.0, -900.0, 30.0, 180.0),
+        scenario = "WORLD_HUMAN_CLIPBOARD",
+        renderDistance = 15.0,
+        targetOptions = {
+            {
+                icon = "fas fa-comments",
+                label = "Talk",
+                serverEvent = "myresource:talkToNpc",
+            },
+        },
+    })
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Ped with Animation and Prop [#ped-with-animation-and-prop-step]
+
+    ```lua
+    local pedPoint = exports.sleepless_pedmanager:addPed({
+        model = "u_m_y_zombie_01",
+        coords = vec4(-1665.45, -3143.31, 13.99, 281.13),
+        renderDistance = 8.0,
+        animation = {
+            dict = "amb@code_human_in_bus_passenger_idles@female@tablet@idle_a",
+            anim = "idle_a",
+            flag = 63,
+        },
+        prop = {
+            propModel = "prop_cs_tablet",
+            bone = 28422,
+            rot = vec3(0.0, 0.0, 0.03),
+            pos = vec3(0.0, 0.0, 0.03),
+        },
+    })
+    ```
+
+    <Callout type="info">
+      The `addPed` export returns an `ox_lib` point instance that you can use to manage the ped's lifecycle. See the [Client Exports](/docs/pedmanager/exports/Client) page for the full API reference.
+    </Callout>
+  </div>
+</div>
+
+## Support [#support]
+
+If you need help or have questions:
+
+* [Discord](https://discord.gg/A2bDPbfgNP)
+* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_pedmanager/issues)
+
+
 # Configuration (/docs/prompts/configuration)
 
 
@@ -3972,7 +4087,7 @@ Color tokens are **RGB triplets**, not `rgb()` values, so both `rgb(var(--primar
 
 Root `font-size` is `1vh`, so `1rem` is 1% of the viewport height. Size the group and icons in `rem`, not `px`.
 
-This HUD is a fullscreen NUI overlay, so `backdrop-filter` blur works. Interact's world sprite cannot blur GTA; Prompts can.
+Do not use `backdrop-filter`. It cannot see GTA and paints black. Panels are black at `--panel-a` with a white hairline.
 
 ## What to style [#what-to-style]
 
@@ -4014,8 +4129,6 @@ Do not fill `.item.is-active` with a background. Hold state is the progress bar 
   border: 0.12rem solid rgba(var(--hairline), 0.7);
   border-radius: 0.7rem;
   background: rgba(var(--surface), var(--panel-a));
-  backdrop-filter: blur(1.2rem);
-  -webkit-backdrop-filter: blur(1.2rem);
 }
 
 [data-theme="ember"] .label {
@@ -4043,11 +4156,6 @@ Do not fill `.item.is-active` with a background. Hold state is the progress bar 
 @media (prefers-reduced-transparency: reduce) {
   [data-theme="ember"] {
     --panel-a: 1;
-  }
-
-  [data-theme="ember"] .group {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
   }
 }
 ```
@@ -4412,121 +4520,6 @@ Arrays draw combo keys:
 ```lua
 { keyboard = { 'Ctrl', 'E' }, gamepad = 'A', label = 'Interact' }
 ```
-
-
-# Sleepless Ped Manager (/docs/pedmanager)
-
-
-
-
-
-A FiveM ped manager for spawning local peds within distance of players and adding target/interact options to them. Uses `ox_lib` points for efficient distance-based spawning and despawning.
-
-<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_pedmanager" />
-
-<Callout type="info">
-  This resource is fully compatible with both `ox_target` and `sleepless_interact` for adding interaction options to managed peds.
-</Callout>
-
-## Features [#features]
-
-* 🧍 **Distance-Based Spawning** - Peds spawn and despawn based on player proximity using `ox_lib` points
-* 🎬 **Animations & Scenarios** - Assign animations or scenarios to peds on spawn
-* 🔧 **Prop Attachments** - Attach props to ped bones with configurable offsets
-* 🎯 **Target Integration** - Built-in support for `ox_target` and `sleepless_interact` options
-* 📍 **Multi-Location Support** - Define multiple spawn coordinates for a single ped configuration
-* 🔄 **Lifecycle Callbacks** - `onSpawn` and `onDespawn` callbacks for custom logic
-
-## Dependencies [#dependencies]
-
-* [ox\_lib](https://github.com/overextended/ox_lib) (required)
-* [ox\_target](https://github.com/overextended/ox_target) (optional — for target options)
-* [sleepless\_interact](https://github.com/Sleepless-Development/sleepless_interact) (optional — for interact options)
-
-## Installation [#installation]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Download the Resource [#download-the-resource-step]
-
-    Download a [release](https://github.com/Sleepless-Development/sleepless_pedmanager/releases) from GitHub.
-  </div>
-
-  <div className="fd-step">
-    ### Add to Server [#add-to-server-step]
-
-    Place the `sleepless_pedmanager` folder in your server's resources directory.
-  </div>
-
-  <div className="fd-step">
-    ### Configure Your Server [#configure-your-server-step]
-
-    Add the following to your `server.cfg`:
-
-    ```bash
-    ensure ox_lib
-    ensure sleepless_pedmanager
-    ```
-  </div>
-</div>
-
-## Quick Start [#quick-start]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Basic Ped with Target Options [#basic-ped-with-target-options-step]
-
-    ```lua
-    local pedPoint = exports.sleepless_pedmanager:addPed({
-        model = "a_m_m_business_01",
-        coords = vec4(200.0, -900.0, 30.0, 180.0),
-        scenario = "WORLD_HUMAN_CLIPBOARD",
-        renderDistance = 15.0,
-        targetOptions = {
-            {
-                icon = "fas fa-comments",
-                label = "Talk",
-                serverEvent = "myresource:talkToNpc",
-            },
-        },
-    })
-    ```
-  </div>
-
-  <div className="fd-step">
-    ### Ped with Animation and Prop [#ped-with-animation-and-prop-step]
-
-    ```lua
-    local pedPoint = exports.sleepless_pedmanager:addPed({
-        model = "u_m_y_zombie_01",
-        coords = vec4(-1665.45, -3143.31, 13.99, 281.13),
-        renderDistance = 8.0,
-        animation = {
-            dict = "amb@code_human_in_bus_passenger_idles@female@tablet@idle_a",
-            anim = "idle_a",
-            flag = 63,
-        },
-        prop = {
-            propModel = "prop_cs_tablet",
-            bone = 28422,
-            rot = vec3(0.0, 0.0, 0.03),
-            pos = vec3(0.0, 0.0, 0.03),
-        },
-    })
-    ```
-
-    <Callout type="info">
-      The `addPed` export returns an `ox_lib` point instance that you can use to manage the ped's lifecycle. See the [Client Exports](/docs/pedmanager/exports/Client) page for the full API reference.
-    </Callout>
-  </div>
-</div>
-
-## Support [#support]
-
-If you need help or have questions:
-
-* [Discord](https://discord.gg/A2bDPbfgNP)
-* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_pedmanager/issues)
 
 
 # Configuration (/docs/waypoints/configuration)
@@ -5966,6 +5959,167 @@ exports.sleepless_lootbox:removeRewardHook('vehicle')
 </Callout>
 
 
+# Client Exports (/docs/pedmanager/exports/Client)
+
+
+
+## addPed [#addped]
+
+Add a new ped to be handled by the manager. Supports target options, interact options, animations, props, scenarios, and lifecycle callbacks.
+
+```lua
+local pedPoint = exports.sleepless_pedmanager:addPed(data)
+```
+
+### Parameters [#parameters]
+
+| Parameter | Type        | Description                                   |
+| --------- | ----------- | --------------------------------------------- |
+| `data`    | `PedConfig` | A table containing the ped configuration data |
+
+### PedConfig Properties [#pedconfig-properties]
+
+| Property          | Type                     | Required | Description                                                                         |
+| ----------------- | ------------------------ | -------- | ----------------------------------------------------------------------------------- |
+| `model`           | `string \| number`       | Yes      | A hash or string for the ped model                                                  |
+| `coords`          | `vec4 \| vec4[]`         | Yes      | The coordinates/heading where the ped(s) will be located                            |
+| `scenario`        | `string`                 | No       | The name of a scenario for the ped to play when spawned                             |
+| `animation`       | `table`                  | No       | Animation data (see below)                                                          |
+| `prop`            | `table`                  | No       | Prop attachment data (see below)                                                    |
+| `targetOptions`   | `table`                  | No       | An array of [ox\_target options](https://overextended.dev/ox_target)                |
+| `interactOptions` | `table`                  | No       | A [sleepless\_interact Option or array of Options](/docs/interact/interact-options) |
+| `renderDistance`  | `number`                 | No       | Distance from the player at which the ped spawns                                    |
+| `onSpawn`         | `function(ped?: number)` | No       | Callback called right **after** the ped is spawned                                  |
+| `onDespawn`       | `function(ped?: number)` | No       | Callback called right **before** the ped is despawned                               |
+
+### Animation Properties [#animation-properties]
+
+| Property | Type     | Required | Description          |
+| -------- | -------- | -------- | -------------------- |
+| `dict`   | `string` | Yes      | Animation dictionary |
+| `anim`   | `string` | Yes      | Animation name       |
+| `flag`   | `number` | No       | Animation flag       |
+
+### Prop Properties [#prop-properties]
+
+| Property    | Type               | Required | Description                                         |
+| ----------- | ------------------ | -------- | --------------------------------------------------- |
+| `propModel` | `string \| number` | Yes      | Model hash or string for the prop                   |
+| `bone`      | `string \| number` | Yes      | Bone name or index of the ped to attach the prop to |
+| `pos`       | `vec3`             | No       | Position offset of the prop relative to the bone    |
+| `rot`       | `vec3`             | No       | Rotation of the prop relative to the bone           |
+
+### Returns [#returns]
+
+| Type                             | Description                                                                                                                 |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `ox_lib point \| ox_lib point[]` | Returns a single `ox_lib` point if one coordinate was provided, or an array of points if multiple coordinates were provided |
+
+<Callout type="info">
+  Use either `scenario` **or** `animation` — not both. If both are provided, the scenario will be used.
+</Callout>
+
+### Example: Basic Ped with Target Options [#example-basic-ped-with-target-options]
+
+```lua
+local pedPoint = exports.sleepless_pedmanager:addPed({
+    model = "a_m_m_business_01",
+    coords = vec4(200.0, -900.0, 30.0, 180.0),
+    scenario = "WORLD_HUMAN_CLIPBOARD",
+    renderDistance = 15.0,
+    targetOptions = {
+        {
+            icon = "fas fa-comments",
+            label = "Talk",
+            serverEvent = "myresource:talkToNpc",
+        },
+    },
+})
+```
+
+### Example: Multiple Locations [#example-multiple-locations]
+
+```lua
+local pedPoints = exports.sleepless_pedmanager:addPed({
+    model = "a_m_m_business_01",
+    coords = {
+        vec4(-1665.45, -3143.31, 13.99, 281.13),
+        vec4(-1664.45, -3142.31, 13.99, 181.13),
+    },
+    scenario = "WORLD_HUMAN_STAND_IMPATIENT",
+    renderDistance = 10.0,
+})
+
+-- pedPoints is an array of ox_lib points when multiple coords are provided
+```
+
+### Example: Animation with Prop and Interact Options [#example-animation-with-prop-and-interact-options]
+
+```lua
+local pedPoints = exports.sleepless_pedmanager:addPed({
+    model = "u_m_y_zombie_01",
+    coords = {
+        vec4(-1665.4545, -3143.3169, 13.9914, 281.1344),
+        vec4(-1664.4545, -3142.3169, 13.9914, 181.1344),
+    },
+    renderDistance = 8.0,
+    animation = {
+        dict = "amb@code_human_in_bus_passenger_idles@female@tablet@idle_a",
+        anim = "idle_a",
+        flag = 63,
+    },
+    prop = {
+        propModel = "prop_cs_tablet",
+        bone = 28422,
+        rot = vec3(0.0, 0.0, 0.03),
+        pos = vec3(0.0, 0.0, 0.03),
+    },
+    targetOptions = {
+        {
+            icon = "fas fa-money-bill-alt",
+            label = "Something",
+            serverEvent = "some_event",
+        },
+    },
+    interactOptions = {
+        {
+            label = "Talk to Ped",
+            name = "talk_to_ped",
+            icon = "comments",
+            distance = 2.0,
+            onSelect = function(data)
+                print("Talking to ped")
+            end,
+            canInteract = function(entity, distance, coords, name)
+                return distance < 2.0
+            end,
+        },
+        {
+            label = "Trade with Ped",
+            name = "trade_with_ped",
+            icon = "hand-holding-dollar",
+            distance = 2.0,
+            cooldown = 1500,
+            onSelect = function(data)
+                print("Trading with ped")
+            end,
+        },
+    },
+    onSpawn = function(ped)
+        GiveWeaponToPed(ped, `WEAPON_RPG`, 100, false, true)
+        SetCurrentPedWeapon(ped, `WEAPON_RPG`, true)
+    end,
+    onDespawn = function(ped)
+        -- cleanup logic here
+    end,
+})
+```
+
+<Callout type="warn">
+  Make sure ped models are valid and streamable. If a model fails to load, the ped will not spawn and no error may be thrown.
+</Callout>
+
+
 # Client Exports (/docs/prompts/exports/Client)
 
 
@@ -6275,167 +6429,6 @@ end)
 The same names are also fired as net-local events: `sleepless_prompts:shown`, `sleepless_prompts:pressed`, and so on.
 
 Hold prompts fill while the control is held, then fire `held` / `onHold`.
-
-
-# Client Exports (/docs/pedmanager/exports/Client)
-
-
-
-## addPed [#addped]
-
-Add a new ped to be handled by the manager. Supports target options, interact options, animations, props, scenarios, and lifecycle callbacks.
-
-```lua
-local pedPoint = exports.sleepless_pedmanager:addPed(data)
-```
-
-### Parameters [#parameters]
-
-| Parameter | Type        | Description                                   |
-| --------- | ----------- | --------------------------------------------- |
-| `data`    | `PedConfig` | A table containing the ped configuration data |
-
-### PedConfig Properties [#pedconfig-properties]
-
-| Property          | Type                     | Required | Description                                                                         |
-| ----------------- | ------------------------ | -------- | ----------------------------------------------------------------------------------- |
-| `model`           | `string \| number`       | Yes      | A hash or string for the ped model                                                  |
-| `coords`          | `vec4 \| vec4[]`         | Yes      | The coordinates/heading where the ped(s) will be located                            |
-| `scenario`        | `string`                 | No       | The name of a scenario for the ped to play when spawned                             |
-| `animation`       | `table`                  | No       | Animation data (see below)                                                          |
-| `prop`            | `table`                  | No       | Prop attachment data (see below)                                                    |
-| `targetOptions`   | `table`                  | No       | An array of [ox\_target options](https://overextended.dev/ox_target)                |
-| `interactOptions` | `table`                  | No       | A [sleepless\_interact Option or array of Options](/docs/interact/interact-options) |
-| `renderDistance`  | `number`                 | No       | Distance from the player at which the ped spawns                                    |
-| `onSpawn`         | `function(ped?: number)` | No       | Callback called right **after** the ped is spawned                                  |
-| `onDespawn`       | `function(ped?: number)` | No       | Callback called right **before** the ped is despawned                               |
-
-### Animation Properties [#animation-properties]
-
-| Property | Type     | Required | Description          |
-| -------- | -------- | -------- | -------------------- |
-| `dict`   | `string` | Yes      | Animation dictionary |
-| `anim`   | `string` | Yes      | Animation name       |
-| `flag`   | `number` | No       | Animation flag       |
-
-### Prop Properties [#prop-properties]
-
-| Property    | Type               | Required | Description                                         |
-| ----------- | ------------------ | -------- | --------------------------------------------------- |
-| `propModel` | `string \| number` | Yes      | Model hash or string for the prop                   |
-| `bone`      | `string \| number` | Yes      | Bone name or index of the ped to attach the prop to |
-| `pos`       | `vec3`             | No       | Position offset of the prop relative to the bone    |
-| `rot`       | `vec3`             | No       | Rotation of the prop relative to the bone           |
-
-### Returns [#returns]
-
-| Type                             | Description                                                                                                                 |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `ox_lib point \| ox_lib point[]` | Returns a single `ox_lib` point if one coordinate was provided, or an array of points if multiple coordinates were provided |
-
-<Callout type="info">
-  Use either `scenario` **or** `animation` — not both. If both are provided, the scenario will be used.
-</Callout>
-
-### Example: Basic Ped with Target Options [#example-basic-ped-with-target-options]
-
-```lua
-local pedPoint = exports.sleepless_pedmanager:addPed({
-    model = "a_m_m_business_01",
-    coords = vec4(200.0, -900.0, 30.0, 180.0),
-    scenario = "WORLD_HUMAN_CLIPBOARD",
-    renderDistance = 15.0,
-    targetOptions = {
-        {
-            icon = "fas fa-comments",
-            label = "Talk",
-            serverEvent = "myresource:talkToNpc",
-        },
-    },
-})
-```
-
-### Example: Multiple Locations [#example-multiple-locations]
-
-```lua
-local pedPoints = exports.sleepless_pedmanager:addPed({
-    model = "a_m_m_business_01",
-    coords = {
-        vec4(-1665.45, -3143.31, 13.99, 281.13),
-        vec4(-1664.45, -3142.31, 13.99, 181.13),
-    },
-    scenario = "WORLD_HUMAN_STAND_IMPATIENT",
-    renderDistance = 10.0,
-})
-
--- pedPoints is an array of ox_lib points when multiple coords are provided
-```
-
-### Example: Animation with Prop and Interact Options [#example-animation-with-prop-and-interact-options]
-
-```lua
-local pedPoints = exports.sleepless_pedmanager:addPed({
-    model = "u_m_y_zombie_01",
-    coords = {
-        vec4(-1665.4545, -3143.3169, 13.9914, 281.1344),
-        vec4(-1664.4545, -3142.3169, 13.9914, 181.1344),
-    },
-    renderDistance = 8.0,
-    animation = {
-        dict = "amb@code_human_in_bus_passenger_idles@female@tablet@idle_a",
-        anim = "idle_a",
-        flag = 63,
-    },
-    prop = {
-        propModel = "prop_cs_tablet",
-        bone = 28422,
-        rot = vec3(0.0, 0.0, 0.03),
-        pos = vec3(0.0, 0.0, 0.03),
-    },
-    targetOptions = {
-        {
-            icon = "fas fa-money-bill-alt",
-            label = "Something",
-            serverEvent = "some_event",
-        },
-    },
-    interactOptions = {
-        {
-            label = "Talk to Ped",
-            name = "talk_to_ped",
-            icon = "comments",
-            distance = 2.0,
-            onSelect = function(data)
-                print("Talking to ped")
-            end,
-            canInteract = function(entity, distance, coords, name)
-                return distance < 2.0
-            end,
-        },
-        {
-            label = "Trade with Ped",
-            name = "trade_with_ped",
-            icon = "hand-holding-dollar",
-            distance = 2.0,
-            cooldown = 1500,
-            onSelect = function(data)
-                print("Trading with ped")
-            end,
-        },
-    },
-    onSpawn = function(ped)
-        GiveWeaponToPed(ped, `WEAPON_RPG`, 100, false, true)
-        SetCurrentPedWeapon(ped, `WEAPON_RPG`, true)
-    end,
-    onDespawn = function(ped)
-        -- cleanup logic here
-    end,
-})
-```
-
-<Callout type="warn">
-  Make sure ped models are valid and streamable. If a model fails to load, the ped will not spawn and no error may be thrown.
-</Callout>
 
 
 # Client Exports (/docs/waypoints/exports/Client)
