@@ -42,10 +42,10 @@ local id = exports.sleepless_prompts:show(data)
 exports.sleepless_prompts:show('vehicle', {
     position = 'bottom-center',
     prompts = {
-        { id = 'enter', key = 'E', gamepad = 'A', label = 'Enter' },
-        { id = 'lock', key = 'L', gamepad = 'X', label = 'Lock' },
-        { id = 'trunk', key = 'G', gamepad = 'B', label = 'Trunk' },
-        { id = 'engine', key = 'F', gamepad = 'Y', label = 'Engine', holdTime = 1500 },
+        { id = 'enter', label = 'Enter', control = 38 },
+        { id = 'lock', label = 'Lock', control = 182 },
+        { id = 'horn', label = 'Horn', control = 86 },
+        { id = 'engine', label = 'Engine', control = 23, holdTime = 1500 },
     },
 })
 ```
@@ -102,8 +102,6 @@ local promptId = exports.sleepless_prompts:addPrompt(groupId, entry)
 
 ```lua
 exports.sleepless_prompts:addPrompt('vehicle', {
-    key = 'H',
-    gamepad = 'LB',
     label = 'Horn',
     control = 86,
 })
@@ -254,7 +252,7 @@ One string applies to the device that owns that style. `alt` and `retro` apply t
 
 ## getKeybindKey
 
-Current keyboard key for an ox_lib keybind name or the table from `lib.addKeybind`.
+Current keyboard key for an ox_lib / FiveM keybind name or the table from `lib.addKeybind`. Follows remaps under Settings > Key Bindings > FiveM.
 
 ```lua
 local key = exports.sleepless_prompts:getKeybindKey('vehicle_enter')
