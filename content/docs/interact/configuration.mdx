@@ -13,11 +13,17 @@ local config = {}
 -- Recommend keeping this pretty low for optimization
 config.maxInteractDistance = 5.0
 
+-- If true, the prompt only opens when the target is inside lookRadius of the reticle.
+config.requireLookAt = true
+
+-- Screen-space radius from the reticle (fraction of screen height). Raise it to aim looser.
+config.lookRadius = 0.08
+
 -- Visual theme for the world prompt.
 -- Built-in: legacy | modern | minimal | light | retro | cyber | vice | noir | industrial | fantasy
 config.theme = 'modern'
 
--- Default accent per theme. Used by the HUD and the world indicator sprite.
+-- Default accent per theme. Used by the HUD highlight.
 config.themeColors = {
     legacy = { 28, 100, 184, 200 },
     modern = { 49, 164, 252, 255 },
@@ -46,8 +52,26 @@ config.compactIdleMs = 2500
 -- Default key for the interact action. Players can rebind this in GTA Settings > Key Bindings > FiveM.
 config.defaultInteractKey = 'E'
 
--- Texture dictionary and texture name for the sprite used to show non-active interactions
-config.IndicatorSprite = { dict = 'shared', txt = 'emptydot_32' }
+-- Distant / inactive marker. `file` loads a PNG from this resource as a runtime texture.
+config.IndicatorSprite = {
+    dict = 'slp_ind',
+    txt = 'radio',
+    file = 'web/indicator.png',
+    rotation = 0.0,
+    color = { 255, 255, 255 },
+    scale = 0.016,
+}
+
+-- Screen-center pip while in range of a usable interact
+config.CenterDot = {
+    enabled = true,
+    dict = 'mpcarhud',
+    txt = 'leaderboard_car_colour_icon_singlecolour',
+    color = { 255, 255, 255, 255 },
+    scale = 0.002,
+    x = 0.5,
+    y = 0.5,
+}
 
 -- Use a keybind to show and hide the interactions
 config.useShowKeyBind = false
@@ -64,13 +88,16 @@ config.showKeyBindBehavior = 'toggle'
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `maxInteractDistance` | `number` | `5.0` | Maximum distance at which interact indicator sprites are rendered. Keep low for performance. |
+| `requireLookAt` | `boolean` | `true` | If true, the prompt only opens when the target is inside `lookRadius` of the reticle. If false, the closest valid nearby interact opens without aiming. |
+| `lookRadius` | `number` | `0.08` | How close to screen center a target must be to open the prompt. Units are a fraction of screen height. Raise it to aim looser. Ignored when `requireLookAt` is false. |
 | `theme` | `string` | `'modern'` | Visual look of the world prompt. Must match a file in `web/themes/<id>.css`. |
-| `themeColors` | `table` | see above | Per-theme RGBA accent `{ r, g, b, a }` (0–255). Drives the HUD highlight and the world indicator sprite. |
+| `themeColors` | `table` | see above | Per-theme RGBA accent `{ r, g, b, a }` (0–255). Drives the HUD highlight. |
 | `themeColor` | `number[] \| nil` | `nil` | Optional global accent override. When set, every theme uses this color instead of `themeColors`. |
 | `compactOptions` | `boolean` | `true` | Compact multi-option prompt. See [Compact prompt](#compact-prompt). |
 | `compactIdleMs` | `number` | `2500` | Idle time in milliseconds before a compact list collapses. Minimum `500`. |
 | `defaultInteractKey` | `string` | `'E'` | Default mapping for the interact action. Players can rebind it in GTA Settings; the prompt shows the live key. |
-| `IndicatorSprite` | `table` | `{ dict = 'shared', txt = 'emptydot_32' }` | Texture dictionary and name for the non-active interaction sprite. |
+| `IndicatorSprite` | `table` | radio PNG, white | Distant marker. `file` is a PNG in this resource. `color` tints it (`{ 255, 255, 255 }` stays white). `scale` is world size. Omit `file` and set `dict` / `txt` to use a GTA texture instead. |
+| `CenterDot` | `table` | `mpcarhud` colour icon | Screen-center circle while at least one usable interact is nearby. Set `enabled` to `false` to hide it. `color` tints the sprite. `scale` is screen size, `x` / `y` are 0–1 screen position. Optional `file` loads a PNG instead of `dict` / `txt`. |
 | `useShowKeyBind` | `boolean` | `false` | Whether a keybind is required to show/hide interactions. |
 | `defaultShowKeyBind` | `string` | `'LMENU'` | The default key mapping for toggling interaction visibility. |
 | `showKeyBindBehavior` | `string` | `'toggle'` | `"hold"` requires holding the key; `"toggle"` switches on/off per press. |
