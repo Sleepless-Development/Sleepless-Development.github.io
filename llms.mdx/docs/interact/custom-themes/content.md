@@ -35,7 +35,7 @@ Each look is a CSS file. The Lua config only picks an id and an accent. Copy a b
     }
     ```
 
-    `themeColors` is the world indicator sprite and the default HUD accent. Leave `config.themeColor = nil` so this color is not forced onto every other theme.
+    `themeColors` is the default HUD accent. Leave `config.themeColor = nil` so this color is not forced onto every other theme. The distant marker is white unless you set `config.IndicatorSprite.color`.
   </div>
 
   <div className="fd-step">
