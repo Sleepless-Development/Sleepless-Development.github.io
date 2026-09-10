@@ -6,34 +6,35 @@ Each call to `show` takes a group table. Each item in `prompts` is a `PromptEntr
 
 ## Prompt group [#prompt-group]
 
-| Property    | Type                                   | Default                                                    | Description                                 |
-| ----------- | -------------------------------------- | ---------------------------------------------------------- | ------------------------------------------- |
-| `id`        | `string`                               | required                                                   | Group id. `show('id', data)` also sets this |
-| `position`  | `string \| table`                      | `config.defaultPosition`                                   | Named slot or custom `{ x, y, origin? }`    |
-| `offset`    | `{ x, y }`                             | `{ x = 0, y = 0 }`                                         | Extra offset in `rem`                       |
-| `layout`    | `'row' \| 'column' \| 'auto'`          | `config.defaultLayout`                                     | Arrangement of prompts in the group         |
-| `separator` | `'slash' \| 'line' \| 'dot' \| 'none'` | `config.separator`                                         | Divider between prompts                     |
-| `order`     | `number`                               | `0`                                                        | CSS order when multiple groups share a slot |
-| `prompts`   | `PromptEntry \| PromptEntry[]`         | required                                                   | One prompt or an array                      |
-| `entity`    | `number?`                              | Default entity for prompt `canInteract` / `distance`       |                                             |
-| `coords`    | `vector3?`                             | Default world coords for prompt `canInteract` / `distance` |                                             |
+| Property         | Type                                   | Default                                                    | Description                                          |
+| ---------------- | -------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------- |
+| `id`             | `string`                               | required                                                   | Group id. `show('id', data)` also sets this          |
+| `position`       | `string \| table`                      | `config.defaultPosition`                                   | Named slot or custom `{ x, y, origin? }`             |
+| `offset`         | `{ x, y }`                             | `{ x = 0, y = 0 }`                                         | Extra offset in `rem`                                |
+| `layout`         | `'row' \| 'column' \| 'auto'`          | `config.defaultLayout`                                     | Arrangement of prompts in the group                  |
+| `separator`      | `'slash' \| 'line' \| 'dot' \| 'none'` | `config.separator`                                         | Divider between prompts                              |
+| `order`          | `number`                               | `0`                                                        | CSS order when multiple groups share a slot          |
+| `persistOnPause` | `boolean?`                             | `false`                                                    | Keep this group visible while the pause menu is open |
+| `prompts`        | `PromptEntry \| PromptEntry[]`         | required                                                   | One prompt or an array                               |
+| `entity`         | `number?`                              | Default entity for prompt `canInteract` / `distance`       |                                                      |
+| `coords`         | `vector3?`                             | Default world coords for prompt `canInteract` / `distance` |                                                      |
 
 ## Prompt entry [#prompt-entry]
 
-A prompt needs a `label` and at least one of `key`, `keyboard`, `gamepad`, `icon`, or `keybind`.
+A prompt needs a `label` and at least one of `control`, `keybind`, `key`, `keyboard`, `gamepad`, or `icon`. Prefer `control` or `keybind`. Icons are resolved from the live mapping, including player remaps. `key` / `keyboard` / `gamepad` are optional overrides.
 
 | Property         | Type                                            | Description                                                                                                                 |
 | ---------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `id`             | `string?`                                       | Unique id within the group. Defaults to the key name                                                                        |
+| `id`             | `string?`                                       | Unique id within the group. Defaults to `control_N`, the keybind name, or the key name                                      |
 | `name`           | `string?`                                       | Alias for `id`                                                                                                              |
 | `label`          | `string`                                        | Visible label                                                                                                               |
-| `key`            | `string \| string[]?`                           | Keyboard and/or shared input name (`E`, `LMB`, `LT`)                                                                        |
-| `keyboard`       | `string \| string[]?`                           | Keyboard-only override                                                                                                      |
-| `gamepad`        | `string \| string[]?`                           | Gamepad-only override (Xbox layout)                                                                                         |
-| `keybind`        | `string \| table?`                              | ox\_lib keybind name, or the table from `lib.addKeybind`                                                                    |
+| `control`        | `number?`                                       | GTA control index. Presses are tracked, hooks fire, and keyboard/gamepad icons follow the live mapping (including remaps)   |
+| `disableControl` | `boolean?`                                      | Disable the GTA control while this prompt is shown, via `lib.disableControls`                                               |
+| `keybind`        | `string \| table?`                              | ox\_lib / FiveM keybind name, or the table from `lib.addKeybind`. Keyboard icon follows the live bind and updates on remap  |
+| `key`            | `string \| string[]?`                           | Optional icon override (`E`, `LMB`, `LT`). Not needed when `control` or `keybind` is set                                    |
+| `keyboard`       | `string \| string[]?`                           | Keyboard-only icon override                                                                                                 |
+| `gamepad`        | `string \| string[]?`                           | Gamepad-only icon override (Xbox layout)                                                                                    |
 | `icon`           | `string \| string[]?`                           | Raw image path. Skips icon lookup                                                                                           |
-| `control`        | `number?`                                       | GTA control index. When set, presses are tracked and hooks fire                                                             |
-| `disableControl` | `boolean?`                                      | Disable the GTA control while this prompt is shown                                                                          |
 | `holdTime`       | `number?`                                       | Hold duration in ms. Shows the localized `hold` string before the button, fills a progress bar, and fires `onHold` / `held` |
 | `cooldown`       | `number?`                                       | Ignore further presses for this many ms after press or hold                                                                 |
 | `disabled`       | `boolean?`                                      | Dimmed, non-interactive                                                                                                     |
@@ -59,8 +60,6 @@ A prompt needs a `label` and at least one of `key`, `keyboard`, `gamepad`, `icon
 ```lua
 {
     id = 'engine',
-    key = 'F',
-    gamepad = 'Y',
     label = 'Engine',
     control = 23,
     holdTime = 1500,
@@ -82,8 +81,6 @@ Press fires the action immediately. `holdTime` waits until the hold completes. `
 ```lua
 {
     id = 'lock',
-    key = 'L',
-    gamepad = 'X',
     label = 'Lock',
     control = 182,
     event = 'myresource:lockVehicle',
@@ -91,8 +88,6 @@ Press fires the action immediately. `holdTime` waits until the hold completes. `
 
 {
     id = 'engine',
-    key = 'F',
-    gamepad = 'Y',
     label = 'Engine',
     control = 23,
     holdTime = 1500,
@@ -101,7 +96,6 @@ Press fires the action immediately. `holdTime` waits until the hold completes. `
 
 {
     id = 'emote',
-    key = 'G',
     label = 'Wave',
     control = 47,
     command = 'e wave',
@@ -127,8 +121,6 @@ Same filters as [Interact](/docs/interact/interact-options). A prompt is hidden 
 ```lua
 {
     id = 'lockpick',
-    key = 'E',
-    gamepad = 'A',
     label = 'Lockpick',
     control = 38,
     groups = { police = 0, mechanic = 2 },
@@ -156,9 +148,21 @@ Jobs and gangs come from the running framework (qbx, qb, esx, ox\_core, ND). Ite
 
 `canInteract` is called as `canInteract(entity, distance, coords, name)`, same as Interact. Set `entity` or `coords` on the group or the prompt so `distance` is measured from the player to that point. If neither is set, `entity` is `0` and `coords` is the player.
 
-<Callout type="info">
-  `keybind` sets the keyboard icon from the live ox\_lib mapping. Combine it with `gamepad` so pad users still see a face or trigger icon.
-</Callout>
+## Live remapping [#live-remapping]
+
+Open prompts keep their icons in sync with the player's current binds.
+
+| Source                  | Property  | What updates                                                                                                         |
+| ----------------------- | --------- | -------------------------------------------------------------------------------------------------------------------- |
+| GTA control             | `control` | Keyboard and gamepad icons via `GetControlInstructionalButton`. Remaps in Settings apply immediately                 |
+| FiveM / ox\_lib keybind | `keybind` | Keyboard icon via the live `RegisterKeyMapping` bind. Remaps under Settings > Key Bindings > FiveM apply immediately |
+
+`auto` mode also swaps keyboard vs gamepad icons when the last input device changes. `key` / `keyboard` / `gamepad` override the live glyph when you set them.
+
+```lua
+{ id = 'enter', label = 'Enter', control = 38 }
+{ id = 'use', label = 'Use', keybind = 'my_use' }
+```
 
 ## Positions [#positions]
 

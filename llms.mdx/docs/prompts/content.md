@@ -4,16 +4,18 @@
 
 
 
-An on-screen input prompt HUD for FiveM. Show keyboard and gamepad button icons with labels, update them while they are open, and place groups in named screen slots.
+An on-screen input prompt HUD for FiveM. Show keyboard and gamepad button icons with labels, follow player remaps, update groups while they are open, and place them in named screen slots.
 
 <ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_prompts" />
 
 ## Features [#features]
 
 * Keyboard and gamepad icons from a bundled button pack
+* Set `control` or `keybind`. Icons are resolved from the live mapping
+* GTA control icons follow remaps in Settings (keyboard and gamepad)
+* FiveM / ox\_lib keybind icons follow remaps under Settings > Key Bindings > FiveM
 * Live updates while a group is open
 * Named slots (`bottom-center`, `top-right`, `middle-left`, and more) plus custom coordinates
-* ox\_lib keybind tracking that follows player remaps
 * Auto Xbox vs DualSense / DualShock detection, or a locked mode
 * Player command `/promptmode` to pick Auto, Keyboard, Xbox, or PlayStation
 * Hold progress, press hooks, and per-prompt disable / hide
@@ -72,10 +74,10 @@ client_script '@sleepless_prompts/init.lua'
 prompts.show('vehicle', {
     position = 'bottom-center',
     prompts = {
-        { id = 'enter', key = 'E', gamepad = 'A', label = 'Enter', control = 38 },
-        { id = 'lock', key = 'L', gamepad = 'X', label = 'Lock' },
-        { id = 'trunk', key = 'G', gamepad = 'B', label = 'Trunk' },
-        { id = 'engine', key = 'F', gamepad = 'Y', label = 'Engine', control = 23, holdTime = 1500 },
+        { id = 'enter', label = 'Enter', control = 38 },
+        { id = 'lock', label = 'Lock', control = 182 },
+        { id = 'horn', label = 'Horn', control = 86 },
+        { id = 'engine', label = 'Engine', control = 23, holdTime = 1500 },
     },
 })
 ```
@@ -87,9 +89,9 @@ The same call works through `exports.sleepless_prompts:show(...)`.
 Same trigger options as Interact. One action runs on press, or when `holdTime` completes:
 
 ```lua
-{ id = 'lock', key = 'L', control = 182, label = 'Lock', event = 'myresource:lockVehicle' }
-{ id = 'engine', key = 'F', holdTime = 1500, label = 'Engine', serverEvent = 'myresource:toggleEngine' }
-{ id = 'wave', key = 'G', control = 47, label = 'Wave', command = 'e wave' }
+{ id = 'lock', label = 'Lock', control = 182, event = 'myresource:lockVehicle' }
+{ id = 'engine', label = 'Engine', control = 23, holdTime = 1500, serverEvent = 'myresource:toggleEngine' }
+{ id = 'wave', label = 'Wave', control = 47, command = 'e wave' }
 ```
 
 Priority: `onSelect`, `export`, `event`, `serverEvent`, `command`. See [Prompt Options](/docs/prompts/prompt-options#actions).
@@ -102,9 +104,26 @@ prompts.setPosition('vehicle', 'top-right')
 prompts.hide('vehicle')
 ```
 
+### Live remapping [#live-remapping]
+
+Icons update when the player remaps input. This applies to both:
+
+* **GTA controls** (`control`): keyboard and gamepad glyphs come from `GetControlInstructionalButton`. Remap INPUT\_PICKUP from E to G, or move it to another pad button, and the open prompt follows.
+* **FiveM / ox\_lib keybinds** (`keybind`): the keyboard icon comes from the live `RegisterKeyMapping` bind. Remap it under Settings > Key Bindings > FiveM and the open prompt follows.
+
+`auto` mode also swaps keyboard vs gamepad icons when the last input device changes.
+
+### GTA controls [#gta-controls]
+
+```lua
+{ id = 'enter', label = 'Enter', control = 38, disableControl = true }
+```
+
+`disableControl` adds that control to `lib.disableControls` while the prompt is shown.
+
 ### ox\_lib keybinds [#ox_lib-keybinds]
 
-Pass the keybind `name` from `lib.addKeybind`. The keyboard icon tracks the live mapping and updates if the player remaps it in GTA settings.
+Pass the keybind `name` from `lib.addKeybind`, or the table it returns. `key` / `gamepad` are not required.
 
 ```lua
 lib.addKeybind({
@@ -116,10 +135,12 @@ lib.addKeybind({
 
 prompts.show('vehicle', {
     prompts = {
-        { keybind = 'vehicle_enter', gamepad = 'A', label = 'Enter' },
+        { keybind = 'vehicle_enter', label = 'Enter' },
     },
 })
 ```
+
+`prompts.getKeybindKey('vehicle_enter')` returns the current keyboard key.
 
 <Callout type="info">
   Gamepad names use Xbox layout (A south, B east, X west, Y north). PlayStation faces remap from that. See [Prompt Options](/docs/prompts/prompt-options) for the full property list and [Client Exports](/docs/prompts/exports/Client) for the API.

@@ -3985,7 +3985,7 @@ When `debug` is `true`:
 * `/prompts` vehicle example
 * `/prompts positions` one prompt in every slot
 * `/prompts hold` hold-to-complete demo
-* `/prompts keybind` demo bound to `sleepless_prompts_demo` (default `E`)
+* `/prompts keybind` remap `sleepless_prompts_demo` under Settings > Key Bindings > FiveM and watch the icon change
 * `/prompts style dark`
 * `/prompts theme cyber`
 * `/prompts hide`
@@ -4200,16 +4200,18 @@ DINPRO is self-hosted in `web/fonts/`. To use another face, add an `@font-face` 
 
 
 
-An on-screen input prompt HUD for FiveM. Show keyboard and gamepad button icons with labels, update them while they are open, and place groups in named screen slots.
+An on-screen input prompt HUD for FiveM. Show keyboard and gamepad button icons with labels, follow player remaps, update groups while they are open, and place them in named screen slots.
 
 <ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_prompts" />
 
 ## Features [#features]
 
 * Keyboard and gamepad icons from a bundled button pack
+* Set `control` or `keybind`. Icons are resolved from the live mapping
+* GTA control icons follow remaps in Settings (keyboard and gamepad)
+* FiveM / ox\_lib keybind icons follow remaps under Settings > Key Bindings > FiveM
 * Live updates while a group is open
 * Named slots (`bottom-center`, `top-right`, `middle-left`, and more) plus custom coordinates
-* ox\_lib keybind tracking that follows player remaps
 * Auto Xbox vs DualSense / DualShock detection, or a locked mode
 * Player command `/promptmode` to pick Auto, Keyboard, Xbox, or PlayStation
 * Hold progress, press hooks, and per-prompt disable / hide
@@ -4268,10 +4270,10 @@ client_script '@sleepless_prompts/init.lua'
 prompts.show('vehicle', {
     position = 'bottom-center',
     prompts = {
-        { id = 'enter', key = 'E', gamepad = 'A', label = 'Enter', control = 38 },
-        { id = 'lock', key = 'L', gamepad = 'X', label = 'Lock' },
-        { id = 'trunk', key = 'G', gamepad = 'B', label = 'Trunk' },
-        { id = 'engine', key = 'F', gamepad = 'Y', label = 'Engine', control = 23, holdTime = 1500 },
+        { id = 'enter', label = 'Enter', control = 38 },
+        { id = 'lock', label = 'Lock', control = 182 },
+        { id = 'horn', label = 'Horn', control = 86 },
+        { id = 'engine', label = 'Engine', control = 23, holdTime = 1500 },
     },
 })
 ```
@@ -4283,9 +4285,9 @@ The same call works through `exports.sleepless_prompts:show(...)`.
 Same trigger options as Interact. One action runs on press, or when `holdTime` completes:
 
 ```lua
-{ id = 'lock', key = 'L', control = 182, label = 'Lock', event = 'myresource:lockVehicle' }
-{ id = 'engine', key = 'F', holdTime = 1500, label = 'Engine', serverEvent = 'myresource:toggleEngine' }
-{ id = 'wave', key = 'G', control = 47, label = 'Wave', command = 'e wave' }
+{ id = 'lock', label = 'Lock', control = 182, event = 'myresource:lockVehicle' }
+{ id = 'engine', label = 'Engine', control = 23, holdTime = 1500, serverEvent = 'myresource:toggleEngine' }
+{ id = 'wave', label = 'Wave', control = 47, command = 'e wave' }
 ```
 
 Priority: `onSelect`, `export`, `event`, `serverEvent`, `command`. See [Prompt Options](/docs/prompts/prompt-options#actions).
@@ -4298,9 +4300,26 @@ prompts.setPosition('vehicle', 'top-right')
 prompts.hide('vehicle')
 ```
 
+### Live remapping [#live-remapping]
+
+Icons update when the player remaps input. This applies to both:
+
+* **GTA controls** (`control`): keyboard and gamepad glyphs come from `GetControlInstructionalButton`. Remap INPUT\_PICKUP from E to G, or move it to another pad button, and the open prompt follows.
+* **FiveM / ox\_lib keybinds** (`keybind`): the keyboard icon comes from the live `RegisterKeyMapping` bind. Remap it under Settings > Key Bindings > FiveM and the open prompt follows.
+
+`auto` mode also swaps keyboard vs gamepad icons when the last input device changes.
+
+### GTA controls [#gta-controls]
+
+```lua
+{ id = 'enter', label = 'Enter', control = 38, disableControl = true }
+```
+
+`disableControl` adds that control to `lib.disableControls` while the prompt is shown.
+
 ### ox\_lib keybinds [#ox_lib-keybinds]
 
-Pass the keybind `name` from `lib.addKeybind`. The keyboard icon tracks the live mapping and updates if the player remaps it in GTA settings.
+Pass the keybind `name` from `lib.addKeybind`, or the table it returns. `key` / `gamepad` are not required.
 
 ```lua
 lib.addKeybind({
@@ -4312,10 +4331,12 @@ lib.addKeybind({
 
 prompts.show('vehicle', {
     prompts = {
-        { keybind = 'vehicle_enter', gamepad = 'A', label = 'Enter' },
+        { keybind = 'vehicle_enter', label = 'Enter' },
     },
 })
 ```
+
+`prompts.getKeybindKey('vehicle_enter')` returns the current keyboard key.
 
 <Callout type="info">
   Gamepad names use Xbox layout (A south, B east, X west, Y north). PlayStation faces remap from that. See [Prompt Options](/docs/prompts/prompt-options) for the full property list and [Client Exports](/docs/prompts/exports/Client) for the API.
@@ -4350,34 +4371,35 @@ Each call to `show` takes a group table. Each item in `prompts` is a `PromptEntr
 
 ## Prompt group [#prompt-group]
 
-| Property    | Type                                   | Default                                                    | Description                                 |
-| ----------- | -------------------------------------- | ---------------------------------------------------------- | ------------------------------------------- |
-| `id`        | `string`                               | required                                                   | Group id. `show('id', data)` also sets this |
-| `position`  | `string \| table`                      | `config.defaultPosition`                                   | Named slot or custom `{ x, y, origin? }`    |
-| `offset`    | `{ x, y }`                             | `{ x = 0, y = 0 }`                                         | Extra offset in `rem`                       |
-| `layout`    | `'row' \| 'column' \| 'auto'`          | `config.defaultLayout`                                     | Arrangement of prompts in the group         |
-| `separator` | `'slash' \| 'line' \| 'dot' \| 'none'` | `config.separator`                                         | Divider between prompts                     |
-| `order`     | `number`                               | `0`                                                        | CSS order when multiple groups share a slot |
-| `prompts`   | `PromptEntry \| PromptEntry[]`         | required                                                   | One prompt or an array                      |
-| `entity`    | `number?`                              | Default entity for prompt `canInteract` / `distance`       |                                             |
-| `coords`    | `vector3?`                             | Default world coords for prompt `canInteract` / `distance` |                                             |
+| Property         | Type                                   | Default                                                    | Description                                          |
+| ---------------- | -------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------- |
+| `id`             | `string`                               | required                                                   | Group id. `show('id', data)` also sets this          |
+| `position`       | `string \| table`                      | `config.defaultPosition`                                   | Named slot or custom `{ x, y, origin? }`             |
+| `offset`         | `{ x, y }`                             | `{ x = 0, y = 0 }`                                         | Extra offset in `rem`                                |
+| `layout`         | `'row' \| 'column' \| 'auto'`          | `config.defaultLayout`                                     | Arrangement of prompts in the group                  |
+| `separator`      | `'slash' \| 'line' \| 'dot' \| 'none'` | `config.separator`                                         | Divider between prompts                              |
+| `order`          | `number`                               | `0`                                                        | CSS order when multiple groups share a slot          |
+| `persistOnPause` | `boolean?`                             | `false`                                                    | Keep this group visible while the pause menu is open |
+| `prompts`        | `PromptEntry \| PromptEntry[]`         | required                                                   | One prompt or an array                               |
+| `entity`         | `number?`                              | Default entity for prompt `canInteract` / `distance`       |                                                      |
+| `coords`         | `vector3?`                             | Default world coords for prompt `canInteract` / `distance` |                                                      |
 
 ## Prompt entry [#prompt-entry]
 
-A prompt needs a `label` and at least one of `key`, `keyboard`, `gamepad`, `icon`, or `keybind`.
+A prompt needs a `label` and at least one of `control`, `keybind`, `key`, `keyboard`, `gamepad`, or `icon`. Prefer `control` or `keybind`. Icons are resolved from the live mapping, including player remaps. `key` / `keyboard` / `gamepad` are optional overrides.
 
 | Property         | Type                                            | Description                                                                                                                 |
 | ---------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `id`             | `string?`                                       | Unique id within the group. Defaults to the key name                                                                        |
+| `id`             | `string?`                                       | Unique id within the group. Defaults to `control_N`, the keybind name, or the key name                                      |
 | `name`           | `string?`                                       | Alias for `id`                                                                                                              |
 | `label`          | `string`                                        | Visible label                                                                                                               |
-| `key`            | `string \| string[]?`                           | Keyboard and/or shared input name (`E`, `LMB`, `LT`)                                                                        |
-| `keyboard`       | `string \| string[]?`                           | Keyboard-only override                                                                                                      |
-| `gamepad`        | `string \| string[]?`                           | Gamepad-only override (Xbox layout)                                                                                         |
-| `keybind`        | `string \| table?`                              | ox\_lib keybind name, or the table from `lib.addKeybind`                                                                    |
+| `control`        | `number?`                                       | GTA control index. Presses are tracked, hooks fire, and keyboard/gamepad icons follow the live mapping (including remaps)   |
+| `disableControl` | `boolean?`                                      | Disable the GTA control while this prompt is shown, via `lib.disableControls`                                               |
+| `keybind`        | `string \| table?`                              | ox\_lib / FiveM keybind name, or the table from `lib.addKeybind`. Keyboard icon follows the live bind and updates on remap  |
+| `key`            | `string \| string[]?`                           | Optional icon override (`E`, `LMB`, `LT`). Not needed when `control` or `keybind` is set                                    |
+| `keyboard`       | `string \| string[]?`                           | Keyboard-only icon override                                                                                                 |
+| `gamepad`        | `string \| string[]?`                           | Gamepad-only icon override (Xbox layout)                                                                                    |
 | `icon`           | `string \| string[]?`                           | Raw image path. Skips icon lookup                                                                                           |
-| `control`        | `number?`                                       | GTA control index. When set, presses are tracked and hooks fire                                                             |
-| `disableControl` | `boolean?`                                      | Disable the GTA control while this prompt is shown                                                                          |
 | `holdTime`       | `number?`                                       | Hold duration in ms. Shows the localized `hold` string before the button, fills a progress bar, and fires `onHold` / `held` |
 | `cooldown`       | `number?`                                       | Ignore further presses for this many ms after press or hold                                                                 |
 | `disabled`       | `boolean?`                                      | Dimmed, non-interactive                                                                                                     |
@@ -4403,8 +4425,6 @@ A prompt needs a `label` and at least one of `key`, `keyboard`, `gamepad`, `icon
 ```lua
 {
     id = 'engine',
-    key = 'F',
-    gamepad = 'Y',
     label = 'Engine',
     control = 23,
     holdTime = 1500,
@@ -4426,8 +4446,6 @@ Press fires the action immediately. `holdTime` waits until the hold completes. `
 ```lua
 {
     id = 'lock',
-    key = 'L',
-    gamepad = 'X',
     label = 'Lock',
     control = 182,
     event = 'myresource:lockVehicle',
@@ -4435,8 +4453,6 @@ Press fires the action immediately. `holdTime` waits until the hold completes. `
 
 {
     id = 'engine',
-    key = 'F',
-    gamepad = 'Y',
     label = 'Engine',
     control = 23,
     holdTime = 1500,
@@ -4445,7 +4461,6 @@ Press fires the action immediately. `holdTime` waits until the hold completes. `
 
 {
     id = 'emote',
-    key = 'G',
     label = 'Wave',
     control = 47,
     command = 'e wave',
@@ -4471,8 +4486,6 @@ Same filters as [Interact](/docs/interact/interact-options). A prompt is hidden 
 ```lua
 {
     id = 'lockpick',
-    key = 'E',
-    gamepad = 'A',
     label = 'Lockpick',
     control = 38,
     groups = { police = 0, mechanic = 2 },
@@ -4500,9 +4513,21 @@ Jobs and gangs come from the running framework (qbx, qb, esx, ox\_core, ND). Ite
 
 `canInteract` is called as `canInteract(entity, distance, coords, name)`, same as Interact. Set `entity` or `coords` on the group or the prompt so `distance` is measured from the player to that point. If neither is set, `entity` is `0` and `coords` is the player.
 
-<Callout type="info">
-  `keybind` sets the keyboard icon from the live ox\_lib mapping. Combine it with `gamepad` so pad users still see a face or trigger icon.
-</Callout>
+## Live remapping [#live-remapping]
+
+Open prompts keep their icons in sync with the player's current binds.
+
+| Source                  | Property  | What updates                                                                                                         |
+| ----------------------- | --------- | -------------------------------------------------------------------------------------------------------------------- |
+| GTA control             | `control` | Keyboard and gamepad icons via `GetControlInstructionalButton`. Remaps in Settings apply immediately                 |
+| FiveM / ox\_lib keybind | `keybind` | Keyboard icon via the live `RegisterKeyMapping` bind. Remaps under Settings > Key Bindings > FiveM apply immediately |
+
+`auto` mode also swaps keyboard vs gamepad icons when the last input device changes. `key` / `keyboard` / `gamepad` override the live glyph when you set them.
+
+```lua
+{ id = 'enter', label = 'Enter', control = 38 }
+{ id = 'use', label = 'Use', keybind = 'my_use' }
+```
 
 ## Positions [#positions]
 
@@ -6191,10 +6216,10 @@ local id = exports.sleepless_prompts:show(data)
 exports.sleepless_prompts:show('vehicle', {
     position = 'bottom-center',
     prompts = {
-        { id = 'enter', key = 'E', gamepad = 'A', label = 'Enter' },
-        { id = 'lock', key = 'L', gamepad = 'X', label = 'Lock' },
-        { id = 'trunk', key = 'G', gamepad = 'B', label = 'Trunk' },
-        { id = 'engine', key = 'F', gamepad = 'Y', label = 'Engine', holdTime = 1500 },
+        { id = 'enter', label = 'Enter', control = 38 },
+        { id = 'lock', label = 'Lock', control = 182 },
+        { id = 'horn', label = 'Horn', control = 86 },
+        { id = 'engine', label = 'Engine', control = 23, holdTime = 1500 },
     },
 })
 ```
@@ -6251,8 +6276,6 @@ local promptId = exports.sleepless_prompts:addPrompt(groupId, entry)
 
 ```lua
 exports.sleepless_prompts:addPrompt('vehicle', {
-    key = 'H',
-    gamepad = 'LB',
     label = 'Horn',
     control = 86,
 })
@@ -6403,7 +6426,7 @@ One string applies to the device that owns that style. `alt` and `retro` apply t
 
 ## getKeybindKey [#getkeybindkey]
 
-Current keyboard key for an ox\_lib keybind name or the table from `lib.addKeybind`.
+Current keyboard key for an ox\_lib / FiveM keybind name or the table from `lib.addKeybind`. Follows remaps under Settings > Key Bindings > FiveM.
 
 ```lua
 local key = exports.sleepless_prompts:getKeybindKey('vehicle_enter')

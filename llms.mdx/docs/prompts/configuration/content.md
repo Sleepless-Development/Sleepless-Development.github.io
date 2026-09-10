@@ -105,7 +105,7 @@ When `debug` is `true`:
 * `/prompts` vehicle example
 * `/prompts positions` one prompt in every slot
 * `/prompts hold` hold-to-complete demo
-* `/prompts keybind` demo bound to `sleepless_prompts_demo` (default `E`)
+* `/prompts keybind` remap `sleepless_prompts_demo` under Settings > Key Bindings > FiveM and watch the icon change
 * `/prompts style dark`
 * `/prompts theme cyber`
 * `/prompts hide`
