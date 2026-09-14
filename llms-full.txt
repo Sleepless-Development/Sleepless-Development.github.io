@@ -1111,6 +1111,10 @@ config.requireLookAt = true
 -- Screen-space radius from the reticle (fraction of screen height). Raise it to aim looser.
 config.lookRadius = 0.08
 
+-- If true, entity options without offset, offsetAbsolute, or bones are placed
+-- at the model bounding-box center instead of the entity origin.
+config.autoCenter = true
+
 -- Visual theme for the world prompt.
 -- Built-in: legacy | modern | minimal | light | retro | cyber | vice | noir | industrial | fantasy
 config.theme = 'modern'
@@ -1182,6 +1186,7 @@ config.showKeyBindBehavior = 'toggle'
 | `maxInteractDistance` | `number`          | `5.0`                  | Maximum distance at which interact indicator sprites are rendered. Keep low for performance.                                                                                                                                                        |
 | `requireLookAt`       | `boolean`         | `true`                 | If true, the prompt only opens when the target is inside `lookRadius` of the reticle. If false, the closest valid nearby interact opens without aiming.                                                                                             |
 | `lookRadius`          | `number`          | `0.08`                 | How close to screen center a target must be to open the prompt. Units are a fraction of screen height. Raise it to aim looser. Ignored when `requireLookAt` is false.                                                                               |
+| `autoCenter`          | `boolean`         | `true`                 | If true, entity options without `offset`, `offsetAbsolute`, or `bones` are placed at the model bounding-box center instead of the entity origin.                                                                                                    |
 | `theme`               | `string`          | `'modern'`             | Visual look of the world prompt. Must match a file in `web/themes/<id>.css`.                                                                                                                                                                        |
 | `themeColors`         | `table`           | see above              | Per-theme RGBA accent `{ r, g, b, a }` (0–255). Drives the HUD highlight.                                                                                                                                                                           |
 | `themeColor`          | `number[] \| nil` | `nil`                  | Optional global accent override. When set, every theme uses this color instead of `themeColors`.                                                                                                                                                    |
