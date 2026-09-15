@@ -14,6 +14,7 @@ All interact actions are formatted as an array containing objects with the follo
 ---@field distance? number The maximum distance at which the option is available.
 ---@field holdTime? number Makes the option a press and hold and sets how long it should be held for (milliseconds).
 ---@field canInteract? fun(entity: number, distance: number, coords: vector3, name: string): boolean? A function to determine if the option can be interacted with.
+---@field hideWhenEmpty? boolean Override `config.hideWhenEmpty` for this option. True hides the distant marker when this option is invalid. False keeps it.
 ---@field name? string A unique identifier for the option.
 ---@field resource? string The resource that registered the option.
 ---@field offset? vector3 A relative offset from the entity's position.
@@ -34,30 +35,31 @@ All interact actions are formatted as an array containing objects with the follo
 
 ### Properties [#properties]
 
-| Property         | Type                 | Required | Description                                                           |
-| ---------------- | -------------------- | -------- | --------------------------------------------------------------------- |
-| `label`          | `string`             | Yes      | The display label for the option                                      |
-| `icon`           | `string`             | No       | FontAwesome icon name                                                 |
-| `iconColor`      | `string`             | No       | CSS color for the icon                                                |
-| `distance`       | `number`             | No       | Maximum distance at which the option is available                     |
-| `holdTime`       | `number`             | No       | Press-and-hold duration in milliseconds                               |
-| `canInteract`    | `function`           | No       | Function to determine if the option can be interacted with            |
-| `name`           | `string`             | No       | A unique identifier for the option                                    |
-| `resource`       | `string`             | No       | The resource that registered the option                               |
-| `offset`         | `vector3`            | No       | Relative offset from the entity's position                            |
-| `offsetAbsolute` | `vector3`            | No       | Absolute offset in world coordinates                                  |
-| `color`          | `number[]`           | No       | RGBA array `{r, g, b, a}` overriding the theme accent for that option |
-| `bones`          | `string \| string[]` | No       | Bone ID(s) associated with the option                                 |
-| `allowInVehicle` | `boolean`            | No       | Allow usage inside a vehicle                                          |
-| `onSelect`       | `function`           | No       | Callback when the option is selected                                  |
-| `cooldown`       | `number`             | No       | Cooldown in milliseconds after selection                              |
-| `export`         | `string`             | No       | Export function name to call                                          |
-| `event`          | `string`             | No       | Client-side event to trigger                                          |
-| `serverEvent`    | `string`             | No       | Server-side event to trigger                                          |
-| `command`        | `string`             | No       | Command to execute                                                    |
-| `onActive`       | `function`           | No       | Callback when the option becomes active                               |
-| `onInactive`     | `function`           | No       | Callback when the option becomes inactive                             |
-| `whileActive`    | `function`           | No       | Callback that runs in a loop while the option is active               |
+| Property         | Type                 | Required | Description                                                                                                                                                           |
+| ---------------- | -------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `label`          | `string`             | Yes      | The display label for the option                                                                                                                                      |
+| `icon`           | `string`             | No       | FontAwesome icon name                                                                                                                                                 |
+| `iconColor`      | `string`             | No       | CSS color for the icon                                                                                                                                                |
+| `distance`       | `number`             | No       | Maximum distance at which the option is available                                                                                                                     |
+| `holdTime`       | `number`             | No       | Press-and-hold duration in milliseconds                                                                                                                               |
+| `canInteract`    | `function`           | No       | Function to determine if the option can be interacted with                                                                                                            |
+| `hideWhenEmpty`  | `boolean`            | No       | Overrides `config.hideWhenEmpty` for this option. `true` hides the distant marker when the option is invalid. `false` keeps it. Takes priority over the type default. |
+| `name`           | `string`             | No       | A unique identifier for the option                                                                                                                                    |
+| `resource`       | `string`             | No       | The resource that registered the option                                                                                                                               |
+| `offset`         | `vector3`            | No       | Relative offset from the entity's position                                                                                                                            |
+| `offsetAbsolute` | `vector3`            | No       | Absolute offset in world coordinates                                                                                                                                  |
+| `color`          | `number[]`           | No       | RGBA array `{r, g, b, a}` overriding the theme accent for that option                                                                                                 |
+| `bones`          | `string \| string[]` | No       | Bone ID(s) associated with the option                                                                                                                                 |
+| `allowInVehicle` | `boolean`            | No       | Allow usage inside a vehicle                                                                                                                                          |
+| `onSelect`       | `function`           | No       | Callback when the option is selected                                                                                                                                  |
+| `cooldown`       | `number`             | No       | Cooldown in milliseconds after selection                                                                                                                              |
+| `export`         | `string`             | No       | Export function name to call                                                                                                                                          |
+| `event`          | `string`             | No       | Client-side event to trigger                                                                                                                                          |
+| `serverEvent`    | `string`             | No       | Server-side event to trigger                                                                                                                                          |
+| `command`        | `string`             | No       | Command to execute                                                                                                                                                    |
+| `onActive`       | `function`           | No       | Callback when the option becomes active                                                                                                                               |
+| `onInactive`     | `function`           | No       | Callback when the option becomes inactive                                                                                                                             |
+| `whileActive`    | `function`           | No       | Callback that runs in a loop while the option is active                                                                                                               |
 
 ## Callback Response [#callback-response]
 

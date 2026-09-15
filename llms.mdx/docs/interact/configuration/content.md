@@ -23,6 +23,20 @@ config.lookRadius = 0.08
 -- at the model bounding-box center instead of the entity origin.
 config.autoCenter = true
 
+-- Hide the distant marker when this interact type currently has no valid options.
+-- true  = hide the sprite
+-- false = keep the sprite as a point of interest
+config.hideWhenEmpty = {
+    globalPeds = true,
+    globalVehicles = true,
+    globalObjects = true,
+    globalPlayers = true,
+    models = false,
+    entities = false,
+    localEntities = false,
+    coords = false,
+}
+
 -- Visual theme for the world prompt.
 -- Built-in: legacy | modern | minimal | light | retro | cyber | vice | noir | industrial | fantasy
 config.theme = 'modern'
@@ -89,26 +103,31 @@ config.showKeyBindBehavior = 'toggle'
 
 ## Options Explained [#options-explained]
 
-| Option                | Type              | Default                | Description                                                                                                                                                                                                                                         |
-| --------------------- | ----------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `maxInteractDistance` | `number`          | `5.0`                  | Maximum distance at which interact indicator sprites are rendered. Keep low for performance.                                                                                                                                                        |
-| `requireLookAt`       | `boolean`         | `true`                 | If true, the prompt only opens when the target is inside `lookRadius` of the reticle. If false, the closest valid nearby interact opens without aiming.                                                                                             |
-| `lookRadius`          | `number`          | `0.08`                 | How close to screen center a target must be to open the prompt. Units are a fraction of screen height. Raise it to aim looser. Ignored when `requireLookAt` is false.                                                                               |
-| `autoCenter`          | `boolean`         | `true`                 | If true, entity options without `offset`, `offsetAbsolute`, or `bones` are placed at the model bounding-box center instead of the entity origin.                                                                                                    |
-| `theme`               | `string`          | `'modern'`             | Visual look of the world prompt. Must match a file in `web/themes/<id>.css`.                                                                                                                                                                        |
-| `themeColors`         | `table`           | see above              | Per-theme RGBA accent `{ r, g, b, a }` (0–255). Drives the HUD highlight.                                                                                                                                                                           |
-| `themeColor`          | `number[] \| nil` | `nil`                  | Optional global accent override. When set, every theme uses this color instead of `themeColors`.                                                                                                                                                    |
-| `compactOptions`      | `boolean`         | `true`                 | Compact multi-option prompt. See [Compact prompt](#compact-prompt).                                                                                                                                                                                 |
-| `compactIdleMs`       | `number`          | `2500`                 | Idle time in milliseconds before a compact list collapses. Minimum `500`.                                                                                                                                                                           |
-| `defaultInteractKey`  | `string`          | `'E'`                  | Default mapping for the interact action. Players can rebind it in GTA Settings; the prompt shows the live key.                                                                                                                                      |
-| `IndicatorSprite`     | `table`           | radio PNG, white       | Distant marker. `file` is a PNG in this resource. `color` tints it (`{ 255, 255, 255 }` stays white). `scale` is world size. Omit `file` and set `dict` / `txt` to use a GTA texture instead.                                                       |
-| `CenterDot`           | `table`           | `mpcarhud` colour icon | Screen-center circle while at least one usable interact is nearby. Set `enabled` to `false` to hide it. `color` tints the sprite. `scale` is screen size, `x` / `y` are 0–1 screen position. Optional `file` loads a PNG instead of `dict` / `txt`. |
-| `useShowKeyBind`      | `boolean`         | `false`                | Whether a keybind is required to show/hide interactions.                                                                                                                                                                                            |
-| `defaultShowKeyBind`  | `string`          | `'LMENU'`              | The default key mapping for toggling interaction visibility.                                                                                                                                                                                        |
-| `showKeyBindBehavior` | `string`          | `'toggle'`             | `"hold"` requires holding the key; `"toggle"` switches on/off per press.                                                                                                                                                                            |
+| Option                | Type              | Default                        | Description                                                                                                                                                                                                                                                                                                     |
+| --------------------- | ----------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `maxInteractDistance` | `number`          | `5.0`                          | Maximum distance at which interact indicator sprites are rendered. Keep low for performance.                                                                                                                                                                                                                    |
+| `requireLookAt`       | `boolean`         | `true`                         | If true, the prompt only opens when the target is inside `lookRadius` of the reticle. If false, the closest valid nearby interact opens without aiming.                                                                                                                                                         |
+| `lookRadius`          | `number`          | `0.08`                         | How close to screen center a target must be to open the prompt. Units are a fraction of screen height. Raise it to aim looser. Ignored when `requireLookAt` is false.                                                                                                                                           |
+| `autoCenter`          | `boolean`         | `true`                         | If true, entity options without `offset`, `offsetAbsolute`, or `bones` are placed at the model bounding-box center instead of the entity origin.                                                                                                                                                                |
+| `hideWhenEmpty`       | `table`           | globals `true`, others `false` | Per interact type: hide the distant marker when every option on that target is currently invalid (`canInteract`, distance, groups, items, in-vehicle). Globals default to hide so nearby peds/vehicles/objects do not spam sprites. Models, entities, and coords keep the marker unless you set them to `true`. |
+| `theme`               | `string`          | `'modern'`                     | Visual look of the world prompt. Must match a file in `web/themes/<id>.css`.                                                                                                                                                                                                                                    |
+| `themeColors`         | `table`           | see above                      | Per-theme RGBA accent `{ r, g, b, a }` (0–255). Drives the HUD highlight.                                                                                                                                                                                                                                       |
+| `themeColor`          | `number[] \| nil` | `nil`                          | Optional global accent override. When set, every theme uses this color instead of `themeColors`.                                                                                                                                                                                                                |
+| `compactOptions`      | `boolean`         | `true`                         | Compact multi-option prompt. See [Compact prompt](#compact-prompt).                                                                                                                                                                                                                                             |
+| `compactIdleMs`       | `number`          | `2500`                         | Idle time in milliseconds before a compact list collapses. Minimum `500`.                                                                                                                                                                                                                                       |
+| `defaultInteractKey`  | `string`          | `'E'`                          | Default mapping for the interact action. Players can rebind it in GTA Settings; the prompt shows the live key.                                                                                                                                                                                                  |
+| `IndicatorSprite`     | `table`           | radio PNG, white               | Distant marker. `file` is a PNG in this resource. `color` tints it (`{ 255, 255, 255 }` stays white). `scale` is world size. Omit `file` and set `dict` / `txt` to use a GTA texture instead.                                                                                                                   |
+| `CenterDot`           | `table`           | `mpcarhud` colour icon         | Screen-center circle while at least one usable interact is nearby. Set `enabled` to `false` to hide it. `color` tints the sprite. `scale` is screen size, `x` / `y` are 0–1 screen position. Optional `file` loads a PNG instead of `dict` / `txt`.                                                             |
+| `useShowKeyBind`      | `boolean`         | `false`                        | Whether a keybind is required to show/hide interactions.                                                                                                                                                                                                                                                        |
+| `defaultShowKeyBind`  | `string`          | `'LMENU'`                      | The default key mapping for toggling interaction visibility.                                                                                                                                                                                                                                                    |
+| `showKeyBindBehavior` | `string`          | `'toggle'`                     | `"hold"` requires holding the key; `"toggle"` switches on/off per press.                                                                                                                                                                                                                                        |
 
 <Callout type="info">
   The `maxInteractDistance` directly affects performance. A lower value means fewer interactions are checked and rendered each frame.
+</Callout>
+
+<Callout type="info">
+  Set `hideWhenEmpty.models = true` if model targets should lose their marker when `canInteract` returns false. An option can set `hideWhenEmpty = true` or `false` to override the type default. The marker only hides when every option on the target wants to hide.
 </Callout>
 
 <Callout type="info">
