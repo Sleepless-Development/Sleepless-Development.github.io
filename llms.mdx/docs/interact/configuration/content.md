@@ -23,6 +23,14 @@ config.lookRadius = 0.08
 -- at the model bounding-box center instead of the entity origin.
 config.autoCenter = true
 
+-- If true, interacts are hidden when the player has no clear line of sight.
+-- Entity targets test LOS to the entity. Coord targets test LOS to the point.
+config.requireLos = true
+
+-- Shape-test flags for requireLos. 1 world, 2 vehicles, 4 peds, 16 objects.
+-- 17 (world + objects) blocks walls and props without peds/vehicles eating LOS.
+config.losFlags = 17
+
 -- Hide the distant marker when this interact type currently has no valid options.
 -- true  = hide the sprite
 -- false = keep the sprite as a point of interest
@@ -109,6 +117,8 @@ config.showKeyBindBehavior = 'toggle'
 | `requireLookAt`       | `boolean`         | `true`                         | If true, the prompt only opens when the target is inside `lookRadius` of the reticle. If false, the closest valid nearby interact opens without aiming.                                                                                                                                                         |
 | `lookRadius`          | `number`          | `0.08`                         | How close to screen center a target must be to open the prompt. Units are a fraction of screen height. Raise it to aim looser. Ignored when `requireLookAt` is false.                                                                                                                                           |
 | `autoCenter`          | `boolean`         | `true`                         | If true, entity options without `offset`, `offsetAbsolute`, or `bones` are placed at the model bounding-box center instead of the entity origin.                                                                                                                                                                |
+| `requireLos`          | `boolean`         | `true`                         | Hide interacts with no clear line of sight. Entity targets (including bones and offsets) test LOS to the entity. Coord targets test LOS to the point.                                                                                                                                                           |
+| `losFlags`            | `number`          | `17`                           | Shape-test bit mask used by `requireLos`. `1` world, `2` vehicles, `4` peds, `16` objects. Default `17` is world + objects.                                                                                                                                                                                     |
 | `hideWhenEmpty`       | `table`           | globals `true`, others `false` | Per interact type: hide the distant marker when every option on that target is currently invalid (`canInteract`, distance, groups, items, in-vehicle). Globals default to hide so nearby peds/vehicles/objects do not spam sprites. Models, entities, and coords keep the marker unless you set them to `true`. |
 | `theme`               | `string`          | `'modern'`                     | Visual look of the world prompt. Must match a file in `web/themes/<id>.css`.                                                                                                                                                                                                                                    |
 | `themeColors`         | `table`           | see above                      | Per-theme RGBA accent `{ r, g, b, a }` (0–255). Drives the HUD highlight.                                                                                                                                                                                                                                       |
