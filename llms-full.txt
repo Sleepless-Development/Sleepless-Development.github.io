@@ -1090,714 +1090,6 @@ To add a new station type:
 ```
 
 
-# Configuration (/docs/interact/configuration)
-
-
-
-The configuration file is located at `client/modules/config.lua`. This file controls the world prompt, visual theme, compact menu, and keybinds.
-
-## General Settings [#general-settings]
-
-```lua
-local config = {}
-
--- Maximum distance that interacts will render the indicator sprite
--- Recommend keeping this pretty low for optimization
-config.maxInteractDistance = 5.0
-
--- If true, the prompt only opens when the target is inside lookRadius of the reticle.
-config.requireLookAt = true
-
--- Screen-space radius from the reticle (fraction of screen height). Raise it to aim looser.
-config.lookRadius = 0.08
-
--- If true, entity options without offset, offsetAbsolute, or bones are placed
--- at the model bounding-box center instead of the entity origin.
-config.autoCenter = true
-
--- If true, interacts are hidden when the player has no clear line of sight.
--- Entity targets test LOS to the entity. Coord targets test LOS to the point.
-config.requireLos = true
-
--- Shape-test flags for requireLos. 1 world, 2 vehicles, 4 peds, 16 objects.
--- 17 (world + objects) blocks walls and props without peds/vehicles eating LOS.
-config.losFlags = 17
-
--- Hide the distant marker when this interact type currently has no valid options.
--- true  = hide the sprite
--- false = keep the sprite as a point of interest
-config.hideWhenEmpty = {
-    globalPeds = true,
-    globalVehicles = true,
-    globalObjects = true,
-    globalPlayers = true,
-    models = false,
-    entities = false,
-    localEntities = false,
-    coords = false,
-}
-
--- Visual theme for the world prompt.
--- Built-in: legacy | modern | minimal | light | retro | cyber | vice | noir | industrial | fantasy
-config.theme = 'modern'
-
--- Default accent per theme. Used by the HUD highlight.
-config.themeColors = {
-    legacy = { 28, 100, 184, 200 },
-    modern = { 49, 164, 252, 255 },
-    minimal = { 168, 186, 204, 255 },
-    light = { 37, 99, 235, 255 },
-    retro = { 255, 176, 32, 255 },
-    cyber = { 0, 229, 255, 255 },
-    vice = { 255, 64, 180, 255 },
-    noir = { 240, 240, 236, 255 },
-    industrial = { 212, 168, 48, 255 },
-    fantasy = { 212, 175, 110, 255 },
-}
-
--- Optional override for every theme. Set to { r, g, b, a } to force one accent
--- across all looks. Leave nil to use the theme's own color above.
-config.themeColor = nil
-
--- If true, targets with more than one option show "Interact" until E is pressed.
--- The list expands, then collapses after a selection or a short idle.
--- If false, every option is shown immediately.
-config.compactOptions = true
-
--- Milliseconds of no menu activity before a compact list collapses.
-config.compactIdleMs = 2500
-
--- Default key for the interact action. Players can rebind this in GTA Settings > Key Bindings > FiveM.
-config.defaultInteractKey = 'E'
-
--- Distant / inactive marker. `file` loads a PNG from this resource as a runtime texture.
-config.IndicatorSprite = {
-    dict = 'slp_ind',
-    txt = 'radio',
-    file = 'web/indicator.png',
-    rotation = 0.0,
-    color = { 255, 255, 255 },
-    scale = 0.016,
-}
-
--- Screen-center pip while in range of a usable interact
-config.CenterDot = {
-    enabled = true,
-    dict = 'mpcarhud',
-    txt = 'leaderboard_car_colour_icon_singlecolour',
-    color = { 255, 255, 255, 255 },
-    scale = 0.002,
-    x = 0.5,
-    y = 0.5,
-}
-
--- Use a keybind to show and hide the interactions
-config.useShowKeyBind = false
-
--- Default key mapping for the show interactions keybind
-config.defaultShowKeyBind = 'LMENU'
-
--- Sets the behavior of the show interactions keybind: "hold" or "toggle"
-config.showKeyBindBehavior = 'toggle'
-```
-
-## Options Explained [#options-explained]
-
-| Option                | Type              | Default                        | Description                                                                                                                                                                                                                                                                                                     |
-| --------------------- | ----------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `maxInteractDistance` | `number`          | `5.0`                          | Maximum distance at which interact indicator sprites are rendered. Keep low for performance.                                                                                                                                                                                                                    |
-| `requireLookAt`       | `boolean`         | `true`                         | If true, the prompt only opens when the target is inside `lookRadius` of the reticle. If false, the closest valid nearby interact opens without aiming.                                                                                                                                                         |
-| `lookRadius`          | `number`          | `0.08`                         | How close to screen center a target must be to open the prompt. Units are a fraction of screen height. Raise it to aim looser. Ignored when `requireLookAt` is false.                                                                                                                                           |
-| `autoCenter`          | `boolean`         | `true`                         | If true, entity options without `offset`, `offsetAbsolute`, or `bones` are placed at the model bounding-box center instead of the entity origin.                                                                                                                                                                |
-| `requireLos`          | `boolean`         | `true`                         | Hide interacts with no clear line of sight. Entity targets (including bones and offsets) test LOS to the entity. Coord targets test LOS to the point.                                                                                                                                                           |
-| `losFlags`            | `number`          | `17`                           | Shape-test bit mask used by `requireLos`. `1` world, `2` vehicles, `4` peds, `16` objects. Default `17` is world + objects.                                                                                                                                                                                     |
-| `hideWhenEmpty`       | `table`           | globals `true`, others `false` | Per interact type: hide the distant marker when every option on that target is currently invalid (`canInteract`, distance, groups, items, in-vehicle). Globals default to hide so nearby peds/vehicles/objects do not spam sprites. Models, entities, and coords keep the marker unless you set them to `true`. |
-| `theme`               | `string`          | `'modern'`                     | Visual look of the world prompt. Must match a file in `web/themes/<id>.css`.                                                                                                                                                                                                                                    |
-| `themeColors`         | `table`           | see above                      | Per-theme RGBA accent `{ r, g, b, a }` (0–255). Drives the HUD highlight.                                                                                                                                                                                                                                       |
-| `themeColor`          | `number[] \| nil` | `nil`                          | Optional global accent override. When set, every theme uses this color instead of `themeColors`.                                                                                                                                                                                                                |
-| `compactOptions`      | `boolean`         | `true`                         | Compact multi-option prompt. See [Compact prompt](#compact-prompt).                                                                                                                                                                                                                                             |
-| `compactIdleMs`       | `number`          | `2500`                         | Idle time in milliseconds before a compact list collapses. Minimum `500`.                                                                                                                                                                                                                                       |
-| `defaultInteractKey`  | `string`          | `'E'`                          | Default mapping for the interact action. Players can rebind it in GTA Settings; the prompt shows the live key.                                                                                                                                                                                                  |
-| `IndicatorSprite`     | `table`           | radio PNG, white               | Distant marker. `file` is a PNG in this resource. `color` tints it (`{ 255, 255, 255 }` stays white). `scale` is world size. Omit `file` and set `dict` / `txt` to use a GTA texture instead.                                                                                                                   |
-| `CenterDot`           | `table`           | `mpcarhud` colour icon         | Screen-center circle while at least one usable interact is nearby. Set `enabled` to `false` to hide it. `color` tints the sprite. `scale` is screen size, `x` / `y` are 0–1 screen position. Optional `file` loads a PNG instead of `dict` / `txt`.                                                             |
-| `useShowKeyBind`      | `boolean`         | `false`                        | Whether a keybind is required to show/hide interactions.                                                                                                                                                                                                                                                        |
-| `defaultShowKeyBind`  | `string`          | `'LMENU'`                      | The default key mapping for toggling interaction visibility.                                                                                                                                                                                                                                                    |
-| `showKeyBindBehavior` | `string`          | `'toggle'`                     | `"hold"` requires holding the key; `"toggle"` switches on/off per press.                                                                                                                                                                                                                                        |
-
-<Callout type="info">
-  The `maxInteractDistance` directly affects performance. A lower value means fewer interactions are checked and rendered each frame.
-</Callout>
-
-<Callout type="info">
-  Set `hideWhenEmpty.models = true` if model targets should lose their marker when `canInteract` returns false. An option can set `hideWhenEmpty = true` or `false` to override the type default. The marker only hides when every option on the target wants to hide.
-</Callout>
-
-<Callout type="info">
-  Interact is registered as a FiveM keybind (`interact_action`). Players rebind it in GTA Settings → Key Bindings → FiveM. The prompt reads the live mapping, so the keycap updates after they leave the pause menu.
-</Callout>
-
-## Themes [#themes]
-
-`config.theme` selects the prompt skin. Each built-in look has its own accent in `config.themeColors`. Leave `config.themeColor` as `nil` unless you want one color on every theme.
-
-| Id           | Description                              |
-| ------------ | ---------------------------------------- |
-| `legacy`     | Original sleepless\_interact prompt      |
-| `modern`     | Night HUD with frost panels              |
-| `minimal`    | Quiet hairline frames                    |
-| `light`      | Light panels, dark type                  |
-| `retro`      | CRT amber with scanlines                 |
-| `cyber`      | Angular HUD with a clipped corner        |
-| `vice`       | Magenta-to-cyan neon rim                 |
-| `noir`       | Circular iris key, letterbox title cards |
-| `industrial` | Riveted plates, hazard stripe on select  |
-| `fantasy`    | Manuscript corner brackets               |
-
-An option's `color` field still overrides the accent for that row only. See [Interact Options](/docs/interact/interact-options).
-
-To add your own look, see [Custom Themes](/docs/interact/custom-themes).
-
-## Compact prompt [#compact-prompt]
-
-When `compactOptions` is `true` (the default), a target with **more than one option** starts as a single `INTERACT` label.
-
-* Press E once to open the list.
-* Press E again to select the highlighted option. Hold E for options with `holdTime`.
-* Scroll to move the highlight. The list stays still; the highlight moves.
-* After a selection, or after `compactIdleMs` with no activity, the list collapses back to `INTERACT`.
-* A hold in progress will not collapse.
-
-Targets with a single option always show that option. Set `compactOptions` to `false` to always show the full list.
-
-## Locales [#locales]
-
-Compact prompt copy uses [ox\_lib locales](https://coxdocs.dev/ox_lib#usage). English ships in `locales/en.json`. Add another file (for example `locales/fr.json`) to translate it; ox\_lib merges that over English using the player's language.
-
-```json
-{
-  "interact": "Interact",
-  "interact_enabled": "Enabled",
-  "interact_disabled": "Disabled"
-}
-```
-
-| Key                 | Use                                                            |
-| ------------------- | -------------------------------------------------------------- |
-| `interact`          | Compact prompt label, keybind name, and notify title           |
-| `interact_enabled`  | Notify when the show-interactions keybind turns the prompt on  |
-| `interact_disabled` | Notify when the show-interactions keybind turns the prompt off |
-
-The compact label is drawn in uppercase by the HUD, so store sentence case in the locale file (`Interact`, not `INTERACT`).
-
-<Callout type="info">
-  For details on how to define interaction options (the `Option` type used in exports), see the [Interact Options](/docs/interact/interact-options) reference page.
-</Callout>
-
-
-# Custom Themes (/docs/interact/custom-themes)
-
-
-
-Each look is a CSS file. The Lua config only picks an id and an accent. Copy a built-in theme, rename the selector, then restyle the E key and option rows.
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Create the stylesheet [#create-the-stylesheet-step]
-
-    Add `web/themes/<id>.css`. The id must be lowercase with no spaces (`ember`, `hospital`, `mytheme`). Every rule is scoped to that id:
-
-    ```css
-    [data-theme="ember"] {
-      --primary: 232, 96, 48;
-      --on-accent: 8, 11, 16;
-      --text: 236, 241, 247;
-    }
-    ```
-
-    Unknown ids are loaded from `web/themes/<id>.css` automatically. If the file is missing, the prompt falls back to `modern`.
-  </div>
-
-  <div className="fd-step">
-    ### Point config at it [#point-config-at-it-step]
-
-    In `client/modules/config.lua`:
-
-    ```lua
-    config.theme = 'ember'
-
-    config.themeColors = {
-        -- keep the built-ins, then add yours
-        ember = { 232, 96, 48, 255 },
-    }
-    ```
-
-    `themeColors` is the default HUD accent. Leave `config.themeColor = nil` so this color is not forced onto every other theme. The distant marker is white unless you set `config.IndicatorSprite.color`.
-  </div>
-
-  <div className="fd-step">
-    ### Preview in a browser [#preview-in-a-browser-step]
-
-    Serve the `web/` folder and open:
-
-    ```
-    http://127.0.0.1:8080/?theme=ember&compact=0
-    ```
-
-    | Query            | Effect                           |
-    | ---------------- | -------------------------------- |
-    | `theme=<id>`     | Load that theme                  |
-    | `compact=0`      | Always show the full option list |
-    | `state=open`     | Expand the compact prompt        |
-    | `state=hold`     | Fill hold progress on the E key  |
-    | `state=cooldown` | Show the cooldown hourglass      |
-
-    The on-page dock is browser-only. In game, restart the resource after CSS or config changes.
-  </div>
-</div>
-
-## Markup [#markup]
-
-The HTML does not change. Themes only restyle these nodes:
-
-```
-#container
-  #interact-container          E key
-    #interact-progress         hold fill (height is set in JS)
-    #interact-key              the letter, or an hourglass in cooldown
-  #options-wrapper
-    .interact-summary          compact "INTERACT" label
-      .option-label
-    #options-list
-      .option-container        one row per option
-        .animated-background   optional fill (legacy / retro)
-        .option-icon
-        .option-label
-        .option-hold           only when the option has holdTime
-```
-
-### States [#states]
-
-| Selector                         | When                                            |
-| -------------------------------- | ----------------------------------------------- |
-| `.option-container.highlighted`  | Current option (E / scroll). There is no hover. |
-| `#interact-container.is-holding` | Player is holding E                             |
-| `body.is-cooldown`               | Option cooldown; the key becomes an hourglass   |
-| `#container.is-compact`          | Target has more than one option                 |
-| `#container.is-compact.is-open`  | Compact list is expanded                        |
-
-Do not add `:hover` or `:active` on option rows. They are never clicked.
-
-## Tokens [#tokens]
-
-Color tokens are **RGB triplets**, not `rgb()` values, so both `rgb(var(--primary))` and `rgba(var(--primary), 0.2)` work. Server `themeColors` / option `color` write `--primary` the same way.
-
-| Token          | Example                            | Use                                          |
-| -------------- | ---------------------------------- | -------------------------------------------- |
-| `--primary`    | `49, 164, 252`                     | Highlight, hold fill, selected border        |
-| `--on-accent`  | `8, 11, 16`                        | Text sitting on a filled `--primary` surface |
-| `--text`       | `236, 241, 247`                    | Labels                                       |
-| `--text-muted` | `156, 170, 186`                    | Idle icons, Hold chip                        |
-| `--surface`    | `10, 14, 20`                       | Panel fill                                   |
-| `--ink`        | `8, 11, 16`                        | Dark insets                                  |
-| `--hairline`   | `220, 230, 242`                    | Borders, usually with `--hairline-a`         |
-| `--panel-a`    | `0.92`                             | Panel opacity                                |
-| `--font`       | `"DINPRO", "Segoe UI", sans-serif` | Typeface                                     |
-
-`--on-accent` should contrast with `--primary`. Light accents need a dark `--on-accent`; dark accents need a light one. JS will recompute `--on-accent` when a global `themeColor` or per-option `color` is applied.
-
-Root `font-size` is `1vh`, so `1rem` is 1% of the viewport height. Size the E key and rows in `rem`, not `px`. Offset the list from the key with `--options-x` on `#options-wrapper` (default `2.6rem`).
-
-## What to style [#what-to-style]
-
-Copy `web/themes/modern.css` or `web/themes/minimal.css` and rename `[data-theme="..."]`. At minimum, cover:
-
-1. **`#interact-container` / `#interact-key`** — size, border, background, letter
-2. **`#interact-progress`** — usually `left/right/bottom: 0; width: 100%; height: 0` with `background: rgb(var(--primary))`. JS only changes `height`.
-3. **`.option-container`** — row chrome
-4. **`.option-container.highlighted`** — selected row. Put `--primary` here, not on every idle row.
-5. **`.option-icon`, `.option-label`, `.option-hold`** — idle and `.highlighted` colors
-6. **`body.is-cooldown`** — dim the key so the hourglass reads as blocked
-
-`.animated-background` is a full-row fill used by `legacy` and `retro`. Most themes hide it with `display: none`.
-
-### Compact INTERACT [#compact-interact]
-
-When compact, global CSS strips border, background, and shadow from `.interact-summary` and draws `INTERACT` as uppercase outlined type. Keep row decorations on `.option-container` only. Pseudos on `.interact-summary` will still show on the compact label.
-
-To force compact label color (light themes need this so it stays white):
-
-```css
-[data-theme="ember"] #container.is-compact .interact-summary .option-label {
-  color: #fff;
-}
-```
-
-### Hold contrast [#hold-contrast]
-
-While holding, the letter keeps its idle color and gets a `--on-accent` stroke so it stays readable as `--primary` fills the key. If the fill and the letter are the same color, that stroke is what keeps E visible.
-
-## Starter [#starter]
-
-```css
-[data-theme="ember"] {
-  --ink: 12, 8, 6;
-  --surface: 22, 14, 12;
-  --text: 255, 236, 228;
-  --text-muted: 196, 150, 132;
-  --hairline: 232, 96, 48;
-  --hairline-a: 0.4;
-  --primary: 232, 96, 48;
-  --on-accent: 12, 8, 6;
-  --font: "DINPRO", "Segoe UI", sans-serif;
-  --panel-a: 0.94;
-}
-
-[data-theme="ember"] body {
-  font-family: var(--font);
-  color: rgb(var(--text));
-}
-
-[data-theme="ember"] .animated-background {
-  display: none;
-}
-
-[data-theme="ember"] #options-list {
-  gap: 0.4rem;
-}
-
-[data-theme="ember"] #interact-container {
-  width: 3.4rem;
-  height: 3.4rem;
-  border: 0.12rem solid rgba(var(--hairline), 0.7);
-  border-radius: 0.4rem;
-  background: rgba(var(--surface), var(--panel-a));
-}
-
-[data-theme="ember"] #interact-progress {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 0;
-  background: rgb(var(--primary));
-}
-
-[data-theme="ember"] #interact-key {
-  width: 100%;
-  height: 100%;
-  color: rgb(var(--text));
-  font-size: 1.4rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-[data-theme="ember"] #interact-container.is-holding {
-  border-color: rgb(var(--primary));
-}
-
-[data-theme="ember"] body.is-cooldown #interact-container {
-  opacity: 0.5;
-}
-
-[data-theme="ember"] .option-container,
-[data-theme="ember"] .interact-summary {
-  min-width: 17rem;
-  height: 2.8rem;
-  padding: 0 0.85rem 0 0.5rem;
-  gap: 0.55rem;
-  overflow: hidden;
-  border: 0.12rem solid rgba(var(--hairline), var(--hairline-a));
-  border-radius: 0.4rem;
-  background: rgba(var(--surface), var(--panel-a));
-  color: rgb(var(--text));
-  font-family: var(--font);
-}
-
-[data-theme="ember"] .interact-summary {
-  min-width: 0;
-  width: max-content;
-  padding-left: 0.9rem;
-  padding-right: 1.2rem;
-}
-
-[data-theme="ember"] .option-container.highlighted {
-  border-color: rgb(var(--primary));
-  background: rgba(var(--primary), 0.2);
-}
-
-[data-theme="ember"] .option-icon {
-  width: 1.6rem;
-  font-size: 1.2rem;
-  color: rgb(var(--text-muted));
-}
-
-[data-theme="ember"] .option-container.highlighted .option-icon,
-[data-theme="ember"] .option-container.highlighted .option-label {
-  color: rgb(var(--text));
-}
-
-[data-theme="ember"] .option-label {
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
-[data-theme="ember"] .option-hold {
-  margin-left: auto;
-  color: rgb(var(--text-muted));
-  font-size: 1.05rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-[data-theme="ember"] .option-container.highlighted .option-hold {
-  color: rgb(var(--text));
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  [data-theme="ember"] {
-    --panel-a: 1;
-  }
-}
-```
-
-## DUI limits [#dui-limits]
-
-This prompt is a world sprite, not a fullscreen NUI overlay.
-
-* Keep `html, body` background transparent. `style.css` already does this.
-* `backdrop-filter` cannot blur GTA. CEF only composites the DUI texture, so a blur with nothing behind it paints black. Use solid or slightly transparent `--surface` fills.
-* Keep the layout compact. Large shadows and oversized rows read poorly in the world.
-* Prefer `rem` over `px`. Animate `transform` and `opacity` only.
-
-DINPRO is self-hosted in `web/fonts/`. To use another face, add an `@font-face` in your theme file (see `legacy.css`) and set `--font`.
-
-<Callout type="info">
-  Built-in themes live in `web/themes/`. `modern.css` is the default HUD. `cyber.css`, `vice.css`, and `noir.css` show how far you can push shape without changing the HTML.
-</Callout>
-
-
-# Sleepless Interact (/docs/interact)
-
-
-
-
-
-A 3D DUI interaction library for interacting with various entities and points in the world. Provides a modern, performant alternative to traditional targeting systems with full ox\_target API compatibility.
-
-<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_interact" />
-
-## Features [#features]
-
-* 🎯 **3D DUI Rendering** - Beautiful interaction indicators rendered in 3D world space
-* 🔄 **ox\_target Compatibility** - Full drop-in support for ox\_target exports
-* 📍 **Multiple Target Types** - Coordinates, entities, models, and global types (objects, peds, players, vehicles)
-* 🎨 **Visual themes** - Ten built-in looks, per-theme accents, or one global color override
-* ⌨️ **Compact prompt** - Multi-option targets show Interact until E is pressed
-* ⚡ **Performance Optimized** - Distance-based culling with configurable render distance
-* 🚗 **Vehicle Support** - Options can be configured to work inside vehicles
-* ⏱️ **Hold Actions** - Support for press-and-hold interactions with configurable durations
-* 🧊 **Cooldown System** - Prevent interaction spam with per-option cooldowns
-* 🔁 **Active Callbacks** - `onActive`, `onInactive`, and `whileActive` callbacks for advanced use cases
-
-## Dependencies [#dependencies]
-
-* [ox\_lib](https://github.com/overextended/ox_lib) (required)
-
-## ox\_target Compatibility [#ox_target-compatibility]
-
-Sleepless Interact fully supports the ox\_target API. If you enable the ox\_target bridge, the resource will handle all ox\_target exports, allowing you to use it as a drop-in replacement without modifying other resources.
-
-## Installation [#installation]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Download the Resource [#download-the-resource-step]
-
-    Download a [release](https://github.com/Sleepless-Development/sleepless_interact/releases) or clone the repository. The prompt UI is vanilla HTML, CSS, and JavaScript under `web/` and does not need a build step.
-  </div>
-
-  <div className="fd-step">
-    ### Add to Server [#add-to-server-step]
-
-    Place the `sleepless_interact` folder in your server's resources directory.
-  </div>
-
-  <div className="fd-step">
-    ### Configure Your Server [#configure-your-server-step]
-
-    Add the following to your `server.cfg`:
-
-    ```bash
-    ensure ox_lib
-    ensure sleepless_interact
-    ```
-  </div>
-
-  <div className="fd-step">
-    ### Configure the Resource [#configure-the-resource-step]
-
-    Edit `client/modules/config.lua` to choose a theme, accent colors, compact prompt behavior, keybinds, and render distance. See the [Configuration](/docs/interact/configuration) page for details, or [Custom Themes](/docs/interact/custom-themes) to add your own look.
-  </div>
-</div>
-
-## Quick Start [#quick-start]
-
-### Adding a Coordinate Interaction [#adding-a-coordinate-interaction]
-
-```lua
-local id = exports.sleepless_interact:addCoords(vec3(100.0, 200.0, 30.0), {
-    label = "Interact Here",
-    icon = "hand",
-    distance = 2.0,
-    onSelect = function(data)
-        print("Selected at", data.coords)
-    end,
-})
-```
-
-### Adding a Global Ped Interaction [#adding-a-global-ped-interaction]
-
-```lua
-exports.sleepless_interact:addGlobalPed({
-    label = "Talk to Ped",
-    name = "talk_to_ped",
-    icon = "comment",
-    distance = 2.0,
-    onSelect = function(data)
-        print("Talking to ped", data.entity)
-    end,
-})
-```
-
-<Callout type="info">
-  See the [Client Exports](/docs/interact/exports/Client) page for the full API reference.
-</Callout>
-
-## Support [#support]
-
-If you need help or have questions:
-
-* [Discord](https://discord.gg/A2bDPbfgNP)
-* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_interact/issues)
-
-
-# Interact Options (/docs/interact/interact-options)
-
-
-
-All interact actions are formatted as an array containing objects with the following properties.
-
-## Option Type Definition [#option-type-definition]
-
-```lua
----@class InteractOption
----@field label string The display label for the option.
----@field icon? string The icon associated with the option.
----@field iconColor? string The CSS color for the icon.
----@field distance? number The maximum distance at which the option is available.
----@field holdTime? number Makes the option a press and hold and sets how long it should be held for (milliseconds).
----@field canInteract? fun(entity: number, distance: number, coords: vector3, name: string): boolean? A function to determine if the option can be interacted with.
----@field hideWhenEmpty? boolean Override `config.hideWhenEmpty` for this option. True hides the distant marker when this option is invalid. False keeps it.
----@field name? string A unique identifier for the option.
----@field resource? string The resource that registered the option.
----@field offset? vector3 A relative offset from the entity's position.
----@field offsetAbsolute? vector3 An absolute offset in world coordinates.
----@field color? number[] 4 numbers in an array used for RGBA, overwriting the theme accent for that option.
----@field bones? string | string[] An array of bone IDs associated with the option.
----@field allowInVehicle? boolean Marks the option as being usable inside a vehicle.
----@field onSelect? fun(data: InteractResponse) A function to execute when the option is selected.
----@field cooldown? number Number of milliseconds the interact system should cooldown for after this option is selected. Prevents spam.
----@field export? string Optional export function name.
----@field event? string Client-side event to trigger.
----@field serverEvent? string Server-side event to trigger.
----@field command? string Command to execute.
----@field onActive? fun(data: InteractResponse) A function to execute when the option is active.
----@field onInactive? fun(data: InteractResponse) A function to execute when the option was active and is now inactive.
----@field whileActive? fun(data: InteractResponse) A function to execute while the option is active on a loop.
-```
-
-### Properties [#properties]
-
-| Property         | Type                 | Required | Description                                                                                                                                                           |
-| ---------------- | -------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `label`          | `string`             | Yes      | The display label for the option                                                                                                                                      |
-| `icon`           | `string`             | No       | FontAwesome icon name                                                                                                                                                 |
-| `iconColor`      | `string`             | No       | CSS color for the icon                                                                                                                                                |
-| `distance`       | `number`             | No       | Maximum distance at which the option is available                                                                                                                     |
-| `holdTime`       | `number`             | No       | Press-and-hold duration in milliseconds                                                                                                                               |
-| `canInteract`    | `function`           | No       | Function to determine if the option can be interacted with                                                                                                            |
-| `hideWhenEmpty`  | `boolean`            | No       | Overrides `config.hideWhenEmpty` for this option. `true` hides the distant marker when the option is invalid. `false` keeps it. Takes priority over the type default. |
-| `name`           | `string`             | No       | A unique identifier for the option                                                                                                                                    |
-| `resource`       | `string`             | No       | The resource that registered the option                                                                                                                               |
-| `offset`         | `vector3`            | No       | Relative offset from the entity's position                                                                                                                            |
-| `offsetAbsolute` | `vector3`            | No       | Absolute offset in world coordinates                                                                                                                                  |
-| `color`          | `number[]`           | No       | RGBA array `{r, g, b, a}` overriding the theme accent for that option                                                                                                 |
-| `bones`          | `string \| string[]` | No       | Bone ID(s) associated with the option                                                                                                                                 |
-| `allowInVehicle` | `boolean`            | No       | Allow usage inside a vehicle                                                                                                                                          |
-| `onSelect`       | `function`           | No       | Callback when the option is selected                                                                                                                                  |
-| `cooldown`       | `number`             | No       | Cooldown in milliseconds after selection                                                                                                                              |
-| `export`         | `string`             | No       | Export function name to call                                                                                                                                          |
-| `event`          | `string`             | No       | Client-side event to trigger                                                                                                                                          |
-| `serverEvent`    | `string`             | No       | Server-side event to trigger                                                                                                                                          |
-| `command`        | `string`             | No       | Command to execute                                                                                                                                                    |
-| `onActive`       | `function`           | No       | Callback when the option becomes active                                                                                                                               |
-| `onInactive`     | `function`           | No       | Callback when the option becomes inactive                                                                                                                             |
-| `whileActive`    | `function`           | No       | Callback that runs in a loop while the option is active                                                                                                               |
-
-## Callback Response [#callback-response]
-
-When a player selects an option, a single action is triggered in the following priority order:
-
-1. `onSelect`
-2. `export`
-3. `event`
-4. `serverEvent`
-5. `command`
-
-The callback or event receives an `InteractResponse` table:
-
-| Property   | Type      | Description                                                                                        |
-| ---------- | --------- | -------------------------------------------------------------------------------------------------- |
-| `entity`   | `number`  | The entity ID hit by the shape test. If triggering a server event, this is the network ID instead. |
-| `coords`   | `vector3` | The resulting coordinates where the shape test hit a collision                                     |
-| `distance` | `number`  | The player's distance from the coords                                                              |
-| `zone`     | `number?` | The ID of the selected zone, if applicable                                                         |
-
-<Callout type="info">
-  When using `serverEvent`, the `entity` value is automatically converted to a network ID so it can be resolved on the server.
-</Callout>
-
-## Example [#example]
-
-```lua
-local options = {
-    {
-        label = "Talk to Ped",
-        name = "talk_to_ped",
-        icon = "comments",
-        distance = 2.0,
-        cooldown = 1500,
-        onSelect = function(data)
-            print("Talking to ped", data.entity)
-        end,
-        canInteract = function(entity, distance, coords, name)
-            return distance < 2.0
-        end,
-    },
-    {
-        label = "Rob Ped",
-        name = "rob_ped",
-        icon = "hand-holding-dollar",
-        distance = 1.5,
-        holdTime = 3000,
-        serverEvent = "myresource:robPed",
-    },
-}
-```
-
-
 # Back Items (/docs/inventoryaddons/back-items)
 
 
@@ -2391,6 +1683,720 @@ local config = {
 <Callout type="warn">
   Ensure the animation dictionaries and prop models you reference are valid and available in the game. Invalid references will result in the carry behavior not displaying correctly.
 </Callout>
+
+
+# Configuration (/docs/interact/configuration)
+
+
+
+The configuration file is located at `client/modules/config.lua`. This file controls the world prompt, visual theme, compact menu, and keybinds.
+
+## General Settings [#general-settings]
+
+```lua
+local config = {}
+
+-- Maximum distance the indicator sprite renders.
+config.maxInteractDistance = 5.0
+
+-- Maximum indicator sprites drawn at once.
+config.maxIndicators = 8
+
+-- Only open the prompt when looking at the target.
+config.requireLookAt = true
+
+-- How close to the reticle the target must be.
+config.lookRadius = 0.08
+
+-- Place unoffset entity options at the model center.
+config.autoCenter = true
+
+-- Hide interacts the player cannot see.
+config.requireLos = true
+
+-- What blocks line of sight. 1 world, 2 vehicles, 4 peds, 16 objects.
+config.losFlags = 17
+
+-- How far collision in front of an ATM can be and still count as visible.
+config.losShellDepth = 2.0
+
+-- Hide the indicator when an interact type has no valid options.
+config.hideWhenEmpty = {
+    globalPeds = true,
+    globalVehicles = true,
+    globalObjects = true,
+    globalPlayers = true,
+    models = false,
+    entities = false,
+    localEntities = false,
+    coords = false,
+}
+
+-- Size of the world prompt.
+config.duiScale = 0.12
+
+-- Maximum size of the prompt texture.
+config.duiResolution = 1024
+
+-- Prompt theme.
+config.theme = 'modern'
+
+-- Accent color for each theme.
+config.themeColors = {
+    legacy = { 28, 100, 184, 200 },
+    modern = { 49, 164, 252, 255 },
+    minimal = { 168, 186, 204, 255 },
+    light = { 37, 99, 235, 255 },
+    retro = { 255, 176, 32, 255 },
+    cyber = { 0, 229, 255, 255 },
+    vice = { 255, 64, 180, 255 },
+    noir = { 240, 240, 236, 255 },
+    industrial = { 212, 168, 48, 255 },
+    fantasy = { 212, 175, 110, 255 },
+}
+
+-- Accent color used for every theme. Nil uses the theme color.
+config.themeColor = nil
+
+-- Show one Interact row until the menu is opened.
+config.compactOptions = true
+
+-- How long before a compact menu closes.
+config.compactIdleMs = 2500
+
+-- Default interact key.
+config.defaultInteractKey = 'E'
+
+-- Distant indicator sprite.
+config.IndicatorSprite = {
+    dict = 'slp_ind',
+    txt = 'radio',
+    file = 'web/indicator.png',
+    rotation = 0.0,
+    color = { 255, 255, 255 },
+    scale = 0.016,
+}
+
+-- Dot drawn at the center of the screen.
+config.CenterDot = {
+    enabled = true,
+    dict = 'mpcarhud',
+    txt = 'leaderboard_car_colour_icon_singlecolour',
+    color = { 255, 255, 255, 255 },
+    scale = 0.002,
+    x = 0.5,
+    y = 0.5,
+}
+
+-- Use a key to show and hide interacts.
+config.useShowKeyBind = false
+
+-- Default key for showing interacts.
+config.defaultShowKeyBind = 'LMENU'
+
+-- Hold or toggle the show key.
+config.showKeyBindBehavior = 'toggle'
+```
+
+## Options Explained [#options-explained]
+
+| Option                | Type              | Default                        | Description                                                                                                                                                                                                                                                                                                     |
+| --------------------- | ----------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `maxInteractDistance` | `number`          | `5.0`                          | Maximum distance at which interact indicator sprites are rendered. Keep low for performance.                                                                                                                                                                                                                    |
+| `maxIndicators`       | `number`          | `8`                            | Max distant marker sprites drawn per frame. The active prompt is not counted. Raise it in busy areas if dots vanish when many targets are nearby.                                                                                                                                                               |
+| `requireLookAt`       | `boolean`         | `true`                         | If true, the prompt only opens when the target is inside `lookRadius` of the reticle. If false, the closest valid nearby interact opens without aiming.                                                                                                                                                         |
+| `lookRadius`          | `number`          | `0.08`                         | How close to screen center a target must be to open the prompt. Units are a fraction of screen height. Raise it to aim looser. Ignored when `requireLookAt` is false.                                                                                                                                           |
+| `autoCenter`          | `boolean`         | `true`                         | If true, entity options without `offset`, `offsetAbsolute`, or `bones` are placed at the model bounding-box center instead of the entity origin.                                                                                                                                                                |
+| `requireLos`          | `boolean`         | `true`                         | Hide interacts the player cannot see.                                                                                                                                                                                                                                                                           |
+| `losFlags`            | `number`          | `17`                           | What blocks line of sight. `1` world, `2` vehicles, `4` peds, `16` objects.                                                                                                                                                                                                                                     |
+| `losShellDepth`       | `number`          | `2.0`                          | How far collision in front of an ATM can be and still count as visible.                                                                                                                                                                                                                                         |
+| `hideWhenEmpty`       | `table`           | globals `true`, others `false` | Per interact type: hide the distant marker when every option on that target is currently invalid (`canInteract`, distance, groups, items, in-vehicle). Globals default to hide so nearby peds/vehicles/objects do not spam sprites. Models, entities, and coords keep the marker unless you set them to `true`. |
+| `duiScale`            | `number`          | `0.12`                         | World size of the prompt sprite. The prompt fills the DUI texture, so this is the on-screen size of the prompt itself. Raise it to make the prompt larger in the world.                                                                                                                                         |
+| `duiResolution`       | `number`          | `2048`                         | Cap on the DUI texture long edge. The texture is sized to 2x the on-screen sprite so type stays sharp. This only clamps very large resolutions.                                                                                                                                                                 |
+| `theme`               | `string`          | `'modern'`                     | Visual look of the world prompt. Must match a file in `web/themes/<id>.css`.                                                                                                                                                                                                                                    |
+| `themeColors`         | `table`           | see above                      | Per-theme RGBA accent `{ r, g, b, a }` (0–255). Drives the HUD highlight.                                                                                                                                                                                                                                       |
+| `themeColor`          | `number[] \| nil` | `nil`                          | Optional global accent override. When set, every theme uses this color instead of `themeColors`.                                                                                                                                                                                                                |
+| `compactOptions`      | `boolean`         | `true`                         | Compact multi-option prompt. See [Compact prompt](#compact-prompt).                                                                                                                                                                                                                                             |
+| `compactIdleMs`       | `number`          | `2500`                         | Idle time in milliseconds before a compact list collapses. Minimum `500`.                                                                                                                                                                                                                                       |
+| `defaultInteractKey`  | `string`          | `'E'`                          | Default mapping for the interact action. Players can rebind it in GTA Settings; the prompt shows the live key.                                                                                                                                                                                                  |
+| `IndicatorSprite`     | `table`           | radio PNG, white               | Distant marker. `file` is a PNG in this resource. `color` tints it (`{ 255, 255, 255 }` stays white). `scale` is world size. Omit `file` and set `dict` / `txt` to use a GTA texture instead.                                                                                                                   |
+| `CenterDot`           | `table`           | `mpcarhud` colour icon         | Screen-center circle while at least one usable interact is nearby. Set `enabled` to `false` to hide it. `color` tints the sprite. `scale` is screen size, `x` / `y` are 0–1 screen position. Optional `file` loads a PNG instead of `dict` / `txt`.                                                             |
+| `useShowKeyBind`      | `boolean`         | `false`                        | Whether a keybind is required to show/hide interactions.                                                                                                                                                                                                                                                        |
+| `defaultShowKeyBind`  | `string`          | `'LMENU'`                      | The default key mapping for toggling interaction visibility.                                                                                                                                                                                                                                                    |
+| `showKeyBindBehavior` | `string`          | `'toggle'`                     | `"hold"` requires holding the key; `"toggle"` switches on/off per press.                                                                                                                                                                                                                                        |
+
+<Callout type="info">
+  The `maxInteractDistance` directly affects performance. A lower value means fewer interactions are checked and rendered each frame.
+</Callout>
+
+<Callout type="info">
+  Set `hideWhenEmpty.models = true` if model targets should lose their marker when `canInteract` returns false. An option can set `hideWhenEmpty = true` or `false` to override the type default. The marker only hides when every option on the target wants to hide.
+</Callout>
+
+<Callout type="info">
+  Interact is registered as a FiveM keybind (`interact_action`). Players rebind it in GTA Settings → Key Bindings → FiveM. The prompt reads the live mapping, so the keycap updates after they leave the pause menu.
+</Callout>
+
+## Themes [#themes]
+
+`config.theme` selects the prompt skin. Each built-in look has its own accent in `config.themeColors`. Leave `config.themeColor` as `nil` unless you want one color on every theme.
+
+| Id           | Description                              |
+| ------------ | ---------------------------------------- |
+| `legacy`     | Original sleepless\_interact prompt      |
+| `modern`     | Night HUD with frost panels              |
+| `minimal`    | Quiet hairline frames                    |
+| `light`      | Light panels, dark type                  |
+| `retro`      | CRT amber with scanlines                 |
+| `cyber`      | Angular HUD with a clipped corner        |
+| `vice`       | Magenta-to-cyan neon rim                 |
+| `noir`       | Circular iris key, letterbox title cards |
+| `industrial` | Riveted plates, hazard stripe on select  |
+| `fantasy`    | Manuscript corner brackets               |
+
+An option's `color` field still overrides the accent for that row only. See [Interact Options](/docs/interact/interact-options).
+
+To add your own look, see [Custom Themes](/docs/interact/custom-themes).
+
+## Compact prompt [#compact-prompt]
+
+When `compactOptions` is `true` (the default), a target with **more than one option** starts as a single `INTERACT` label.
+
+* Press E once to open the list.
+* Press E again to select the highlighted option. Hold E for options with `holdTime`.
+* Scroll to move the highlight. The list stays still; the highlight moves.
+* After a selection, or after `compactIdleMs` with no activity, the list collapses back to `INTERACT`.
+* A hold in progress will not collapse.
+
+Targets with a single option always show that option. Set `compactOptions` to `false` to always show the full list.
+
+## Locales [#locales]
+
+Compact prompt copy uses [ox\_lib locales](https://coxdocs.dev/ox_lib#usage). English ships in `locales/en.json`. Add another file (for example `locales/fr.json`) to translate it; ox\_lib merges that over English using the player's language.
+
+```json
+{
+  "interact": "Interact",
+  "interact_enabled": "Enabled",
+  "interact_disabled": "Disabled"
+}
+```
+
+| Key                 | Use                                                            |
+| ------------------- | -------------------------------------------------------------- |
+| `interact`          | Compact prompt label, keybind name, and notify title           |
+| `interact_enabled`  | Notify when the show-interactions keybind turns the prompt on  |
+| `interact_disabled` | Notify when the show-interactions keybind turns the prompt off |
+
+The compact label is drawn in uppercase by the HUD, so store sentence case in the locale file (`Interact`, not `INTERACT`).
+
+<Callout type="info">
+  For details on how to define interaction options (the `Option` type used in exports), see the [Interact Options](/docs/interact/interact-options) reference page.
+</Callout>
+
+
+# Custom Themes (/docs/interact/custom-themes)
+
+
+
+Each look is a CSS file. The Lua config only picks an id and an accent. Copy a built-in theme, rename the selector, then restyle the E key and option rows.
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Create the stylesheet [#create-the-stylesheet-step]
+
+    Add `web/themes/<id>.css`. The id must be lowercase with no spaces (`ember`, `hospital`, `mytheme`). Every rule is scoped to that id:
+
+    ```css
+    [data-theme="ember"] {
+      --primary: 232, 96, 48;
+      --on-accent: 8, 11, 16;
+      --text: 236, 241, 247;
+    }
+    ```
+
+    Unknown ids are loaded from `web/themes/<id>.css` automatically. If the file is missing, the prompt falls back to `modern`.
+  </div>
+
+  <div className="fd-step">
+    ### Point config at it [#point-config-at-it-step]
+
+    In `client/modules/config.lua`:
+
+    ```lua
+    config.theme = 'ember'
+
+    config.themeColors = {
+        -- keep the built-ins, then add yours
+        ember = { 232, 96, 48, 255 },
+    }
+    ```
+
+    `themeColors` is the default HUD accent. Leave `config.themeColor = nil` so this color is not forced onto every other theme. The distant marker is white unless you set `config.IndicatorSprite.color`.
+  </div>
+
+  <div className="fd-step">
+    ### Preview in a browser [#preview-in-a-browser-step]
+
+    Serve the `web/` folder and open:
+
+    ```
+    http://127.0.0.1:8080/?theme=ember&compact=0
+    ```
+
+    | Query            | Effect                           |
+    | ---------------- | -------------------------------- |
+    | `theme=<id>`     | Load that theme                  |
+    | `compact=0`      | Always show the full option list |
+    | `state=open`     | Expand the compact prompt        |
+    | `state=hold`     | Fill hold progress on the E key  |
+    | `state=cooldown` | Show the cooldown hourglass      |
+
+    The on-page dock is browser-only. In game, restart the resource after CSS or config changes.
+  </div>
+</div>
+
+## Markup [#markup]
+
+The HTML does not change. Themes only restyle these nodes:
+
+```
+#container
+  #interact-container          E key
+    #interact-progress         hold fill (height is set in JS)
+    #interact-key              the letter, or an hourglass in cooldown
+  #options-wrapper
+    .interact-summary          compact "INTERACT" label
+      .option-label
+    #options-list
+      .option-container        one row per option
+        .animated-background   optional fill (legacy / retro)
+        .option-icon
+        .option-label
+        .option-hold           only when the option has holdTime
+```
+
+### States [#states]
+
+| Selector                         | When                                            |
+| -------------------------------- | ----------------------------------------------- |
+| `.option-container.highlighted`  | Current option (E / scroll). There is no hover. |
+| `#interact-container.is-holding` | Player is holding E                             |
+| `body.is-cooldown`               | Option cooldown; the key becomes an hourglass   |
+| `#container.is-compact`          | Target has more than one option                 |
+| `#container.is-compact.is-open`  | Compact list is expanded                        |
+
+Do not add `:hover` or `:active` on option rows. They are never clicked.
+
+## Tokens [#tokens]
+
+Color tokens are **RGB triplets**, not `rgb()` values, so both `rgb(var(--primary))` and `rgba(var(--primary), 0.2)` work. Server `themeColors` / option `color` write `--primary` the same way.
+
+| Token          | Example                            | Use                                          |
+| -------------- | ---------------------------------- | -------------------------------------------- |
+| `--primary`    | `49, 164, 252`                     | Highlight, hold fill, selected border        |
+| `--on-accent`  | `8, 11, 16`                        | Text sitting on a filled `--primary` surface |
+| `--text`       | `236, 241, 247`                    | Labels                                       |
+| `--text-muted` | `156, 170, 186`                    | Idle icons, Hold chip                        |
+| `--surface`    | `10, 14, 20`                       | Panel fill                                   |
+| `--ink`        | `8, 11, 16`                        | Dark insets                                  |
+| `--hairline`   | `220, 230, 242`                    | Borders, usually with `--hairline-a`         |
+| `--panel-a`    | `0.92`                             | Panel opacity                                |
+| `--font`       | `"DINPRO", "Segoe UI", sans-serif` | Typeface                                     |
+
+`--on-accent` should contrast with `--primary`. Light accents need a dark `--on-accent`; dark accents need a light one. JS will recompute `--on-accent` when a global `themeColor` or per-option `color` is applied.
+
+Root `font-size` is `1vh`, so `1rem` is 1% of the viewport height. Size the E key and rows in `rem`, not `px`. Offset the list from the key with `--options-x` on `#options-wrapper` (default `2.6rem`).
+
+## What to style [#what-to-style]
+
+Copy `web/themes/modern.css` or `web/themes/minimal.css` and rename `[data-theme="..."]`. At minimum, cover:
+
+1. **`#interact-container` / `#interact-key`** — size, border, background, letter
+2. **`#interact-progress`** — usually `left/right/bottom: 0; width: 100%; height: 0` with `background: rgb(var(--primary))`. JS only changes `height`.
+3. **`.option-container`** — row chrome
+4. **`.option-container.highlighted`** — selected row. Put `--primary` here, not on every idle row.
+5. **`.option-icon`, `.option-label`, `.option-hold`** — idle and `.highlighted` colors
+6. **`body.is-cooldown`** — dim the key so the hourglass reads as blocked
+
+`.animated-background` is a full-row fill used by `legacy` and `retro`. Most themes hide it with `display: none`.
+
+### Compact INTERACT [#compact-interact]
+
+When compact, global CSS strips border, background, and shadow from `.interact-summary` and draws `INTERACT` as uppercase outlined type. Keep row decorations on `.option-container` only. Pseudos on `.interact-summary` will still show on the compact label.
+
+To force compact label color (light themes need this so it stays white):
+
+```css
+[data-theme="ember"] #container.is-compact .interact-summary .option-label {
+  color: #fff;
+}
+```
+
+### Hold contrast [#hold-contrast]
+
+While holding, the letter keeps its idle color and gets a `--on-accent` stroke so it stays readable as `--primary` fills the key. If the fill and the letter are the same color, that stroke is what keeps E visible.
+
+## Starter [#starter]
+
+```css
+[data-theme="ember"] {
+  --ink: 12, 8, 6;
+  --surface: 22, 14, 12;
+  --text: 255, 236, 228;
+  --text-muted: 196, 150, 132;
+  --hairline: 232, 96, 48;
+  --hairline-a: 0.4;
+  --primary: 232, 96, 48;
+  --on-accent: 12, 8, 6;
+  --font: "DINPRO", "Segoe UI", sans-serif;
+  --panel-a: 0.94;
+}
+
+[data-theme="ember"] body {
+  font-family: var(--font);
+  color: rgb(var(--text));
+}
+
+[data-theme="ember"] .animated-background {
+  display: none;
+}
+
+[data-theme="ember"] #options-list {
+  gap: 0.4rem;
+}
+
+[data-theme="ember"] #interact-container {
+  width: 3.4rem;
+  height: 3.4rem;
+  border: 0.12rem solid rgba(var(--hairline), 0.7);
+  border-radius: 0.4rem;
+  background: rgba(var(--surface), var(--panel-a));
+}
+
+[data-theme="ember"] #interact-progress {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 0;
+  background: rgb(var(--primary));
+}
+
+[data-theme="ember"] #interact-key {
+  width: 100%;
+  height: 100%;
+  color: rgb(var(--text));
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme="ember"] #interact-container.is-holding {
+  border-color: rgb(var(--primary));
+}
+
+[data-theme="ember"] body.is-cooldown #interact-container {
+  opacity: 0.5;
+}
+
+[data-theme="ember"] .option-container,
+[data-theme="ember"] .interact-summary {
+  min-width: 17rem;
+  height: 2.8rem;
+  padding: 0 0.85rem 0 0.5rem;
+  gap: 0.55rem;
+  overflow: hidden;
+  border: 0.12rem solid rgba(var(--hairline), var(--hairline-a));
+  border-radius: 0.4rem;
+  background: rgba(var(--surface), var(--panel-a));
+  color: rgb(var(--text));
+  font-family: var(--font);
+}
+
+[data-theme="ember"] .interact-summary {
+  min-width: 0;
+  width: max-content;
+  padding-left: 0.9rem;
+  padding-right: 1.2rem;
+}
+
+[data-theme="ember"] .option-container.highlighted {
+  border-color: rgb(var(--primary));
+  background: rgba(var(--primary), 0.2);
+}
+
+[data-theme="ember"] .option-icon {
+  width: 1.6rem;
+  font-size: 1.2rem;
+  color: rgb(var(--text-muted));
+}
+
+[data-theme="ember"] .option-container.highlighted .option-icon,
+[data-theme="ember"] .option-container.highlighted .option-label {
+  color: rgb(var(--text));
+}
+
+[data-theme="ember"] .option-label {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+[data-theme="ember"] .option-hold {
+  margin-left: auto;
+  color: rgb(var(--text-muted));
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme="ember"] .option-container.highlighted .option-hold {
+  color: rgb(var(--text));
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-theme="ember"] {
+    --panel-a: 1;
+  }
+}
+```
+
+## DUI limits [#dui-limits]
+
+This prompt is a world sprite, not a fullscreen NUI overlay.
+
+* Keep `html, body` background transparent. `style.css` already does this.
+* `backdrop-filter` cannot blur GTA. CEF only composites the DUI texture, so a blur with nothing behind it paints black. Use solid or slightly transparent `--surface` fills.
+* Keep the layout compact. Large shadows and oversized rows read poorly in the world.
+* Prefer `rem` over `px`. Animate `transform` and `opacity` only.
+
+DINPRO is self-hosted in `web/fonts/`. To use another face, add an `@font-face` in your theme file (see `legacy.css`) and set `--font`.
+
+<Callout type="info">
+  Built-in themes live in `web/themes/`. `modern.css` is the default HUD. `cyber.css`, `vice.css`, and `noir.css` show how far you can push shape without changing the HTML.
+</Callout>
+
+
+# Sleepless Interact (/docs/interact)
+
+
+
+
+
+A 3D DUI interaction library for interacting with various entities and points in the world. Provides a modern, performant alternative to traditional targeting systems with full ox\_target API compatibility.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_interact" />
+
+## Features [#features]
+
+* 🎯 **3D DUI Rendering** - Beautiful interaction indicators rendered in 3D world space
+* 🔄 **ox\_target Compatibility** - Full drop-in support for ox\_target exports
+* 📍 **Multiple Target Types** - Coordinates, entities, models, and global types (objects, peds, players, vehicles)
+* 🎨 **Visual themes** - Ten built-in looks, per-theme accents, or one global color override
+* ⌨️ **Compact prompt** - Multi-option targets show Interact until E is pressed
+* ⚡ **Performance Optimized** - Distance-based culling with configurable render distance
+* 🚗 **Vehicle Support** - Options can be configured to work inside vehicles
+* ⏱️ **Hold Actions** - Support for press-and-hold interactions with configurable durations
+* 🧊 **Cooldown System** - Prevent interaction spam with per-option cooldowns
+* 🔁 **Active Callbacks** - `onActive`, `onInactive`, and `whileActive` callbacks for advanced use cases
+
+## Dependencies [#dependencies]
+
+* [ox\_lib](https://github.com/overextended/ox_lib) (required)
+
+## ox\_target Compatibility [#ox_target-compatibility]
+
+Sleepless Interact fully supports the ox\_target API. If you enable the ox\_target bridge, the resource will handle all ox\_target exports, allowing you to use it as a drop-in replacement without modifying other resources.
+
+## Installation [#installation]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Download the Resource [#download-the-resource-step]
+
+    Download a [release](https://github.com/Sleepless-Development/sleepless_interact/releases) or clone the repository. The prompt UI is vanilla HTML, CSS, and JavaScript under `web/` and does not need a build step.
+  </div>
+
+  <div className="fd-step">
+    ### Add to Server [#add-to-server-step]
+
+    Place the `sleepless_interact` folder in your server's resources directory.
+  </div>
+
+  <div className="fd-step">
+    ### Configure Your Server [#configure-your-server-step]
+
+    Add the following to your `server.cfg`:
+
+    ```bash
+    ensure ox_lib
+    ensure sleepless_interact
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Configure the Resource [#configure-the-resource-step]
+
+    Edit `client/modules/config.lua` to choose a theme, accent colors, compact prompt behavior, keybinds, and render distance. See the [Configuration](/docs/interact/configuration) page for details, or [Custom Themes](/docs/interact/custom-themes) to add your own look.
+  </div>
+</div>
+
+## Quick Start [#quick-start]
+
+### Adding a Coordinate Interaction [#adding-a-coordinate-interaction]
+
+```lua
+local id = exports.sleepless_interact:addCoords(vec3(100.0, 200.0, 30.0), {
+    label = "Interact Here",
+    icon = "hand",
+    distance = 2.0,
+    onSelect = function(data)
+        print("Selected at", data.coords)
+    end,
+})
+```
+
+### Adding a Global Ped Interaction [#adding-a-global-ped-interaction]
+
+```lua
+exports.sleepless_interact:addGlobalPed({
+    label = "Talk to Ped",
+    name = "talk_to_ped",
+    icon = "comment",
+    distance = 2.0,
+    onSelect = function(data)
+        print("Talking to ped", data.entity)
+    end,
+})
+```
+
+<Callout type="info">
+  See the [Client Exports](/docs/interact/exports/Client) page for the full API reference.
+</Callout>
+
+## Support [#support]
+
+If you need help or have questions:
+
+* [Discord](https://discord.gg/A2bDPbfgNP)
+* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_interact/issues)
+
+
+# Interact Options (/docs/interact/interact-options)
+
+
+
+All interact actions are formatted as an array containing objects with the following properties.
+
+## Option Type Definition [#option-type-definition]
+
+```lua
+---@class InteractOption
+---@field label string The display label for the option.
+---@field icon? string The icon associated with the option.
+---@field iconColor? string The CSS color for the icon.
+---@field distance? number The maximum distance at which the option is available.
+---@field holdTime? number Makes the option a press and hold and sets how long it should be held for (milliseconds).
+---@field canInteract? fun(entity: number, distance: number, coords: vector3, name: string): boolean? A function to determine if the option can be interacted with.
+---@field hideWhenEmpty? boolean Override `config.hideWhenEmpty` for this option. True hides the distant marker when this option is invalid. False keeps it.
+---@field name? string A unique identifier for the option.
+---@field resource? string The resource that registered the option.
+---@field offset? vector3 A relative offset from the entity's position.
+---@field offsetAbsolute? vector3 An absolute offset in world coordinates.
+---@field color? number[] 4 numbers in an array used for RGBA, overwriting the theme accent for that option.
+---@field bones? string | string[] An array of bone IDs associated with the option.
+---@field allowInVehicle? boolean Marks the option as being usable inside a vehicle.
+---@field onSelect? fun(data: InteractResponse) A function to execute when the option is selected.
+---@field cooldown? number Number of milliseconds the interact system should cooldown for after this option is selected. Prevents spam.
+---@field export? string Optional export function name.
+---@field event? string Client-side event to trigger.
+---@field serverEvent? string Server-side event to trigger.
+---@field command? string Command to execute.
+---@field onActive? fun(data: InteractResponse) A function to execute when the option is active.
+---@field onInactive? fun(data: InteractResponse) A function to execute when the option was active and is now inactive.
+---@field whileActive? fun(data: InteractResponse) A function to execute while the option is active on a loop.
+```
+
+### Properties [#properties]
+
+| Property         | Type                 | Required | Description                                                                                                                                                           |
+| ---------------- | -------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `label`          | `string`             | Yes      | The display label for the option                                                                                                                                      |
+| `icon`           | `string`             | No       | FontAwesome icon name                                                                                                                                                 |
+| `iconColor`      | `string`             | No       | CSS color for the icon                                                                                                                                                |
+| `distance`       | `number`             | No       | Maximum distance at which the option is available                                                                                                                     |
+| `holdTime`       | `number`             | No       | Press-and-hold duration in milliseconds                                                                                                                               |
+| `canInteract`    | `function`           | No       | Function to determine if the option can be interacted with                                                                                                            |
+| `hideWhenEmpty`  | `boolean`            | No       | Overrides `config.hideWhenEmpty` for this option. `true` hides the distant marker when the option is invalid. `false` keeps it. Takes priority over the type default. |
+| `name`           | `string`             | No       | A unique identifier for the option                                                                                                                                    |
+| `resource`       | `string`             | No       | The resource that registered the option                                                                                                                               |
+| `offset`         | `vector3`            | No       | Relative offset from the entity's position                                                                                                                            |
+| `offsetAbsolute` | `vector3`            | No       | Absolute offset in world coordinates                                                                                                                                  |
+| `color`          | `number[]`           | No       | RGBA array `{r, g, b, a}` overriding the theme accent for that option                                                                                                 |
+| `bones`          | `string \| string[]` | No       | Bone ID(s) associated with the option                                                                                                                                 |
+| `allowInVehicle` | `boolean`            | No       | Allow usage inside a vehicle                                                                                                                                          |
+| `onSelect`       | `function`           | No       | Callback when the option is selected                                                                                                                                  |
+| `cooldown`       | `number`             | No       | Cooldown in milliseconds after selection                                                                                                                              |
+| `export`         | `string`             | No       | Export function name to call                                                                                                                                          |
+| `event`          | `string`             | No       | Client-side event to trigger                                                                                                                                          |
+| `serverEvent`    | `string`             | No       | Server-side event to trigger                                                                                                                                          |
+| `command`        | `string`             | No       | Command to execute                                                                                                                                                    |
+| `onActive`       | `function`           | No       | Callback when the option becomes active                                                                                                                               |
+| `onInactive`     | `function`           | No       | Callback when the option becomes inactive                                                                                                                             |
+| `whileActive`    | `function`           | No       | Callback that runs in a loop while the option is active                                                                                                               |
+
+## Callback Response [#callback-response]
+
+When a player selects an option, a single action is triggered in the following priority order:
+
+1. `onSelect`
+2. `export`
+3. `event`
+4. `serverEvent`
+5. `command`
+
+The callback or event receives an `InteractResponse` table:
+
+| Property   | Type      | Description                                                                                        |
+| ---------- | --------- | -------------------------------------------------------------------------------------------------- |
+| `entity`   | `number`  | The entity ID hit by the shape test. If triggering a server event, this is the network ID instead. |
+| `coords`   | `vector3` | The resulting coordinates where the shape test hit a collision                                     |
+| `distance` | `number`  | The player's distance from the coords                                                              |
+| `zone`     | `number?` | The ID of the selected zone, if applicable                                                         |
+
+<Callout type="info">
+  When using `serverEvent`, the `entity` value is automatically converted to a network ID so it can be resolved on the server.
+</Callout>
+
+## Example [#example]
+
+```lua
+local options = {
+    {
+        label = "Talk to Ped",
+        name = "talk_to_ped",
+        icon = "comments",
+        distance = 2.0,
+        cooldown = 1500,
+        onSelect = function(data)
+            print("Talking to ped", data.entity)
+        end,
+        canInteract = function(entity, distance, coords, name)
+            return distance < 2.0
+        end,
+    },
+    {
+        label = "Rob Ped",
+        name = "rob_ped",
+        icon = "hand-holding-dollar",
+        distance = 1.5,
+        holdTime = 3000,
+        serverEvent = "myresource:robPed",
+    },
+}
+```
 
 
 # Configuration (/docs/lootbox/configuration)

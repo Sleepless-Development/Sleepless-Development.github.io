@@ -9,31 +9,31 @@ The configuration file is located at `client/modules/config.lua`. This file cont
 ```lua
 local config = {}
 
--- Maximum distance that interacts will render the indicator sprite
--- Recommend keeping this pretty low for optimization
+-- Maximum distance the indicator sprite renders.
 config.maxInteractDistance = 5.0
 
--- If true, the prompt only opens when the target is inside lookRadius of the reticle.
+-- Maximum indicator sprites drawn at once.
+config.maxIndicators = 8
+
+-- Only open the prompt when looking at the target.
 config.requireLookAt = true
 
--- Screen-space radius from the reticle (fraction of screen height). Raise it to aim looser.
+-- How close to the reticle the target must be.
 config.lookRadius = 0.08
 
--- If true, entity options without offset, offsetAbsolute, or bones are placed
--- at the model bounding-box center instead of the entity origin.
+-- Place unoffset entity options at the model center.
 config.autoCenter = true
 
--- If true, interacts are hidden when the player has no clear line of sight.
--- Entity targets test LOS to the entity. Coord targets test LOS to the point.
+-- Hide interacts the player cannot see.
 config.requireLos = true
 
--- Shape-test flags for requireLos. 1 world, 2 vehicles, 4 peds, 16 objects.
--- 17 (world + objects) blocks walls and props without peds/vehicles eating LOS.
+-- What blocks line of sight. 1 world, 2 vehicles, 4 peds, 16 objects.
 config.losFlags = 17
 
--- Hide the distant marker when this interact type currently has no valid options.
--- true  = hide the sprite
--- false = keep the sprite as a point of interest
+-- How far collision in front of an ATM can be and still count as visible.
+config.losShellDepth = 2.0
+
+-- Hide the indicator when an interact type has no valid options.
 config.hideWhenEmpty = {
     globalPeds = true,
     globalVehicles = true,
@@ -45,11 +45,16 @@ config.hideWhenEmpty = {
     coords = false,
 }
 
--- Visual theme for the world prompt.
--- Built-in: legacy | modern | minimal | light | retro | cyber | vice | noir | industrial | fantasy
+-- Size of the world prompt.
+config.duiScale = 0.12
+
+-- Maximum size of the prompt texture.
+config.duiResolution = 1024
+
+-- Prompt theme.
 config.theme = 'modern'
 
--- Default accent per theme. Used by the HUD highlight.
+-- Accent color for each theme.
 config.themeColors = {
     legacy = { 28, 100, 184, 200 },
     modern = { 49, 164, 252, 255 },
@@ -63,22 +68,19 @@ config.themeColors = {
     fantasy = { 212, 175, 110, 255 },
 }
 
--- Optional override for every theme. Set to { r, g, b, a } to force one accent
--- across all looks. Leave nil to use the theme's own color above.
+-- Accent color used for every theme. Nil uses the theme color.
 config.themeColor = nil
 
--- If true, targets with more than one option show "Interact" until E is pressed.
--- The list expands, then collapses after a selection or a short idle.
--- If false, every option is shown immediately.
+-- Show one Interact row until the menu is opened.
 config.compactOptions = true
 
--- Milliseconds of no menu activity before a compact list collapses.
+-- How long before a compact menu closes.
 config.compactIdleMs = 2500
 
--- Default key for the interact action. Players can rebind this in GTA Settings > Key Bindings > FiveM.
+-- Default interact key.
 config.defaultInteractKey = 'E'
 
--- Distant / inactive marker. `file` loads a PNG from this resource as a runtime texture.
+-- Distant indicator sprite.
 config.IndicatorSprite = {
     dict = 'slp_ind',
     txt = 'radio',
@@ -88,7 +90,7 @@ config.IndicatorSprite = {
     scale = 0.016,
 }
 
--- Screen-center pip while in range of a usable interact
+-- Dot drawn at the center of the screen.
 config.CenterDot = {
     enabled = true,
     dict = 'mpcarhud',
@@ -99,13 +101,13 @@ config.CenterDot = {
     y = 0.5,
 }
 
--- Use a keybind to show and hide the interactions
+-- Use a key to show and hide interacts.
 config.useShowKeyBind = false
 
--- Default key mapping for the show interactions keybind
+-- Default key for showing interacts.
 config.defaultShowKeyBind = 'LMENU'
 
--- Sets the behavior of the show interactions keybind: "hold" or "toggle"
+-- Hold or toggle the show key.
 config.showKeyBindBehavior = 'toggle'
 ```
 
@@ -114,12 +116,16 @@ config.showKeyBindBehavior = 'toggle'
 | Option                | Type              | Default                        | Description                                                                                                                                                                                                                                                                                                     |
 | --------------------- | ----------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `maxInteractDistance` | `number`          | `5.0`                          | Maximum distance at which interact indicator sprites are rendered. Keep low for performance.                                                                                                                                                                                                                    |
+| `maxIndicators`       | `number`          | `8`                            | Max distant marker sprites drawn per frame. The active prompt is not counted. Raise it in busy areas if dots vanish when many targets are nearby.                                                                                                                                                               |
 | `requireLookAt`       | `boolean`         | `true`                         | If true, the prompt only opens when the target is inside `lookRadius` of the reticle. If false, the closest valid nearby interact opens without aiming.                                                                                                                                                         |
 | `lookRadius`          | `number`          | `0.08`                         | How close to screen center a target must be to open the prompt. Units are a fraction of screen height. Raise it to aim looser. Ignored when `requireLookAt` is false.                                                                                                                                           |
 | `autoCenter`          | `boolean`         | `true`                         | If true, entity options without `offset`, `offsetAbsolute`, or `bones` are placed at the model bounding-box center instead of the entity origin.                                                                                                                                                                |
-| `requireLos`          | `boolean`         | `true`                         | Hide interacts with no clear line of sight. Entity targets (including bones and offsets) test LOS to the entity. Coord targets test LOS to the point.                                                                                                                                                           |
-| `losFlags`            | `number`          | `17`                           | Shape-test bit mask used by `requireLos`. `1` world, `2` vehicles, `4` peds, `16` objects. Default `17` is world + objects.                                                                                                                                                                                     |
+| `requireLos`          | `boolean`         | `true`                         | Hide interacts the player cannot see.                                                                                                                                                                                                                                                                           |
+| `losFlags`            | `number`          | `17`                           | What blocks line of sight. `1` world, `2` vehicles, `4` peds, `16` objects.                                                                                                                                                                                                                                     |
+| `losShellDepth`       | `number`          | `2.0`                          | How far collision in front of an ATM can be and still count as visible.                                                                                                                                                                                                                                         |
 | `hideWhenEmpty`       | `table`           | globals `true`, others `false` | Per interact type: hide the distant marker when every option on that target is currently invalid (`canInteract`, distance, groups, items, in-vehicle). Globals default to hide so nearby peds/vehicles/objects do not spam sprites. Models, entities, and coords keep the marker unless you set them to `true`. |
+| `duiScale`            | `number`          | `0.12`                         | World size of the prompt sprite. The prompt fills the DUI texture, so this is the on-screen size of the prompt itself. Raise it to make the prompt larger in the world.                                                                                                                                         |
+| `duiResolution`       | `number`          | `2048`                         | Cap on the DUI texture long edge. The texture is sized to 2x the on-screen sprite so type stays sharp. This only clamps very large resolutions.                                                                                                                                                                 |
 | `theme`               | `string`          | `'modern'`                     | Visual look of the world prompt. Must match a file in `web/themes/<id>.css`.                                                                                                                                                                                                                                    |
 | `themeColors`         | `table`           | see above                      | Per-theme RGBA accent `{ r, g, b, a }` (0–255). Drives the HUD highlight.                                                                                                                                                                                                                                       |
 | `themeColor`          | `number[] \| nil` | `nil`                          | Optional global accent override. When set, every theme uses this color instead of `themeColors`.                                                                                                                                                                                                                |
