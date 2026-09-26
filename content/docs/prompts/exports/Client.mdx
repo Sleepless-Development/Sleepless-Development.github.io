@@ -12,6 +12,8 @@ Then call `prompts.show(...)` instead of `exports.sleepless_prompts:show(...)`.
 
 Prompt table shapes are documented on [Prompt Options](/docs/prompts/prompt-options).
 
+World targets (`addCoords`, `addEntity`, `addModel`, and the global adds) register prompts that show and hide by distance. `show` / `hide` still own prompts you turn on yourself.
+
 ---
 
 ## show
@@ -305,3 +307,252 @@ end)
 The same names are also fired as net-local events: `sleepless_prompts:shown`, `sleepless_prompts:pressed`, and so on.
 
 Hold prompts fill while the control is held, then fire `held` / `onHold`.
+
+---
+
+## World targets
+
+Register a prompt on a point or an entity. It appears while the player is within `distance` and disappears when they leave. Distance is measured to the entity origin or the coord.
+
+Each option is a [prompt entry](/docs/prompts/prompt-options): `label`, plus `control` or `keybind` (or `key` / `keyboard` / `gamepad` / `icon`). `name` is how you remove or replace that prompt later. `groups`, `items`, `anyItem`, `canInteract`, and `allowInVehicle` use the same rules as a manual prompt.
+
+`distance` defaults to `config.defaultPromptDistance` (2). An optional third argument sets the HUD slot and a default distance for that call:
+
+```lua
+{
+    position = 'bottom-center',
+    layout = 'row',
+    separator = 'slash',
+    offset = { x = 0, y = 0 },
+    order = 0,
+    distance = 2.5,
+}
+```
+
+Several targets can be on screen at once. Each one is its own group.
+
+| Target | What shows |
+|--------|------------|
+| Coord | One group per point, while the player is in range of that point |
+| Local entity or network id | That entity's prompts, plus model and global prompts when it is the closest match |
+| Model | The closest entity of that model |
+| Global ped, vehicle, object, or player | The closest entity of that type |
+
+Model prompts and global prompts attach to that closest entity. Prompts registered on the entity itself are merged into the same group, specific ones first, then model, then global. A second car nearby does not get a second copy of a global vehicle prompt.
+
+`canInteract` receives `(entity, distance, coords, name)`. Coord targets pass `entity` as `0`. The action payload adds `entity`, `coords`, `distance`, and `coordId` when the prompt is tied to a target. `serverEvent` sends a network id instead of the client handle, or `0` when the entity is local.
+
+`hide` and `hideAll` clear the HUD. They do not unregister a world target, so a prompt in range comes back on the next check. `remove*` drops it. Stopping the resource that registered it drops it too.
+
+---
+
+## addCoords
+
+```lua
+local id = exports.sleepless_prompts:addCoords(coords, options, settings?)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `coords` | `vector3 \| vector3[]` | One point, an array of points, or `{ x, y, z }` |
+| `options` | `PromptEntry \| PromptEntry[]` | One prompt or an array |
+| `settings` | `table?` | Optional slot, layout, and default distance |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `string \| string[]` | One coord id, or an array of ids when you passed several points |
+
+The id is stable for the same point. A later `addCoords` on that point merges prompts. The same `name` from the same resource replaces the previous prompt.
+
+### Example
+
+```lua
+local id = exports.sleepless_prompts:addCoords(vec3(100.0, 200.0, 30.0), {
+    {
+        name = 'open_stash',
+        label = 'Open',
+        control = 38,
+        distance = 2.0,
+        onSelect = function(data)
+            print(data.coordId, data.distance)
+        end,
+    },
+})
+
+exports.sleepless_prompts:removeCoords(id, 'open_stash')
+exports.sleepless_prompts:removeCoords(id)
+```
+
+---
+
+## removeCoords
+
+```lua
+exports.sleepless_prompts:removeCoords(id, names?)
+```
+
+Omit `names` to remove every prompt the calling resource added to that id. `id` can be the array returned by `addCoords`.
+
+---
+
+## addLocalEntity
+
+Prompts for one local entity, or a list of them. The handle must already exist.
+
+```lua
+exports.sleepless_prompts:addLocalEntity(entityId, {
+    {
+        name = 'talk',
+        label = 'Talk',
+        control = 38,
+        distance = 2.5,
+        onSelect = function(data)
+            print(data.entity)
+        end,
+    },
+})
+```
+
+```lua
+exports.sleepless_prompts:removeLocalEntity(entityId, 'talk')
+exports.sleepless_prompts:removeLocalEntity(entityId)
+```
+
+---
+
+## addEntity
+
+Prompts for a network id. The entity can stream in after the call.
+
+```lua
+local netId = NetworkGetNetworkIdFromEntity(entity)
+
+exports.sleepless_prompts:addEntity(netId, {
+    name = 'trunk',
+    label = 'Trunk',
+    control = 47,
+    distance = 2.5,
+})
+```
+
+```lua
+exports.sleepless_prompts:removeEntity(netId, 'trunk')
+exports.sleepless_prompts:removeEntity(netId)
+```
+
+---
+
+## addModel
+
+Prompts for every entity of a model. While several are in range, the closest one shows the group.
+
+```lua
+exports.sleepless_prompts:addModel(`prop_atm_01`, {
+    name = 'atm',
+    label = 'Use ATM',
+    control = 38,
+    distance = 1.5,
+})
+
+exports.sleepless_prompts:addModel({ `prop_atm_01`, 'prop_atm_02' }, options)
+```
+
+```lua
+exports.sleepless_prompts:removeModel(`prop_atm_01`, 'atm')
+exports.sleepless_prompts:removeModel(`prop_atm_01`)
+```
+
+Model names and hashes both work.
+
+---
+
+## addGlobalPed
+
+Prompts for the closest ped. Player peds are skipped.
+
+```lua
+exports.sleepless_prompts:addGlobalPed({
+    name = 'talk',
+    label = 'Talk',
+    control = 38,
+    distance = 2.0,
+})
+```
+
+```lua
+exports.sleepless_prompts:removeGlobalPed('talk')
+exports.sleepless_prompts:removeGlobalPed()
+```
+
+`removeGlobalPed()` with no names removes every global ped prompt the calling resource added. The vehicle, object, and player removes work the same way.
+
+---
+
+## addGlobalVehicle
+
+Prompts for the closest vehicle, including the one the player is in. Set `allowInVehicle` when the prompt should stay up while seated.
+
+```lua
+exports.sleepless_prompts:addGlobalVehicle({
+    {
+        name = 'lock',
+        label = 'Lock',
+        control = 182,
+        distance = 4.0,
+        allowInVehicle = true,
+    },
+    {
+        name = 'trunk',
+        label = 'Trunk',
+        control = 47,
+        distance = 2.5,
+    },
+})
+```
+
+```lua
+exports.sleepless_prompts:removeGlobalVehicle('lock')
+exports.sleepless_prompts:removeGlobalVehicle()
+```
+
+---
+
+## addGlobalObject
+
+Prompts for the closest object.
+
+```lua
+exports.sleepless_prompts:addGlobalObject({
+    name = 'pickup',
+    label = 'Pick up',
+    control = 38,
+    distance = 2.0,
+})
+```
+
+```lua
+exports.sleepless_prompts:removeGlobalObject('pickup')
+```
+
+---
+
+## addGlobalPlayer
+
+Prompts for the closest other player.
+
+```lua
+exports.sleepless_prompts:addGlobalPlayer({
+    name = 'trade',
+    label = 'Trade',
+    control = 38,
+    distance = 2.0,
+})
+```
+
+```lua
+exports.sleepless_prompts:removeGlobalPlayer('trade')
+```

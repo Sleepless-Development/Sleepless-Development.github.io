@@ -9,6 +9,7 @@ local config = {}
 
 config.debug = false
 
+config.defaultPromptDistance = 2.0
 config.defaultPosition = 'bottom-center'
 config.defaultLayout = 'auto'
 config.separator = 'slash'
@@ -50,6 +51,7 @@ return config
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `debug` | `boolean` | `false` | Enables the `/prompts` test command |
+| `defaultPromptDistance` | `number` | `2.0` | Distance, in meters, for world prompts that omit `distance` |
 | `defaultPosition` | `string` | `'bottom-center'` | Slot used when `show()` omits `position` |
 | `defaultLayout` | `'row' \| 'column' \| 'auto'` | `'auto'` | `auto` uses a column on left/right middle slots, otherwise a row |
 | `separator` | `'slash' \| 'line' \| 'dot' \| 'none'` | `'slash'` | Divider between prompts in a group |
