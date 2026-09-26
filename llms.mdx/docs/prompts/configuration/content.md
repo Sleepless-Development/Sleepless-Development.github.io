@@ -9,6 +9,7 @@ local config = {}
 
 config.debug = false
 
+config.defaultPromptDistance = 2.0
 config.defaultPosition = 'bottom-center'
 config.defaultLayout = 'auto'
 config.separator = 'slash'
@@ -47,23 +48,24 @@ return config
 
 ## Options [#options]
 
-| Option                | Type                                              | Default           | Description                                                                                     |
-| --------------------- | ------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------- |
-| `debug`               | `boolean`                                         | `false`           | Enables the `/prompts` test command                                                             |
-| `defaultPosition`     | `string`                                          | `'bottom-center'` | Slot used when `show()` omits `position`                                                        |
-| `defaultLayout`       | `'row' \| 'column' \| 'auto'`                     | `'auto'`          | `auto` uses a column on left/right middle slots, otherwise a row                                |
-| `separator`           | `'slash' \| 'line' \| 'dot' \| 'none'`            | `'slash'`         | Divider between prompts in a group                                                              |
-| `mode`                | `'auto' \| 'keyboard' \| 'xbox' \| 'playstation'` | `'auto'`          | Default icon mode when the player has no saved preference                                       |
-| `modeCommand`         | `string`                                          | `'promptmode'`    | Chat command that opens the mode dialog                                                         |
-| `keyboardStyle`       | `string`                                          | `'white'`         | Keyboard / mouse art style                                                                      |
-| `gamepadStyle`        | `string`                                          | `'light'`         | Xbox / PlayStation art style                                                                    |
-| `coloredButtons`      | `boolean`                                         | `false`           | Use colored face-button variants when the pack has them                                         |
-| `scale`               | `number`                                          | `1.0`             | Overall HUD scale                                                                               |
-| `iconSize`            | `number`                                          | `2.4`             | Icon size in `rem` (`1rem` = 1% of viewport height)                                             |
-| `versionCheckEnabled` | `boolean`                                         | `true`            | GitHub version check on the server                                                              |
-| `theme`               | `string`                                          | `'modern'`        | Visual look. Must match a file in `web/themes/<id>.css`                                         |
-| `themeColors`         | `table`                                           | see above         | Per-theme RGBA accent `{ r, g, b, a }` (0–255)                                                  |
-| `themeColor`          | `number[] \| nil`                                 | `nil`             | Optional global accent override. When set, every theme uses this color instead of `themeColors` |
+| Option                  | Type                                              | Default           | Description                                                                                     |
+| ----------------------- | ------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------- |
+| `debug`                 | `boolean`                                         | `false`           | Enables the `/prompts` test command                                                             |
+| `defaultPromptDistance` | `number`                                          | `2.0`             | Distance, in meters, for world prompts that omit `distance`                                     |
+| `defaultPosition`       | `string`                                          | `'bottom-center'` | Slot used when `show()` omits `position`                                                        |
+| `defaultLayout`         | `'row' \| 'column' \| 'auto'`                     | `'auto'`          | `auto` uses a column on left/right middle slots, otherwise a row                                |
+| `separator`             | `'slash' \| 'line' \| 'dot' \| 'none'`            | `'slash'`         | Divider between prompts in a group                                                              |
+| `mode`                  | `'auto' \| 'keyboard' \| 'xbox' \| 'playstation'` | `'auto'`          | Default icon mode when the player has no saved preference                                       |
+| `modeCommand`           | `string`                                          | `'promptmode'`    | Chat command that opens the mode dialog                                                         |
+| `keyboardStyle`         | `string`                                          | `'white'`         | Keyboard / mouse art style                                                                      |
+| `gamepadStyle`          | `string`                                          | `'light'`         | Xbox / PlayStation art style                                                                    |
+| `coloredButtons`        | `boolean`                                         | `false`           | Use colored face-button variants when the pack has them                                         |
+| `scale`                 | `number`                                          | `1.0`             | Overall HUD scale                                                                               |
+| `iconSize`              | `number`                                          | `2.4`             | Icon size in `rem` (`1rem` = 1% of viewport height)                                             |
+| `versionCheckEnabled`   | `boolean`                                         | `true`            | GitHub version check on the server                                                              |
+| `theme`                 | `string`                                          | `'modern'`        | Visual look. Must match a file in `web/themes/<id>.css`                                         |
+| `themeColors`           | `table`                                           | see above         | Per-theme RGBA accent `{ r, g, b, a }` (0–255)                                                  |
+| `themeColor`            | `number[] \| nil`                                 | `nil`             | Optional global accent override. When set, every theme uses this color instead of `themeColors` |
 
 ## Icon styles [#icon-styles]
 

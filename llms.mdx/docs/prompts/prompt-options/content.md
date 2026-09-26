@@ -104,15 +104,19 @@ Press fires the action immediately. `holdTime` waits until the hold completes. `
 
 The callback or event receives:
 
-| Property   | Type     | Description                    |
-| ---------- | -------- | ------------------------------ |
-| `id`       | `string` | Prompt id                      |
-| `name`     | `string` | Same as `id`                   |
-| `label`    | `string` | Visible label                  |
-| `groupId`  | `string` | Group id                       |
-| `resource` | `string` | Resource that showed the group |
+| Property   | Type       | Description                                                                                                   |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| `id`       | `string`   | Prompt id                                                                                                     |
+| `name`     | `string`   | Same as `id`                                                                                                  |
+| `label`    | `string`   | Visible label                                                                                                 |
+| `groupId`  | `string`   | Group id                                                                                                      |
+| `resource` | `string`   | Resource that registered the prompt                                                                           |
+| `entity`   | `number?`  | Present when the group is tied to a target. Client handle, or a network id for `serverEvent`. `0` for a coord |
+| `coords`   | `vector3?` | World point for that target                                                                                   |
+| `distance` | `number?`  | Meters from the player to `coords`                                                                            |
+| `coordId`  | `string?`  | Set for `addCoords` targets                                                                                   |
 
-`export` is called as `exports[resource][export](nil, data)` on the resource that called `show`.
+`export` is called as `exports[resource][export](nil, data)` on the resource that registered the prompt.
 
 ## Restrictions [#restrictions]
 
@@ -147,6 +151,8 @@ Same filters as [Interact](/docs/interact/interact-options). A prompt is hidden 
 Jobs and gangs come from the running framework (qbx, qb, esx, ox\_core, ND). Item counts use ox\_inventory when it is started.
 
 `canInteract` is called as `canInteract(entity, distance, coords, name)`, same as Interact. Set `entity` or `coords` on the group or the prompt so `distance` is measured from the player to that point. If neither is set, `entity` is `0` and `coords` is the player.
+
+World targets pass the entity or the coord in for you. See [World targets](/docs/prompts/exports/Client#world-targets).
 
 ## Live remapping [#live-remapping]
 

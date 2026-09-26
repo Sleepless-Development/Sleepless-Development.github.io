@@ -3931,6 +3931,7 @@ local config = {}
 
 config.debug = false
 
+config.defaultPromptDistance = 2.0
 config.defaultPosition = 'bottom-center'
 config.defaultLayout = 'auto'
 config.separator = 'slash'
@@ -3969,23 +3970,24 @@ return config
 
 ## Options [#options]
 
-| Option                | Type                                              | Default           | Description                                                                                     |
-| --------------------- | ------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------- |
-| `debug`               | `boolean`                                         | `false`           | Enables the `/prompts` test command                                                             |
-| `defaultPosition`     | `string`                                          | `'bottom-center'` | Slot used when `show()` omits `position`                                                        |
-| `defaultLayout`       | `'row' \| 'column' \| 'auto'`                     | `'auto'`          | `auto` uses a column on left/right middle slots, otherwise a row                                |
-| `separator`           | `'slash' \| 'line' \| 'dot' \| 'none'`            | `'slash'`         | Divider between prompts in a group                                                              |
-| `mode`                | `'auto' \| 'keyboard' \| 'xbox' \| 'playstation'` | `'auto'`          | Default icon mode when the player has no saved preference                                       |
-| `modeCommand`         | `string`                                          | `'promptmode'`    | Chat command that opens the mode dialog                                                         |
-| `keyboardStyle`       | `string`                                          | `'white'`         | Keyboard / mouse art style                                                                      |
-| `gamepadStyle`        | `string`                                          | `'light'`         | Xbox / PlayStation art style                                                                    |
-| `coloredButtons`      | `boolean`                                         | `false`           | Use colored face-button variants when the pack has them                                         |
-| `scale`               | `number`                                          | `1.0`             | Overall HUD scale                                                                               |
-| `iconSize`            | `number`                                          | `2.4`             | Icon size in `rem` (`1rem` = 1% of viewport height)                                             |
-| `versionCheckEnabled` | `boolean`                                         | `true`            | GitHub version check on the server                                                              |
-| `theme`               | `string`                                          | `'modern'`        | Visual look. Must match a file in `web/themes/<id>.css`                                         |
-| `themeColors`         | `table`                                           | see above         | Per-theme RGBA accent `{ r, g, b, a }` (0–255)                                                  |
-| `themeColor`          | `number[] \| nil`                                 | `nil`             | Optional global accent override. When set, every theme uses this color instead of `themeColors` |
+| Option                  | Type                                              | Default           | Description                                                                                     |
+| ----------------------- | ------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------- |
+| `debug`                 | `boolean`                                         | `false`           | Enables the `/prompts` test command                                                             |
+| `defaultPromptDistance` | `number`                                          | `2.0`             | Distance, in meters, for world prompts that omit `distance`                                     |
+| `defaultPosition`       | `string`                                          | `'bottom-center'` | Slot used when `show()` omits `position`                                                        |
+| `defaultLayout`         | `'row' \| 'column' \| 'auto'`                     | `'auto'`          | `auto` uses a column on left/right middle slots, otherwise a row                                |
+| `separator`             | `'slash' \| 'line' \| 'dot' \| 'none'`            | `'slash'`         | Divider between prompts in a group                                                              |
+| `mode`                  | `'auto' \| 'keyboard' \| 'xbox' \| 'playstation'` | `'auto'`          | Default icon mode when the player has no saved preference                                       |
+| `modeCommand`           | `string`                                          | `'promptmode'`    | Chat command that opens the mode dialog                                                         |
+| `keyboardStyle`         | `string`                                          | `'white'`         | Keyboard / mouse art style                                                                      |
+| `gamepadStyle`          | `string`                                          | `'light'`         | Xbox / PlayStation art style                                                                    |
+| `coloredButtons`        | `boolean`                                         | `false`           | Use colored face-button variants when the pack has them                                         |
+| `scale`                 | `number`                                          | `1.0`             | Overall HUD scale                                                                               |
+| `iconSize`              | `number`                                          | `2.4`             | Icon size in `rem` (`1rem` = 1% of viewport height)                                             |
+| `versionCheckEnabled`   | `boolean`                                         | `true`            | GitHub version check on the server                                                              |
+| `theme`                 | `string`                                          | `'modern'`        | Visual look. Must match a file in `web/themes/<id>.css`                                         |
+| `themeColors`           | `table`                                           | see above         | Per-theme RGBA accent `{ r, g, b, a }` (0–255)                                                  |
+| `themeColor`            | `number[] \| nil`                                 | `nil`             | Optional global accent override. When set, every theme uses this color instead of `themeColors` |
 
 ## Icon styles [#icon-styles]
 
@@ -4258,6 +4260,7 @@ An on-screen input prompt HUD for FiveM. Show keyboard and gamepad button icons 
 * Player command `/promptmode` to pick Auto, Keyboard, Xbox, or PlayStation
 * Hold progress, press hooks, and per-prompt disable / hide
 * Interact-style actions: `onSelect`, `export`, `event`, `serverEvent`, `command`
+* World targets that show and hide by distance to a coord, entity, or model
 * Art styles for keyboard and gamepad
 * The same visual themes as Interact (`modern`, `cyber`, `vice`, and more), plus custom CSS looks
 
@@ -4321,6 +4324,22 @@ prompts.show('vehicle', {
 ```
 
 The same call works through `exports.sleepless_prompts:show(...)`.
+
+### Show a prompt near a coord [#show-a-prompt-near-a-coord]
+
+`addCoords`, `addLocalEntity`, `addEntity`, `addModel`, and `addGlobalPed` / `Vehicle` / `Object` / `Player` register a prompt that appears inside `distance` and hides when the player leaves. See [World targets](/docs/prompts/exports/Client#world-targets).
+
+```lua
+prompts.addCoords(vec3(100.0, 200.0, 30.0), {
+    name = 'open_stash',
+    label = 'Open',
+    control = 38,
+    distance = 2.0,
+    onSelect = function(data)
+        print(data.coordId)
+    end,
+})
+```
 
 ### Actions [#actions]
 
@@ -4511,15 +4530,19 @@ Press fires the action immediately. `holdTime` waits until the hold completes. `
 
 The callback or event receives:
 
-| Property   | Type     | Description                    |
-| ---------- | -------- | ------------------------------ |
-| `id`       | `string` | Prompt id                      |
-| `name`     | `string` | Same as `id`                   |
-| `label`    | `string` | Visible label                  |
-| `groupId`  | `string` | Group id                       |
-| `resource` | `string` | Resource that showed the group |
+| Property   | Type       | Description                                                                                                   |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| `id`       | `string`   | Prompt id                                                                                                     |
+| `name`     | `string`   | Same as `id`                                                                                                  |
+| `label`    | `string`   | Visible label                                                                                                 |
+| `groupId`  | `string`   | Group id                                                                                                      |
+| `resource` | `string`   | Resource that registered the prompt                                                                           |
+| `entity`   | `number?`  | Present when the group is tied to a target. Client handle, or a network id for `serverEvent`. `0` for a coord |
+| `coords`   | `vector3?` | World point for that target                                                                                   |
+| `distance` | `number?`  | Meters from the player to `coords`                                                                            |
+| `coordId`  | `string?`  | Set for `addCoords` targets                                                                                   |
 
-`export` is called as `exports[resource][export](nil, data)` on the resource that called `show`.
+`export` is called as `exports[resource][export](nil, data)` on the resource that registered the prompt.
 
 ## Restrictions [#restrictions]
 
@@ -4554,6 +4577,8 @@ Same filters as [Interact](/docs/interact/interact-options). A prompt is hidden 
 Jobs and gangs come from the running framework (qbx, qb, esx, ox\_core, ND). Item counts use ox\_inventory when it is started.
 
 `canInteract` is called as `canInteract(entity, distance, coords, name)`, same as Interact. Set `entity` or `coords` on the group or the prompt so `distance` is measured from the player to that point. If neither is set, `entity` is `0` and `coords` is the player.
+
+World targets pass the entity or the coord in for you. See [World targets](/docs/prompts/exports/Client#world-targets).
 
 ## Live remapping [#live-remapping]
 
@@ -6228,6 +6253,8 @@ Then call `prompts.show(...)` instead of `exports.sleepless_prompts:show(...)`.
 
 Prompt table shapes are documented on [Prompt Options](/docs/prompts/prompt-options).
 
+World targets (`addCoords`, `addEntity`, `addModel`, and the global adds) register prompts that show and hide by distance. `show` / `hide` still own prompts you turn on yourself.
+
 ***
 
 ## show [#show]
@@ -6521,6 +6548,255 @@ end)
 The same names are also fired as net-local events: `sleepless_prompts:shown`, `sleepless_prompts:pressed`, and so on.
 
 Hold prompts fill while the control is held, then fire `held` / `onHold`.
+
+***
+
+## World targets [#world-targets]
+
+Register a prompt on a point or an entity. It appears while the player is within `distance` and disappears when they leave. Distance is measured to the entity origin or the coord.
+
+Each option is a [prompt entry](/docs/prompts/prompt-options): `label`, plus `control` or `keybind` (or `key` / `keyboard` / `gamepad` / `icon`). `name` is how you remove or replace that prompt later. `groups`, `items`, `anyItem`, `canInteract`, and `allowInVehicle` use the same rules as a manual prompt.
+
+`distance` defaults to `config.defaultPromptDistance` (2). An optional third argument sets the HUD slot and a default distance for that call:
+
+```lua
+{
+    position = 'bottom-center',
+    layout = 'row',
+    separator = 'slash',
+    offset = { x = 0, y = 0 },
+    order = 0,
+    distance = 2.5,
+}
+```
+
+Several targets can be on screen at once. Each one is its own group.
+
+| Target                                 | What shows                                                                        |
+| -------------------------------------- | --------------------------------------------------------------------------------- |
+| Coord                                  | One group per point, while the player is in range of that point                   |
+| Local entity or network id             | That entity's prompts, plus model and global prompts when it is the closest match |
+| Model                                  | The closest entity of that model                                                  |
+| Global ped, vehicle, object, or player | The closest entity of that type                                                   |
+
+Model prompts and global prompts attach to that closest entity. Prompts registered on the entity itself are merged into the same group, specific ones first, then model, then global. A second car nearby does not get a second copy of a global vehicle prompt.
+
+`canInteract` receives `(entity, distance, coords, name)`. Coord targets pass `entity` as `0`. The action payload adds `entity`, `coords`, `distance`, and `coordId` when the prompt is tied to a target. `serverEvent` sends a network id instead of the client handle, or `0` when the entity is local.
+
+`hide` and `hideAll` clear the HUD. They do not unregister a world target, so a prompt in range comes back on the next check. `remove*` drops it. Stopping the resource that registered it drops it too.
+
+***
+
+## addCoords [#addcoords]
+
+```lua
+local id = exports.sleepless_prompts:addCoords(coords, options, settings?)
+```
+
+### Parameters [#parameters-2]
+
+| Parameter  | Type                           | Description                                     |
+| ---------- | ------------------------------ | ----------------------------------------------- |
+| `coords`   | `vector3 \| vector3[]`         | One point, an array of points, or `{ x, y, z }` |
+| `options`  | `PromptEntry \| PromptEntry[]` | One prompt or an array                          |
+| `settings` | `table?`                       | Optional slot, layout, and default distance     |
+
+### Returns [#returns-1]
+
+| Type                 | Description                                                     |
+| -------------------- | --------------------------------------------------------------- |
+| `string \| string[]` | One coord id, or an array of ids when you passed several points |
+
+The id is stable for the same point. A later `addCoords` on that point merges prompts. The same `name` from the same resource replaces the previous prompt.
+
+### Example [#example-5]
+
+```lua
+local id = exports.sleepless_prompts:addCoords(vec3(100.0, 200.0, 30.0), {
+    {
+        name = 'open_stash',
+        label = 'Open',
+        control = 38,
+        distance = 2.0,
+        onSelect = function(data)
+            print(data.coordId, data.distance)
+        end,
+    },
+})
+
+exports.sleepless_prompts:removeCoords(id, 'open_stash')
+exports.sleepless_prompts:removeCoords(id)
+```
+
+***
+
+## removeCoords [#removecoords]
+
+```lua
+exports.sleepless_prompts:removeCoords(id, names?)
+```
+
+Omit `names` to remove every prompt the calling resource added to that id. `id` can be the array returned by `addCoords`.
+
+***
+
+## addLocalEntity [#addlocalentity]
+
+Prompts for one local entity, or a list of them. The handle must already exist.
+
+```lua
+exports.sleepless_prompts:addLocalEntity(entityId, {
+    {
+        name = 'talk',
+        label = 'Talk',
+        control = 38,
+        distance = 2.5,
+        onSelect = function(data)
+            print(data.entity)
+        end,
+    },
+})
+```
+
+```lua
+exports.sleepless_prompts:removeLocalEntity(entityId, 'talk')
+exports.sleepless_prompts:removeLocalEntity(entityId)
+```
+
+***
+
+## addEntity [#addentity]
+
+Prompts for a network id. The entity can stream in after the call.
+
+```lua
+local netId = NetworkGetNetworkIdFromEntity(entity)
+
+exports.sleepless_prompts:addEntity(netId, {
+    name = 'trunk',
+    label = 'Trunk',
+    control = 47,
+    distance = 2.5,
+})
+```
+
+```lua
+exports.sleepless_prompts:removeEntity(netId, 'trunk')
+exports.sleepless_prompts:removeEntity(netId)
+```
+
+***
+
+## addModel [#addmodel]
+
+Prompts for every entity of a model. While several are in range, the closest one shows the group.
+
+```lua
+exports.sleepless_prompts:addModel(`prop_atm_01`, {
+    name = 'atm',
+    label = 'Use ATM',
+    control = 38,
+    distance = 1.5,
+})
+
+exports.sleepless_prompts:addModel({ `prop_atm_01`, 'prop_atm_02' }, options)
+```
+
+```lua
+exports.sleepless_prompts:removeModel(`prop_atm_01`, 'atm')
+exports.sleepless_prompts:removeModel(`prop_atm_01`)
+```
+
+Model names and hashes both work.
+
+***
+
+## addGlobalPed [#addglobalped]
+
+Prompts for the closest ped. Player peds are skipped.
+
+```lua
+exports.sleepless_prompts:addGlobalPed({
+    name = 'talk',
+    label = 'Talk',
+    control = 38,
+    distance = 2.0,
+})
+```
+
+```lua
+exports.sleepless_prompts:removeGlobalPed('talk')
+exports.sleepless_prompts:removeGlobalPed()
+```
+
+`removeGlobalPed()` with no names removes every global ped prompt the calling resource added. The vehicle, object, and player removes work the same way.
+
+***
+
+## addGlobalVehicle [#addglobalvehicle]
+
+Prompts for the closest vehicle, including the one the player is in. Set `allowInVehicle` when the prompt should stay up while seated.
+
+```lua
+exports.sleepless_prompts:addGlobalVehicle({
+    {
+        name = 'lock',
+        label = 'Lock',
+        control = 182,
+        distance = 4.0,
+        allowInVehicle = true,
+    },
+    {
+        name = 'trunk',
+        label = 'Trunk',
+        control = 47,
+        distance = 2.5,
+    },
+})
+```
+
+```lua
+exports.sleepless_prompts:removeGlobalVehicle('lock')
+exports.sleepless_prompts:removeGlobalVehicle()
+```
+
+***
+
+## addGlobalObject [#addglobalobject]
+
+Prompts for the closest object.
+
+```lua
+exports.sleepless_prompts:addGlobalObject({
+    name = 'pickup',
+    label = 'Pick up',
+    control = 38,
+    distance = 2.0,
+})
+```
+
+```lua
+exports.sleepless_prompts:removeGlobalObject('pickup')
+```
+
+***
+
+## addGlobalPlayer [#addglobalplayer]
+
+Prompts for the closest other player.
+
+```lua
+exports.sleepless_prompts:addGlobalPlayer({
+    name = 'trade',
+    label = 'Trade',
+    control = 38,
+    distance = 2.0,
+})
+```
+
+```lua
+exports.sleepless_prompts:removeGlobalPlayer('trade')
+```
 
 
 # Client Exports (/docs/waypoints/exports/Client)

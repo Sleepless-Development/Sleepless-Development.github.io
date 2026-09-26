@@ -20,6 +20,7 @@ An on-screen input prompt HUD for FiveM. Show keyboard and gamepad button icons 
 * Player command `/promptmode` to pick Auto, Keyboard, Xbox, or PlayStation
 * Hold progress, press hooks, and per-prompt disable / hide
 * Interact-style actions: `onSelect`, `export`, `event`, `serverEvent`, `command`
+* World targets that show and hide by distance to a coord, entity, or model
 * Art styles for keyboard and gamepad
 * The same visual themes as Interact (`modern`, `cyber`, `vice`, and more), plus custom CSS looks
 
@@ -83,6 +84,22 @@ prompts.show('vehicle', {
 ```
 
 The same call works through `exports.sleepless_prompts:show(...)`.
+
+### Show a prompt near a coord [#show-a-prompt-near-a-coord]
+
+`addCoords`, `addLocalEntity`, `addEntity`, `addModel`, and `addGlobalPed` / `Vehicle` / `Object` / `Player` register a prompt that appears inside `distance` and hides when the player leaves. See [World targets](/docs/prompts/exports/Client#world-targets).
+
+```lua
+prompts.addCoords(vec3(100.0, 200.0, 30.0), {
+    name = 'open_stash',
+    label = 'Open',
+    control = 38,
+    distance = 2.0,
+    onSelect = function(data)
+        print(data.coordId)
+    end,
+})
+```
 
 ### Actions [#actions]
 
