@@ -36,6 +36,10 @@
   - Exports
     - [Client Exports](/docs/waypoints/exports/Client)
     - [Server Exports](/docs/waypoints/exports/Server)
+- Routing
+  - [Sleepless Routing](/docs/routing)
+  - Exports
+    - [Server Exports](/docs/routing/exports/Server)
 - Inventory Addons
   - [Sleepless Inventory Addons](/docs/inventoryaddons)
   - [Back Items](/docs/inventoryaddons/back-items)
