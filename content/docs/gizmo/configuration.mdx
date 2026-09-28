@@ -1,0 +1,139 @@
+---
+title: "Configuration"
+---
+
+The configuration file is `config.lua` in the resource root. These values are the defaults for every `useGizmo` call. A single call can override them. See [Call Options](/docs/gizmo/options).
+
+`Config.debug` registers `/testGizmo`. Leave it `false` on a live server. The command lets any player spawn a prop.
+
+## Editor
+
+```lua
+Config.camera = 'orbit'
+Config.mode = 'translate'
+Config.space = 'world'
+Config.pivot = 'center'
+Config.gizmoSize = 0.5
+Config.enableScale = false
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `camera` | `'gameplay'` \| `'orbit'` | `'orbit'` | `orbit` takes a scripted camera. Drag empty space to orbit, and scroll to zoom. `gameplay` keeps the player camera. `G` releases the cursor so they can look. |
+| `mode` | `'translate'` \| `'rotate'` \| `'scale'` | `'translate'` | Mode when the gizmo opens. `scale` is ignored unless `enableScale` is true. |
+| `space` | `'world'` \| `'local'` | `'world'` | `world` aligns the handles to the world. `local` aligns them to the entity. |
+| `pivot` | `'origin'` \| `'center'` | `'center'` | `center` uses the model bounding box and rotates around that point. `origin` sits on the entity position scripts already save. The returned `position` is still the entity origin. |
+| `gizmoSize` | `number` | `0.5` | Screen-space size of the handles. |
+| `enableScale` | `boolean` | `false` | Shows scale mode on `S`. Scale does not affect collisions and resets once physics run. |
+
+## Camera Orbit
+
+Used only when the camera mode is `orbit`.
+
+```lua
+Config.orbit = {
+    minRadius = 1.5,
+    maxRadius = 25.0,
+    zoomStep = 0.75,
+    sensitivity = 0.005,
+    blend = 250,
+}
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `minRadius` | `number` | `1.5` | Closest the orbit camera can sit, in metres. |
+| `maxRadius` | `number` | `25.0` | Farthest the orbit camera can sit, in metres. |
+| `zoomStep` | `number` | `0.75` | Metres added or removed per scroll step. |
+| `sensitivity` | `number` | `0.005` | Mouse drag sensitivity. |
+| `blend` | `number` | `250` | Milliseconds to blend into and out of the scripted camera. |
+
+## Highlight
+
+Objects get an outline. Peds cannot be outlined, so they fade instead.
+
+```lua
+Config.outlineColor = { r = 255, g = 255, b = 255, a = 255 }
+Config.outlineShader = 0
+Config.pedAlpha = 200
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `outlineColor` | `{ r, g, b, a }` | white | Outline colour. Each channel is `0` to `255`. |
+| `outlineShader` | `number` | `0` | `0` is a hard edge. `1` is a softer filled edge. |
+| `pedAlpha` | `number` | `200` | Ped alpha while the gizmo is open. `0` to `255`. |
+
+## Movement Limits And Physics
+
+```lua
+Config.freezeEntity = true
+Config.freezePlayer = false
+Config.disableCollision = false
+Config.playerCanMove = false
+Config.requestControl = true
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `freezeEntity` | `boolean` | `true` | Freeze the entity while editing, then restore the freeze state it had before. |
+| `freezePlayer` | `boolean` | `false` | Freeze the player ped for the edit. |
+| `disableCollision` | `boolean` | `false` | Turn entity collision off for the edit, then turn it back on. |
+| `playerCanMove` | `boolean` | `false` | When `false`, movement controls are blocked so `W` does not walk. |
+| `requestControl` | `boolean` | `true` | Request network control before editing a networked entity. |
+
+`distanceLimit` and `bounds` are per call. They are not config keys. See [Call Options](/docs/gizmo/options#bounds).
+
+## Controls
+
+```lua
+Config.enableCancel = true
+Config.snapToGround = true
+Config.enableSnapToggle = true
+Config.enableCopy = true
+Config.snapEnabled = false
+Config.translationSnap = 0.25
+Config.rotationSnap = 15
+Config.scaleSnap = 0.1
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enableCancel` | `boolean` | `true` | `Esc` restores the entity to the transform it had when the gizmo opened. |
+| `snapToGround` | `boolean` | `true` | Show the ground-snap control. |
+| `enableSnapToggle` | `boolean` | `true` | Show the snap toggle. |
+| `enableCopy` | `boolean` | `true` | Show the copy control. Copies `vec3` position and `vec3` rotation. |
+| `snapEnabled` | `boolean` | `false` | Start with snap already on. |
+| `translationSnap` | `number` | `0.25` | Snap step in metres while snap is on. |
+| `rotationSnap` | `number` | `15` | Snap step in degrees while snap is on. |
+| `scaleSnap` | `number` | `0.1` | Scale snap step while snap is on. |
+
+## HUD
+
+When `sleepless_prompts` is started and `prompts` is not `false`, the controls use a prompt strip. Otherwise they use ox_lib text UI, which also prints the live position and rotation when `showCoords` is true.
+
+```lua
+Config.prompts = true
+Config.promptPosition = 'bottom-center'
+Config.promptLayout = 'row'
+Config.textUiPosition = 'right-center'
+Config.showCoords = true
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `prompts` | `boolean` | `true` | Use sleepless_prompts when that resource is started. `false` always uses text UI. |
+| `promptPosition` | `string` | `'bottom-center'` | Prompt slot. See [Prompts](/docs/prompts). |
+| `promptLayout` | `'row'` \| `'column'` | `'row'` | Prompt layout. |
+| `textUiPosition` | `string` | `'right-center'` | ox_lib text UI position when prompts are not showing. |
+| `showCoords` | `boolean` | `true` | Include position and rotation in the text UI. The prompt strip does not repeat these numbers. |
+
+## Debug
+
+```lua
+Config.debug = false
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `debug` | `boolean` | `false` | Register `/testGizmo`. Do not enable this on a live server. |
