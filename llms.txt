@@ -17,6 +17,12 @@
   - [Prompt Options](/docs/prompts/prompt-options)
   - Exports
     - [Client Exports](/docs/prompts/exports/Client)
+- Object Gizmo
+  - [Object Gizmo](/docs/gizmo)
+  - [Configuration](/docs/gizmo/configuration)
+  - [Call Options](/docs/gizmo/options)
+  - Exports
+    - [Client Exports](/docs/gizmo/exports/Client)
 - Lootbox
   - [Sleepless Lootbox](/docs/lootbox)
   - [Configuration](/docs/lootbox/configuration)

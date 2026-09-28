@@ -1090,6 +1090,446 @@ To add a new station type:
 ```
 
 
+# Configuration (/docs/gizmo/configuration)
+
+
+
+The configuration file is `config.lua` in the resource root. These values are the defaults for every `useGizmo` call. A single call can override them. See [Call Options](/docs/gizmo/options).
+
+`Config.debug` registers `/testGizmo`. Leave it `false` on a live server. The command lets any player spawn a prop.
+
+## Editor [#editor]
+
+```lua
+Config.camera = 'orbit'
+Config.mode = 'translate'
+Config.space = 'world'
+Config.pivot = 'center'
+Config.gizmoSize = 0.5
+Config.enableScale = false
+```
+
+| Option        | Type                                     | Default       | Description                                                                                                                                                                        |
+| ------------- | ---------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `camera`      | `'gameplay'` \| `'orbit'`                | `'orbit'`     | `orbit` takes a scripted camera. Drag empty space to orbit, and scroll to zoom. `gameplay` keeps the player camera. `G` releases the cursor so they can look.                      |
+| `mode`        | `'translate'` \| `'rotate'` \| `'scale'` | `'translate'` | Mode when the gizmo opens. `scale` is ignored unless `enableScale` is true.                                                                                                        |
+| `space`       | `'world'` \| `'local'`                   | `'world'`     | `world` aligns the handles to the world. `local` aligns them to the entity.                                                                                                        |
+| `pivot`       | `'origin'` \| `'center'`                 | `'center'`    | `center` uses the model bounding box and rotates around that point. `origin` sits on the entity position scripts already save. The returned `position` is still the entity origin. |
+| `gizmoSize`   | `number`                                 | `0.5`         | Screen-space size of the handles.                                                                                                                                                  |
+| `enableScale` | `boolean`                                | `false`       | Shows scale mode on `S`. Scale does not affect collisions and resets once physics run.                                                                                             |
+
+## Camera Orbit [#camera-orbit]
+
+Used only when the camera mode is `orbit`.
+
+```lua
+Config.orbit = {
+    minRadius = 1.5,
+    maxRadius = 25.0,
+    zoomStep = 0.75,
+    sensitivity = 0.005,
+    blend = 250,
+}
+```
+
+| Option        | Type     | Default | Description                                                |
+| ------------- | -------- | ------- | ---------------------------------------------------------- |
+| `minRadius`   | `number` | `1.5`   | Closest the orbit camera can sit, in metres.               |
+| `maxRadius`   | `number` | `25.0`  | Farthest the orbit camera can sit, in metres.              |
+| `zoomStep`    | `number` | `0.75`  | Metres added or removed per scroll step.                   |
+| `sensitivity` | `number` | `0.005` | Mouse drag sensitivity.                                    |
+| `blend`       | `number` | `250`   | Milliseconds to blend into and out of the scripted camera. |
+
+## Highlight [#highlight]
+
+Objects get an outline. Peds cannot be outlined, so they fade instead.
+
+```lua
+Config.outlineColor = { r = 255, g = 255, b = 255, a = 255 }
+Config.outlineShader = 0
+Config.pedAlpha = 200
+```
+
+| Option          | Type             | Default | Description                                      |
+| --------------- | ---------------- | ------- | ------------------------------------------------ |
+| `outlineColor`  | `{ r, g, b, a }` | white   | Outline colour. Each channel is `0` to `255`.    |
+| `outlineShader` | `number`         | `0`     | `0` is a hard edge. `1` is a softer filled edge. |
+| `pedAlpha`      | `number`         | `200`   | Ped alpha while the gizmo is open. `0` to `255`. |
+
+## Movement Limits And Physics [#movement-limits-and-physics]
+
+```lua
+Config.freezeEntity = true
+Config.freezePlayer = false
+Config.disableCollision = false
+Config.playerCanMove = false
+Config.requestControl = true
+```
+
+| Option             | Type      | Default | Description                                                                   |
+| ------------------ | --------- | ------- | ----------------------------------------------------------------------------- |
+| `freezeEntity`     | `boolean` | `true`  | Freeze the entity while editing, then restore the freeze state it had before. |
+| `freezePlayer`     | `boolean` | `false` | Freeze the player ped for the edit.                                           |
+| `disableCollision` | `boolean` | `false` | Turn entity collision off for the edit, then turn it back on.                 |
+| `playerCanMove`    | `boolean` | `false` | When `false`, movement controls are blocked so `W` does not walk.             |
+| `requestControl`   | `boolean` | `true`  | Request network control before editing a networked entity.                    |
+
+`distanceLimit` and `bounds` are per call. They are not config keys. See [Call Options](/docs/gizmo/options#bounds).
+
+## Controls [#controls]
+
+```lua
+Config.enableCancel = true
+Config.snapToGround = true
+Config.enableSnapToggle = true
+Config.enableCopy = true
+Config.snapEnabled = false
+Config.translationSnap = 0.25
+Config.rotationSnap = 15
+Config.scaleSnap = 0.1
+```
+
+| Option             | Type      | Default | Description                                                              |
+| ------------------ | --------- | ------- | ------------------------------------------------------------------------ |
+| `enableCancel`     | `boolean` | `true`  | `Esc` restores the entity to the transform it had when the gizmo opened. |
+| `snapToGround`     | `boolean` | `true`  | Show the ground-snap control.                                            |
+| `enableSnapToggle` | `boolean` | `true`  | Show the snap toggle.                                                    |
+| `enableCopy`       | `boolean` | `true`  | Show the copy control. Copies `vec3` position and `vec3` rotation.       |
+| `snapEnabled`      | `boolean` | `false` | Start with snap already on.                                              |
+| `translationSnap`  | `number`  | `0.25`  | Snap step in metres while snap is on.                                    |
+| `rotationSnap`     | `number`  | `15`    | Snap step in degrees while snap is on.                                   |
+| `scaleSnap`        | `number`  | `0.1`   | Scale snap step while snap is on.                                        |
+
+## HUD [#hud]
+
+When `sleepless_prompts` is started and `prompts` is not `false`, the controls use a prompt strip. Otherwise they use ox\_lib text UI, which also prints the live position and rotation when `showCoords` is true.
+
+```lua
+Config.prompts = true
+Config.promptPosition = 'bottom-center'
+Config.promptLayout = 'row'
+Config.textUiPosition = 'right-center'
+Config.showCoords = true
+```
+
+| Option           | Type                  | Default           | Description                                                                                   |
+| ---------------- | --------------------- | ----------------- | --------------------------------------------------------------------------------------------- |
+| `prompts`        | `boolean`             | `true`            | Use sleepless\_prompts when that resource is started. `false` always uses text UI.            |
+| `promptPosition` | `string`              | `'bottom-center'` | Prompt slot. See [Prompts](/docs/prompts).                                                    |
+| `promptLayout`   | `'row'` \| `'column'` | `'row'`           | Prompt layout.                                                                                |
+| `textUiPosition` | `string`              | `'right-center'`  | ox\_lib text UI position when prompts are not showing.                                        |
+| `showCoords`     | `boolean`             | `true`            | Include position and rotation in the text UI. The prompt strip does not repeat these numbers. |
+
+## Debug [#debug]
+
+```lua
+Config.debug = false
+```
+
+| Option  | Type      | Default | Description                                                 |
+| ------- | --------- | ------- | ----------------------------------------------------------- |
+| `debug` | `boolean` | `false` | Register `/testGizmo`. Do not enable this on a live server. |
+
+
+# Object Gizmo (/docs/gizmo)
+
+
+
+
+
+A drop-in 3D gizmo for moving, rotating, and optionally scaling entities. `exports.object_gizmo:useGizmo(entity)` blocks until the player finishes and returns `handle`, `position`, and `rotation`.
+
+<ResourceLinks repo="https://github.com/DemiAutomatic/object_gizmo" />
+
+<Callout type="info">
+  Keep the resource folder named `object_gizmo`. Existing scripts that call `exports.object_gizmo:useGizmo` keep working. `cancelled` and `confirmed` are extra result fields and are safe to ignore.
+</Callout>
+
+## Features [#features]
+
+* Translate, rotate, and optional scale handles drawn with Three.js
+* Gameplay camera, or a scripted orbit camera, chosen per call
+* World or local space
+* Handles on the entity origin, or on the model bounds center
+* Snap to ground, grid snap, and copy the transform to the clipboard
+* Distance limit and an ox\_lib zone bounds limit
+* Control strip uses [sleepless\_prompts](/docs/prompts) when that resource is running, and ox\_lib text UI otherwise
+* Outline on objects, and a fade on peds
+
+## Dependencies [#dependencies]
+
+* [ox\_lib](https://github.com/communityox/ox_lib) (required)
+* [sleepless\_prompts](/docs/prompts) (optional)
+
+## Installation [#installation]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Download the Resource [#download-the-resource-step]
+
+    Download a [release](https://github.com/DemiAutomatic/object_gizmo/releases) or clone the repository. The gizmo UI is the built `web/dist` folder. You do not need to build it unless you change `web/src`.
+  </div>
+
+  <div className="fd-step">
+    ### Add to Server [#add-to-server-step]
+
+    Place the `object_gizmo` folder in your server's resources directory.
+  </div>
+
+  <div className="fd-step">
+    ### Configure Your Server [#configure-your-server-step]
+
+    Add the following to your `server.cfg`, after `ox_lib`:
+
+    ```bash
+    ensure ox_lib
+    ensure object_gizmo
+    ```
+
+    Start `sleepless_prompts` as well if you want the prompt strip. It is not a dependency.
+  </div>
+
+  <div className="fd-step">
+    ### Configure the Resource [#configure-the-resource-step]
+
+    Edit `config.lua` for the defaults every call inherits. See [Configuration](/docs/gizmo/configuration). Pass a table to `useGizmo` when one placement needs different settings. See [Call Options](/docs/gizmo/options).
+  </div>
+</div>
+
+## Quick Start [#quick-start]
+
+```lua
+local result = exports.object_gizmo:useGizmo(entity)
+
+if result.confirmed then
+    print(result.position, result.rotation)
+end
+```
+
+A number as the second argument is a distance limit, in metres, measured from the entity origin when the gizmo opened:
+
+```lua
+local result = exports.object_gizmo:useGizmo(entity, 2.5)
+```
+
+Switch the camera for a single call without changing `config.lua`:
+
+```lua
+exports.object_gizmo:useGizmo(entity, { camera = 'gameplay' })
+exports.object_gizmo:useGizmo(entity, { camera = 'orbit' })
+```
+
+## Controls [#controls]
+
+Players can rebind these under Settings, Key Bindings, FiveM.
+
+| Key      | Action                                             |
+| -------- | -------------------------------------------------- |
+| W        | Translate                                          |
+| R        | Rotate                                             |
+| S        | Scale, when scale is enabled for that call         |
+| Q        | World / local                                      |
+| Left Alt | Snap to ground                                     |
+| G        | Release the cursor so the gameplay camera can look |
+| X        | Toggle snap                                        |
+| C        | Copy the transform                                 |
+| Enter    | Finish                                             |
+| Esc      | Cancel and restore                                 |
+
+G is not used while the camera mode is `orbit`. Drag empty space to orbit, and scroll to zoom.
+
+Enter from the chat command that opened the gizmo is ignored. Press Enter again after the gizmo is open to finish.
+
+## Test Command [#test-command]
+
+`/testGizmo` is registered only when `Config.debug` is `true`. Leave that off on a live server. The command spawns a prop in front of the player.
+
+```lua
+/testGizmo
+/testGizmo prop_bench_01a
+/testGizmo orbit
+/testGizmo gameplay prop_barrier_work05
+```
+
+## Locales [#locales]
+
+Set the language with the `ox:locale` convar, for example `setr ox:locale "de"`.
+
+Available: `cs`, `de`, `en`, `es`, `fr`, `it`, `nl`, `pl`, `pt-br`, `ru`, `sv`, `tr`.
+
+## Support [#support]
+
+If you need help or have questions:
+
+* [Discord](https://discord.gg/A2bDPbfgNP)
+* [GitHub Issues](https://github.com/DemiAutomatic/object_gizmo/issues)
+
+
+# Call Options (/docs/gizmo/options)
+
+
+
+Pass a table as the second argument of `useGizmo` to override [config.lua](/docs/gizmo/configuration) for that edit only. Omitted keys keep the config value.
+
+A number is shorthand for `distanceLimit`:
+
+```lua
+exports.object_gizmo:useGizmo(entity, 2.5)
+```
+
+```lua
+exports.object_gizmo:useGizmo(entity, {
+    camera = 'orbit',
+    pivot = 'center',
+    enableScale = true,
+    distanceLimit = 4.0,
+})
+```
+
+## Editor [#editor]
+
+| Option            | Type                                     | Description                                                                 |
+| ----------------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| `camera`          | `'gameplay'` \| `'orbit'`                | Camera for this edit.                                                       |
+| `mode`            | `'translate'` \| `'rotate'` \| `'scale'` | Starting mode.                                                              |
+| `space`           | `'world'` \| `'local'`                   | `relative` is accepted and treated as `local`.                              |
+| `pivot`           | `'origin'` \| `'center'`                 | Where the handles sit. The returned position is always the entity origin.   |
+| `enableScale`     | `boolean`                                | Allow scale mode on this call.                                              |
+| `enableRotate`    | `boolean`                                | Allow rotate mode. Default `true`.                                          |
+| `enableTranslate` | `boolean`                                | Allow translate mode. Default `true`.                                       |
+| `gizmoSize`       | `number`                                 | Handle size.                                                                |
+| `axes`            | `{ x, y, z }`                            | GTA axes. `z = false` hides the vertical handle. Missing axes stay visible. |
+
+## Orbit [#orbit]
+
+`orbit` is merged over `Config.orbit`. Set only the fields this call should change.
+
+```lua
+exports.object_gizmo:useGizmo(entity, {
+    camera = 'orbit',
+    orbit = {
+        minRadius = 2.0,
+        maxRadius = 8.0,
+        zoomStep = 0.5,
+    },
+})
+```
+
+| Field         | Type     | Description                         |
+| ------------- | -------- | ----------------------------------- |
+| `minRadius`   | `number` | Closest orbit distance, in metres.  |
+| `maxRadius`   | `number` | Farthest orbit distance, in metres. |
+| `zoomStep`    | `number` | Scroll step, in metres.             |
+| `sensitivity` | `number` | Drag sensitivity.                   |
+| `blend`       | `number` | Camera blend, in milliseconds.      |
+
+## Bounds [#bounds]
+
+`bounds` keeps the entity origin inside a volume. The check is that zone's `contains`, so a rotated box and a poly thickness behave the same as they do elsewhere in ox\_lib.
+
+Pass a zone you already created:
+
+```lua
+local room = lib.zones.box({
+    coords = vec3(100.0, 200.0, 30.0),
+    size = vec3(4.0, 4.0, 3.0),
+    rotation = 45,
+})
+
+exports.object_gizmo:useGizmo(entity, {
+    bounds = room,
+})
+```
+
+Or pass a definition. It uses the same fields as `lib.zones.box`, `lib.zones.sphere`, or `lib.zones.poly`, plus `type`. The temporary zone is removed when the gizmo closes. A zone you created yourself is left in place.
+
+```lua
+exports.object_gizmo:useGizmo(entity, {
+    bounds = {
+        type = 'sphere',
+        coords = GetEntityCoords(entity),
+        radius = 3.0,
+        debug = true,
+    },
+})
+```
+
+```lua
+exports.object_gizmo:useGizmo(entity, {
+    bounds = {
+        type = 'poly',
+        points = {
+            vec3(100.0, 200.0, 30.0),
+            vec3(104.0, 200.0, 30.0),
+            vec3(104.0, 204.0, 30.0),
+            vec3(100.0, 204.0, 30.0),
+        },
+        thickness = 4.0,
+    },
+})
+```
+
+`debug = true` on a definition draws the zone for the edit.
+
+If the entity starts outside the zone, and the zone center is inside, the entity is pulled to the edge when the gizmo opens. Dragging past the edge stops on it. The prompt shows the limit. `distanceLimit` still applies, and the entity has to satisfy both.
+
+<Callout type="info">
+  Bounds constrain the entity origin, which is the `position` you get back. With `pivot = 'center'`, the handles can stop before the zone edge by the distance from the origin to the model center.
+</Callout>
+
+## Distance [#distance]
+
+| Option          | Type      | Description                                                                               |
+| --------------- | --------- | ----------------------------------------------------------------------------------------- |
+| `distanceLimit` | `number`  | Max metres from `origin`. `0` or omitting it disables the limit.                          |
+| `origin`        | `vector3` | Point the distance is measured from. Default is the entity position when the gizmo opens. |
+
+## Highlight And Physics [#highlight-and-physics]
+
+| Option             | Type             | Description                                                  |
+| ------------------ | ---------------- | ------------------------------------------------------------ |
+| `outline`          | `boolean`        | Draw the outline. Default `true`. Peds fade instead.         |
+| `outlineColor`     | `{ r, g, b, a }` | Outline colour for this call.                                |
+| `outlineShader`    | `number`         | `0` hard edge, `1` softer edge.                              |
+| `pedAlpha`         | `number`         | Ped alpha while editing.                                     |
+| `freezeEntity`     | `boolean`        | Freeze the entity, then restore the previous freeze state.   |
+| `freezePlayer`     | `boolean`        | Freeze the player ped.                                       |
+| `disableCollision` | `boolean`        | Disable entity collision for the edit, then turn it back on. |
+| `playerCanMove`    | `boolean`        | Allow the player to walk while the gizmo is open.            |
+| `requestControl`   | `boolean`        | Request network control of a networked entity.               |
+
+## Controls And HUD [#controls-and-hud]
+
+| Option             | Type                  | Description                                                                      |
+| ------------------ | --------------------- | -------------------------------------------------------------------------------- |
+| `enableCancel`     | `boolean`             | `Esc` cancels and can restore the entity.                                        |
+| `restoreOnCancel`  | `boolean`             | Put the entity back when the edit is cancelled. Default `true`.                  |
+| `snapToGround`     | `boolean`             | Show ground snap.                                                                |
+| `enableSnapToggle` | `boolean`             | Show the snap toggle.                                                            |
+| `snap`             | `boolean`             | Start with snap on. Matches `Config.snapEnabled`.                                |
+| `translationSnap`  | `number`              | Metres while snap is on.                                                         |
+| `rotationSnap`     | `number`              | Degrees while snap is on.                                                        |
+| `scaleSnap`        | `number`              | Scale step while snap is on.                                                     |
+| `enableCopy`       | `boolean`             | Show the copy control.                                                           |
+| `prompts`          | `boolean`             | Use sleepless\_prompts for this call when it is started. `false` forces text UI. |
+| `promptPosition`   | `string`              | Prompt slot for this call.                                                       |
+| `promptLayout`     | `'row'` \| `'column'` | Prompt layout for this call.                                                     |
+| `textUiPosition`   | `string`              | Text UI position for this call.                                                  |
+| `showCoords`       | `boolean`             | Print position and rotation in the text UI.                                      |
+
+## onChange [#onchange]
+
+Called while the entity is moving. `confirmed` is `false` until the player finishes. Errors in the callback are caught and do not close the gizmo.
+
+```lua
+exports.object_gizmo:useGizmo(entity, {
+    onChange = function(update)
+        print(update.position)
+    end,
+})
+```
+
+
 # Configuration (/docs/interact/configuration)
 
 
@@ -1802,601 +2242,6 @@ local options = {
     },
 }
 ```
-
-
-# Back Items (/docs/inventoryaddons/back-items)
-
-
-
-Attach items to player models with customizable bone positions and rotations. Supports weapons, backpacks, and custom items with priority-based slot management.
-
-You can find the configuration in `backitems/config.lua`.
-
-## Configuration Overview [#configuration-overview]
-
-The Back Items module has two main configuration sections:
-
-1. **Default Slots** (`Config.defaultSlots`) — Defines available attachment slots with bone positions and rotations
-2. **Back Items** (`Config.BackItems`) — Defines which items can be attached and how they display
-
-***
-
-## Default Slots [#default-slots]
-
-Default slots define the available positions for item attachment, each linked to a specific bone, position, and rotation.
-
-```lua
-Config.defaultSlots = {
-    ['back'] = {
-        { bone = 24818, pos = vec3(0.09, -0.16, 0.12), rot = vec3(0.0, 180.0, 0.0) },
-        -- Add more slots to allow multiple items on the back
-    }
-}
-```
-
-### Slot Properties [#slot-properties]
-
-| Property | Type     | Description                            |
-| -------- | -------- | -------------------------------------- |
-| `bone`   | `number` | The bone ID where the slot is attached |
-| `pos`    | `vec3`   | Position offset relative to the bone   |
-| `rot`    | `vec3`   | Rotation offset relative to the bone   |
-
-<Callout type="info">
-  Each slot group (e.g., `'back'`) can contain multiple slots, allowing multiple items to be displayed simultaneously based on priority.
-</Callout>
-
-***
-
-## Back Items [#back-items]
-
-Back items define which inventory items can be attached to the player model and how they are displayed. The **index** for each entry should match the **item name** in your inventory system.
-
-```lua
-Config.BackItems = {
-    ['WEAPON_CARBINERIFLE'] = {
-        prio = 3,
-        group = 'back',
-    },
-}
-```
-
-### BackItem Properties [#backitem-properties]
-
-| Property       | Type      | Required | Description                                                  |
-| -------------- | --------- | -------- | ------------------------------------------------------------ |
-| `prio`         | `number`  | Yes      | Display priority of the item (lower = higher priority)       |
-| `group`        | `string`  | No       | Slot group for the item (defaults to `'back'`)               |
-| `model`        | `number`  | No       | Model hash for non-weapon items or alternative weapon models |
-| `customPos`    | `table`   | No       | Custom position override (see below)                         |
-| `ignoreLimits` | `boolean` | No       | When `true`, the item attaches regardless of available slots |
-
-### Custom Position Properties [#custom-position-properties]
-
-| Property | Type     | Required | Description                   |
-| -------- | -------- | -------- | ----------------------------- |
-| `bone`   | `number` | No\*     | Bone ID for custom attachment |
-| `pos`    | `vec3`   | No\*     | Custom position offset        |
-| `rot`    | `vec3`   | No\*     | Custom rotation offset        |
-
-<Callout type="warn">
-  When using `ignoreLimits = true`, a complete `customPos` with `bone`, `pos`, and `rot` is **required**.
-</Callout>
-
-***
-
-## Examples [#examples]
-
-### Normal Weapon Back Item [#normal-weapon-back-item]
-
-Standard weapon that uses the default slot group and positioning:
-
-```lua
-Config.BackItems = {
-    ['WEAPON_CARBINERIFLE'] = {
-        prio = 3,
-        group = 'back',
-    },
-}
-```
-
-### Non-Weapon Back Item [#non-weapon-back-item]
-
-Non-weapon items require a `model` property since they don't have an inherent weapon model:
-
-```lua
-Config.BackItems = {
-    ['cone'] = {
-        prio = 3,
-        model = `prop_roadcone02a`,
-        group = 'back',
-    },
-}
-```
-
-### Weapon with Alternative Model [#weapon-with-alternative-model]
-
-Use a custom model instead of the default weapon model:
-
-```lua
-Config.BackItems = {
-    ['katana'] = {
-        prio = 3,
-        model = `sheathed_katana`,
-        group = 'back',
-    },
-}
-```
-
-### Weapon with Custom Position [#weapon-with-custom-position]
-
-Override the default slot position with partial custom offsets:
-
-```lua
-Config.BackItems = {
-    ['WEAPON_BAT'] = {
-        prio = 3,
-        group = 'back',
-        customPos = {
-            pos = { x = 0.4, y = -0.15 },
-            rot = { y = 270.0 },
-        },
-    },
-}
-```
-
-### Item with `ignoreLimits` [#item-with-ignorelimits]
-
-Items with `ignoreLimits` will **always** equip when in the inventory, regardless of available slots. A complete `customPos` is required.
-
-This example places a cone on the player's head:
-
-```lua
-Config.BackItems = {
-    ['cone'] = {
-        ignoreLimits = true,
-        model = `prop_roadcone02a`,
-        customPos = {
-            bone = 12844,
-            pos = vec3(0.06, 0.0, 0.0),
-            rot = vec3(0.0, 90.0, 0.0),
-        },
-    },
-}
-```
-
-<Callout type="info">
-  Items with `ignoreLimits` don't use a slot group or priority — they bypass the slot system entirely.
-</Callout>
-
-***
-
-## Customization Tips [#customization-tips]
-
-* Ensure correct bone IDs, positions, and rotations for desired item placements
-* Use `ignoreLimits` only with a complete `customPos` (bone, pos, and rot)
-* The `model` field is **required** for non-weapon items or when using an alternative weapon model
-* Lower `prio` values take precedence when multiple items compete for the same slot
-
-
-# Drag Craft (/docs/inventoryaddons/drag-craft)
-
-
-
-A simple crafting system using `ox_inventory` drag-and-drop hooks. Players craft items by dragging one item onto another in their inventory.
-
-## Configuration [#configuration]
-
-Recipes are defined in `dragcraft/config.lua`. Each recipe key is a pair of item names separated by a space — these are the two items the player drags onto each other.
-
-### Recipe Properties [#recipe-properties]
-
-| Property   | Type     | Required | Description                                                        |
-| ---------- | -------- | -------- | ------------------------------------------------------------------ |
-| `duration` | `number` | Yes      | Duration in milliseconds for the craft to complete                 |
-| `client`   | `table`  | No       | Client-side callbacks (`before` and `after`)                       |
-| `server`   | `table`  | No       | Server-side callbacks (`before`, `after`, and optional `metadata`) |
-| `costs`    | `table`  | Yes      | Items required and whether they are consumed                       |
-| `result`   | `table`  | Yes      | Array of resulting items from the craft                            |
-
-### Cost Properties [#cost-properties]
-
-Each entry in the `costs` table is keyed by item name:
-
-| Property | Type      | Description                                                                                                       |
-| -------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
-| `need`   | `number`  | Quantity required in the dragged slot. If between `0.0` and `1.0`, removes that percentage of durability instead. |
-| `remove` | `boolean` | Whether the item should be removed/consumed upon completion                                                       |
-
-<Callout type="info">
-  A `need` value of `0.1` with `remove = true` removes 10% durability per craft, allowing up to 10 uses before the item breaks.
-</Callout>
-
-<Callout type="warn">
-  Ingredient counts are checked against the **dragged slots**, not the player's total item count. The items are also removed from those slots on success.
-</Callout>
-
-### Result Properties [#result-properties]
-
-Each entry in the `result` array:
-
-| Property | Type     | Required | Description                                          |
-| -------- | -------- | -------- | ---------------------------------------------------- |
-| `name`   | `string` | Yes      | Item name to give the player                         |
-| `amount` | `number` | No       | Fixed quantity to give (use this **or** `min`/`max`) |
-| `min`    | `number` | No       | Minimum random quantity                              |
-| `max`    | `number` | No       | Maximum random quantity                              |
-
-### Callback Functions [#callback-functions]
-
-The `client` table supports `before` and `after`. The `server` table supports `before`, `after`, and `metadata`:
-
-| Callback                                 | Context         | Description                                                                                                    |
-| ---------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------- |
-| `before(recipeData)`                     | Client / Server | Runs before crafting starts. Return `false` to cancel the craft. Returning `true` or `nil` continues normally. |
-| `after(recipeData)`                      | Client / Server | Runs after crafting completes successfully.                                                                    |
-| `metadata(resultName, fromSlot, toSlot)` | Server          | Optional. Return a metadata table applied to that result item.                                                 |
-
-<Callout type="warn">
-  The `recipeData` parameter passed to `before` / `after` contains all the properties defined for that specific recipe.
-</Callout>
-
-### Complete Example [#complete-example]
-
-```lua
-RECIPES = {
-    ['garbage scrapmetal'] = {
-        duration = 2000,
-        client = {
-            before = function(recipeData)
-                -- Client logic before crafting
-                -- Return false to cancel the craft
-            end,
-            after = function(recipeData)
-                -- Client logic after successfully crafting
-            end,
-        },
-        server = {
-            before = function(recipeData)
-                -- Server logic before crafting
-                -- Return false to cancel the craft
-            end,
-            after = function(recipeData)
-                -- Server logic after successfully crafting
-            end,
-            metadata = function(resultName, fromSlot, toSlot)
-                -- Optional metadata for the resulting item
-                -- return { quality = 100 }
-            end,
-        },
-        costs = {
-            ['garbage'] = { need = 1, remove = true },
-            ['scrapmetal'] = { need = 0.1, remove = true },
-        },
-        result = {
-            { name = 'lockpick', amount = 1 },
-        },
-    },
-}
-```
-
-## Exports [#exports]
-
-### addRecipe [#addrecipe]
-
-Register a recipe externally from another resource.
-
-Craftable recipes (&#x2A;*`costs`*&#x2A;, &#x2A;*`result`*&#x2A;, &#x2A;*`duration`**, and server callbacks) must be registered on the **server**. The client export only stores client callbacks and cannot create a working craft.
-
-```lua
--- server
-local success = exports.sleepless_inventory_addons:addRecipe(key, data, target?)
-
--- client (callbacks only)
-exports.sleepless_inventory_addons:addRecipe(key, data)
-```
-
-#### Server Parameters [#server-parameters]
-
-| Parameter | Type      | Description                                                                           |
-| --------- | --------- | ------------------------------------------------------------------------------------- |
-| `key`     | `string`  | The recipe key — two item names separated by a space (e.g., `'garbage scrapmetal'`)   |
-| `data`    | `table`   | The recipe data. Must include `costs` and `result`                                    |
-| `target`  | `number?` | Optional player id to sync the recipe UI to. Omit (or pass `nil`) to sync all players |
-
-#### Server Returns [#server-returns]
-
-| Type      | Description                         |
-| --------- | ----------------------------------- |
-| `boolean` | `true` if the recipe was registered |
-
-#### Client Parameters [#client-parameters]
-
-| Parameter | Type     | Description                                                       |
-| --------- | -------- | ----------------------------------------------------------------- |
-| `key`     | `string` | The same recipe key used on the server                            |
-| `data`    | `table`  | Client-side data. Only `client` callbacks are used from this call |
-
-<Callout type="error">
-  A client-only `addRecipe` call does **not** register the recipe on the server. Players will not be able to craft it unless the same key is also registered from a server resource.
-</Callout>
-
-<Callout type="warn">
-  Callbacks only work in the context you register them. A client-side call can only register `client` callbacks, and a server-side call can only register `server` callbacks. Functions cannot be sent over the network.
-</Callout>
-
-<Tabs items="['Server', 'Client']">
-  <Tab value="Server">
-    ```lua
-    local success = exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
-        duration = 2000,
-        server = {
-            before = function(recipeData)
-                -- Server logic before crafting
-                -- Return false to cancel
-            end,
-            after = function(recipeData)
-                -- Server logic after crafting
-            end,
-            metadata = function(resultName, fromSlot, toSlot)
-                -- Optional metadata for the resulting item
-            end,
-        },
-        costs = {
-            ['garbage'] = { need = 1, remove = true },
-            ['scrapmetal'] = { need = 0.1, remove = true },
-        },
-        result = {
-            { name = 'lockpick', amount = 1 },
-        },
-    })
-    ```
-  </Tab>
-
-  <Tab value="Client">
-    ```lua
-    -- Only registers client callbacks. The craftable recipe must already
-    -- exist in config or be registered from the server export.
-    exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
-        client = {
-            before = function(recipeData)
-                -- Client logic before crafting
-                -- Return false to cancel
-            end,
-            after = function(recipeData)
-                -- Client logic after crafting
-            end,
-        },
-    })
-    ```
-  </Tab>
-</Tabs>
-
-
-# Sleepless Inventory Addons (/docs/inventoryaddons)
-
-
-
-
-
-Addon modules for ox\_inventory that enhance its utility with back items, drag crafting, and item carrying systems. Each addon can be used independently or together.
-
-<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_inventory_addons" />
-
-## Features [#features]
-
-* 🎒 **Back Items** - Attach items to player models with customizable bone positions and rotations
-* 🔨 **Drag Craft** - Simple crafting system using ox\_inventory drag-and-drop mechanics
-* 📦 **Item Carry** - Automatic item carrying with animations and prop attachments
-
-## Dependencies [#dependencies]
-
-* [ox\_lib](https://github.com/overextended/ox_lib) (required)
-* [ox\_inventory](https://github.com/overextended/ox_inventory) (required)
-
-## Installation [#installation]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Download the Resource [#download-the-resource-step]
-
-    Download a [release](https://github.com/Sleepless-Development/sleepless_inventory_addons/releases) or clone the repository:
-
-    ```bash
-    git clone https://github.com/Sleepless-Development/sleepless_inventory_addons.git
-    ```
-  </div>
-
-  <div className="fd-step">
-    ### Add to Server [#add-to-server-step]
-
-    Place the `sleepless_inventory_addons` folder in your server's resources directory.
-  </div>
-
-  <div className="fd-step">
-    ### Configure Your Server [#configure-your-server-step]
-
-    Add the following to your `server.cfg` (after ox\_inventory):
-
-    ```bash
-    ensure ox_lib
-    ensure ox_inventory
-    ensure sleepless_inventory_addons
-    ```
-  </div>
-
-  <div className="fd-step">
-    ### Configure Addons [#configure-addons-step]
-
-    Each addon has its own configuration file in its respective subfolder. See the individual addon pages for details:
-
-    * [Back Items](/docs/inventoryaddons/back-items) — `backitems/config.lua`
-    * [Drag Craft](/docs/inventoryaddons/drag-craft) — `dragcraft/config.lua`
-    * [Item Carry](/docs/inventoryaddons/item-carry) — `itemcarry/config.lua`
-  </div>
-</div>
-
-## Addons Overview [#addons-overview]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Back Items [#back-items-step]
-
-    Configure item attachments to player models with bone-specific positioning. Supports weapons, backpacks, and custom items with priority-based slot management. Items visually display on the player's back (or other bones) when in their inventory.
-  </div>
-
-  <div className="fd-step">
-    ### Drag Craft [#drag-craft-step]
-
-    Create crafting recipes that work with ox\_inventory's drag-and-drop system. Drag one item onto another to trigger a craft. Supports multi-item recipes, durability costs, and client/server-side callbacks for custom logic.
-  </div>
-
-  <div className="fd-step">
-    ### Item Carry [#item-carry-step]
-
-    Automatically attach props and play animations when players receive specific items. Includes options for vehicle blocking and walk-only mode for realistic item carrying behavior.
-
-    <Callout type="info">
-      Each addon can be configured independently. You only need to set up the addons you want to use — unused addons can be left with their default (empty) configurations.
-    </Callout>
-  </div>
-</div>
-
-## Support [#support]
-
-If you need help or have questions:
-
-* [Discord](https://discord.gg/A2bDPbfgNP)
-* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_inventory_addons/issues)
-
-
-# Item Carry (/docs/inventoryaddons/item-carry)
-
-
-
-Automatically attach props and play animations when players receive specific items using `ox_inventory`. Includes vehicle blocking and walk-only options for realistic item carrying.
-
-## Configuration [#configuration]
-
-The configuration file is located at `itemcarry/config.lua`. Each entry in the config table maps an inventory item name to its carry behavior.
-
-### Config Properties [#config-properties]
-
-| Property       | Type      | Required | Description                                                                   |
-| -------------- | --------- | -------- | ----------------------------------------------------------------------------- |
-| `walkOnly`     | `boolean` | No       | Whether the player can only walk while carrying this item                     |
-| `blockVehicle` | `boolean` | No       | Whether the player is blocked from entering vehicles while carrying this item |
-| `anim`         | `table`   | Yes      | Animation data for the carrying animation                                     |
-| `prop`         | `table`   | Yes      | Prop attachment data for the carried item                                     |
-
-### Animation Properties [#animation-properties]
-
-| Property | Type     | Required | Description                                       |
-| -------- | -------- | -------- | ------------------------------------------------- |
-| `dict`   | `string` | Yes      | Animation dictionary name                         |
-| `clip`   | `string` | Yes      | Animation clip name                               |
-| `flag`   | `number` | No       | Animation flag (controls looping, movement, etc.) |
-
-### Prop Properties [#prop-properties]
-
-| Property        | Type               | Required | Description                                            |
-| --------------- | ------------------ | -------- | ------------------------------------------------------ |
-| `bone`          | `number`           | Yes      | Bone index to attach the prop to                       |
-| `model`         | `number \| string` | Yes      | Model hash or string for the prop                      |
-| `placement`     | `table`            | Yes      | Position and rotation of the prop relative to the bone |
-| `placement.pos` | `vec3`             | Yes      | Position offset relative to the bone                   |
-| `placement.rot` | `vec3`             | Yes      | Rotation offset relative to the bone                   |
-
-## Examples [#examples]
-
-### Box Carry (Walk Only, No Vehicles) [#box-carry-walk-only-no-vehicles]
-
-```lua
-['box'] = {
-    walkOnly = true,
-    blockVehicle = true,
-    anim = {
-        dict = 'anim@heists@box_carry@',
-        clip = 'idle',
-        flag = 51,
-    },
-    prop = {
-        bone = 60309,
-        model = joaat('hei_prop_heist_box'),
-        placement = {
-            pos = vec3(0.025000, 0.080000, 0.255000),
-            rot = vec3(-145.000000, 290.000000, 0.000000),
-        },
-    },
-},
-```
-
-### Briefcase Carry (Free Movement) [#briefcase-carry-free-movement]
-
-```lua
-['briefcase'] = {
-    anim = {
-        dict = 'anim@heists@briefcase@',
-        clip = 'idle',
-        flag = 52,
-    },
-    prop = {
-        bone = 60310,
-        model = 'prop_briefcase_02',
-        placement = {
-            pos = vec3(0.035000, 0.070000, 0.240000),
-            rot = vec3(-135.000000, 280.000000, 0.000000),
-        },
-    },
-},
-```
-
-## Complete Config Example [#complete-config-example]
-
-```lua
-local config = {
-    ['box'] = {
-        walkOnly = true,
-        blockVehicle = true,
-        anim = {
-            dict = 'anim@heists@box_carry@',
-            clip = 'idle',
-            flag = 51,
-        },
-        prop = {
-            bone = 60309,
-            model = joaat('hei_prop_heist_box'),
-            placement = {
-                pos = vec3(0.025000, 0.080000, 0.255000),
-                rot = vec3(-145.000000, 290.000000, 0.000000),
-            },
-        },
-    },
-    ['briefcase'] = {
-        anim = {
-            dict = 'anim@heists@briefcase@',
-            clip = 'idle',
-            flag = 52,
-        },
-        prop = {
-            bone = 60310,
-            model = 'prop_briefcase_02',
-            placement = {
-                pos = vec3(0.035000, 0.070000, 0.240000),
-                rot = vec3(-135.000000, 280.000000, 0.000000),
-            },
-        },
-    },
-}
-```
-
-<Callout type="info">
-  The config key (e.g., `'box'`, `'briefcase'`) must match the item name in your `ox_inventory` item definitions. When a player receives the item, the carry behavior activates automatically.
-</Callout>
-
-<Callout type="warn">
-  Ensure the animation dictionaries and prop models you reference are valid and available in the game. Invalid references will result in the carry behavior not displaying correctly.
-</Callout>
 
 
 # Configuration (/docs/lootbox/configuration)
@@ -3805,6 +3650,601 @@ The resource includes a `_items.lua` reference file in its root directory contai
 * See the [Framework Setup](/docs/lootbox/framework-setup) page for detailed troubleshooting
 
 
+# Back Items (/docs/inventoryaddons/back-items)
+
+
+
+Attach items to player models with customizable bone positions and rotations. Supports weapons, backpacks, and custom items with priority-based slot management.
+
+You can find the configuration in `backitems/config.lua`.
+
+## Configuration Overview [#configuration-overview]
+
+The Back Items module has two main configuration sections:
+
+1. **Default Slots** (`Config.defaultSlots`) — Defines available attachment slots with bone positions and rotations
+2. **Back Items** (`Config.BackItems`) — Defines which items can be attached and how they display
+
+***
+
+## Default Slots [#default-slots]
+
+Default slots define the available positions for item attachment, each linked to a specific bone, position, and rotation.
+
+```lua
+Config.defaultSlots = {
+    ['back'] = {
+        { bone = 24818, pos = vec3(0.09, -0.16, 0.12), rot = vec3(0.0, 180.0, 0.0) },
+        -- Add more slots to allow multiple items on the back
+    }
+}
+```
+
+### Slot Properties [#slot-properties]
+
+| Property | Type     | Description                            |
+| -------- | -------- | -------------------------------------- |
+| `bone`   | `number` | The bone ID where the slot is attached |
+| `pos`    | `vec3`   | Position offset relative to the bone   |
+| `rot`    | `vec3`   | Rotation offset relative to the bone   |
+
+<Callout type="info">
+  Each slot group (e.g., `'back'`) can contain multiple slots, allowing multiple items to be displayed simultaneously based on priority.
+</Callout>
+
+***
+
+## Back Items [#back-items]
+
+Back items define which inventory items can be attached to the player model and how they are displayed. The **index** for each entry should match the **item name** in your inventory system.
+
+```lua
+Config.BackItems = {
+    ['WEAPON_CARBINERIFLE'] = {
+        prio = 3,
+        group = 'back',
+    },
+}
+```
+
+### BackItem Properties [#backitem-properties]
+
+| Property       | Type      | Required | Description                                                  |
+| -------------- | --------- | -------- | ------------------------------------------------------------ |
+| `prio`         | `number`  | Yes      | Display priority of the item (lower = higher priority)       |
+| `group`        | `string`  | No       | Slot group for the item (defaults to `'back'`)               |
+| `model`        | `number`  | No       | Model hash for non-weapon items or alternative weapon models |
+| `customPos`    | `table`   | No       | Custom position override (see below)                         |
+| `ignoreLimits` | `boolean` | No       | When `true`, the item attaches regardless of available slots |
+
+### Custom Position Properties [#custom-position-properties]
+
+| Property | Type     | Required | Description                   |
+| -------- | -------- | -------- | ----------------------------- |
+| `bone`   | `number` | No\*     | Bone ID for custom attachment |
+| `pos`    | `vec3`   | No\*     | Custom position offset        |
+| `rot`    | `vec3`   | No\*     | Custom rotation offset        |
+
+<Callout type="warn">
+  When using `ignoreLimits = true`, a complete `customPos` with `bone`, `pos`, and `rot` is **required**.
+</Callout>
+
+***
+
+## Examples [#examples]
+
+### Normal Weapon Back Item [#normal-weapon-back-item]
+
+Standard weapon that uses the default slot group and positioning:
+
+```lua
+Config.BackItems = {
+    ['WEAPON_CARBINERIFLE'] = {
+        prio = 3,
+        group = 'back',
+    },
+}
+```
+
+### Non-Weapon Back Item [#non-weapon-back-item]
+
+Non-weapon items require a `model` property since they don't have an inherent weapon model:
+
+```lua
+Config.BackItems = {
+    ['cone'] = {
+        prio = 3,
+        model = `prop_roadcone02a`,
+        group = 'back',
+    },
+}
+```
+
+### Weapon with Alternative Model [#weapon-with-alternative-model]
+
+Use a custom model instead of the default weapon model:
+
+```lua
+Config.BackItems = {
+    ['katana'] = {
+        prio = 3,
+        model = `sheathed_katana`,
+        group = 'back',
+    },
+}
+```
+
+### Weapon with Custom Position [#weapon-with-custom-position]
+
+Override the default slot position with partial custom offsets:
+
+```lua
+Config.BackItems = {
+    ['WEAPON_BAT'] = {
+        prio = 3,
+        group = 'back',
+        customPos = {
+            pos = { x = 0.4, y = -0.15 },
+            rot = { y = 270.0 },
+        },
+    },
+}
+```
+
+### Item with `ignoreLimits` [#item-with-ignorelimits]
+
+Items with `ignoreLimits` will **always** equip when in the inventory, regardless of available slots. A complete `customPos` is required.
+
+This example places a cone on the player's head:
+
+```lua
+Config.BackItems = {
+    ['cone'] = {
+        ignoreLimits = true,
+        model = `prop_roadcone02a`,
+        customPos = {
+            bone = 12844,
+            pos = vec3(0.06, 0.0, 0.0),
+            rot = vec3(0.0, 90.0, 0.0),
+        },
+    },
+}
+```
+
+<Callout type="info">
+  Items with `ignoreLimits` don't use a slot group or priority — they bypass the slot system entirely.
+</Callout>
+
+***
+
+## Customization Tips [#customization-tips]
+
+* Ensure correct bone IDs, positions, and rotations for desired item placements
+* Use `ignoreLimits` only with a complete `customPos` (bone, pos, and rot)
+* The `model` field is **required** for non-weapon items or when using an alternative weapon model
+* Lower `prio` values take precedence when multiple items compete for the same slot
+
+
+# Drag Craft (/docs/inventoryaddons/drag-craft)
+
+
+
+A simple crafting system using `ox_inventory` drag-and-drop hooks. Players craft items by dragging one item onto another in their inventory.
+
+## Configuration [#configuration]
+
+Recipes are defined in `dragcraft/config.lua`. Each recipe key is a pair of item names separated by a space — these are the two items the player drags onto each other.
+
+### Recipe Properties [#recipe-properties]
+
+| Property   | Type     | Required | Description                                                        |
+| ---------- | -------- | -------- | ------------------------------------------------------------------ |
+| `duration` | `number` | Yes      | Duration in milliseconds for the craft to complete                 |
+| `client`   | `table`  | No       | Client-side callbacks (`before` and `after`)                       |
+| `server`   | `table`  | No       | Server-side callbacks (`before`, `after`, and optional `metadata`) |
+| `costs`    | `table`  | Yes      | Items required and whether they are consumed                       |
+| `result`   | `table`  | Yes      | Array of resulting items from the craft                            |
+
+### Cost Properties [#cost-properties]
+
+Each entry in the `costs` table is keyed by item name:
+
+| Property | Type      | Description                                                                                                       |
+| -------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
+| `need`   | `number`  | Quantity required in the dragged slot. If between `0.0` and `1.0`, removes that percentage of durability instead. |
+| `remove` | `boolean` | Whether the item should be removed/consumed upon completion                                                       |
+
+<Callout type="info">
+  A `need` value of `0.1` with `remove = true` removes 10% durability per craft, allowing up to 10 uses before the item breaks.
+</Callout>
+
+<Callout type="warn">
+  Ingredient counts are checked against the **dragged slots**, not the player's total item count. The items are also removed from those slots on success.
+</Callout>
+
+### Result Properties [#result-properties]
+
+Each entry in the `result` array:
+
+| Property | Type     | Required | Description                                          |
+| -------- | -------- | -------- | ---------------------------------------------------- |
+| `name`   | `string` | Yes      | Item name to give the player                         |
+| `amount` | `number` | No       | Fixed quantity to give (use this **or** `min`/`max`) |
+| `min`    | `number` | No       | Minimum random quantity                              |
+| `max`    | `number` | No       | Maximum random quantity                              |
+
+### Callback Functions [#callback-functions]
+
+The `client` table supports `before` and `after`. The `server` table supports `before`, `after`, and `metadata`:
+
+| Callback                                 | Context         | Description                                                                                                    |
+| ---------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------- |
+| `before(recipeData)`                     | Client / Server | Runs before crafting starts. Return `false` to cancel the craft. Returning `true` or `nil` continues normally. |
+| `after(recipeData)`                      | Client / Server | Runs after crafting completes successfully.                                                                    |
+| `metadata(resultName, fromSlot, toSlot)` | Server          | Optional. Return a metadata table applied to that result item.                                                 |
+
+<Callout type="warn">
+  The `recipeData` parameter passed to `before` / `after` contains all the properties defined for that specific recipe.
+</Callout>
+
+### Complete Example [#complete-example]
+
+```lua
+RECIPES = {
+    ['garbage scrapmetal'] = {
+        duration = 2000,
+        client = {
+            before = function(recipeData)
+                -- Client logic before crafting
+                -- Return false to cancel the craft
+            end,
+            after = function(recipeData)
+                -- Client logic after successfully crafting
+            end,
+        },
+        server = {
+            before = function(recipeData)
+                -- Server logic before crafting
+                -- Return false to cancel the craft
+            end,
+            after = function(recipeData)
+                -- Server logic after successfully crafting
+            end,
+            metadata = function(resultName, fromSlot, toSlot)
+                -- Optional metadata for the resulting item
+                -- return { quality = 100 }
+            end,
+        },
+        costs = {
+            ['garbage'] = { need = 1, remove = true },
+            ['scrapmetal'] = { need = 0.1, remove = true },
+        },
+        result = {
+            { name = 'lockpick', amount = 1 },
+        },
+    },
+}
+```
+
+## Exports [#exports]
+
+### addRecipe [#addrecipe]
+
+Register a recipe externally from another resource.
+
+Craftable recipes (&#x2A;*`costs`*&#x2A;, &#x2A;*`result`*&#x2A;, &#x2A;*`duration`**, and server callbacks) must be registered on the **server**. The client export only stores client callbacks and cannot create a working craft.
+
+```lua
+-- server
+local success = exports.sleepless_inventory_addons:addRecipe(key, data, target?)
+
+-- client (callbacks only)
+exports.sleepless_inventory_addons:addRecipe(key, data)
+```
+
+#### Server Parameters [#server-parameters]
+
+| Parameter | Type      | Description                                                                           |
+| --------- | --------- | ------------------------------------------------------------------------------------- |
+| `key`     | `string`  | The recipe key — two item names separated by a space (e.g., `'garbage scrapmetal'`)   |
+| `data`    | `table`   | The recipe data. Must include `costs` and `result`                                    |
+| `target`  | `number?` | Optional player id to sync the recipe UI to. Omit (or pass `nil`) to sync all players |
+
+#### Server Returns [#server-returns]
+
+| Type      | Description                         |
+| --------- | ----------------------------------- |
+| `boolean` | `true` if the recipe was registered |
+
+#### Client Parameters [#client-parameters]
+
+| Parameter | Type     | Description                                                       |
+| --------- | -------- | ----------------------------------------------------------------- |
+| `key`     | `string` | The same recipe key used on the server                            |
+| `data`    | `table`  | Client-side data. Only `client` callbacks are used from this call |
+
+<Callout type="error">
+  A client-only `addRecipe` call does **not** register the recipe on the server. Players will not be able to craft it unless the same key is also registered from a server resource.
+</Callout>
+
+<Callout type="warn">
+  Callbacks only work in the context you register them. A client-side call can only register `client` callbacks, and a server-side call can only register `server` callbacks. Functions cannot be sent over the network.
+</Callout>
+
+<Tabs items="['Server', 'Client']">
+  <Tab value="Server">
+    ```lua
+    local success = exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
+        duration = 2000,
+        server = {
+            before = function(recipeData)
+                -- Server logic before crafting
+                -- Return false to cancel
+            end,
+            after = function(recipeData)
+                -- Server logic after crafting
+            end,
+            metadata = function(resultName, fromSlot, toSlot)
+                -- Optional metadata for the resulting item
+            end,
+        },
+        costs = {
+            ['garbage'] = { need = 1, remove = true },
+            ['scrapmetal'] = { need = 0.1, remove = true },
+        },
+        result = {
+            { name = 'lockpick', amount = 1 },
+        },
+    })
+    ```
+  </Tab>
+
+  <Tab value="Client">
+    ```lua
+    -- Only registers client callbacks. The craftable recipe must already
+    -- exist in config or be registered from the server export.
+    exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
+        client = {
+            before = function(recipeData)
+                -- Client logic before crafting
+                -- Return false to cancel
+            end,
+            after = function(recipeData)
+                -- Client logic after crafting
+            end,
+        },
+    })
+    ```
+  </Tab>
+</Tabs>
+
+
+# Sleepless Inventory Addons (/docs/inventoryaddons)
+
+
+
+
+
+Addon modules for ox\_inventory that enhance its utility with back items, drag crafting, and item carrying systems. Each addon can be used independently or together.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_inventory_addons" />
+
+## Features [#features]
+
+* 🎒 **Back Items** - Attach items to player models with customizable bone positions and rotations
+* 🔨 **Drag Craft** - Simple crafting system using ox\_inventory drag-and-drop mechanics
+* 📦 **Item Carry** - Automatic item carrying with animations and prop attachments
+
+## Dependencies [#dependencies]
+
+* [ox\_lib](https://github.com/overextended/ox_lib) (required)
+* [ox\_inventory](https://github.com/overextended/ox_inventory) (required)
+
+## Installation [#installation]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Download the Resource [#download-the-resource-step]
+
+    Download a [release](https://github.com/Sleepless-Development/sleepless_inventory_addons/releases) or clone the repository:
+
+    ```bash
+    git clone https://github.com/Sleepless-Development/sleepless_inventory_addons.git
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Add to Server [#add-to-server-step]
+
+    Place the `sleepless_inventory_addons` folder in your server's resources directory.
+  </div>
+
+  <div className="fd-step">
+    ### Configure Your Server [#configure-your-server-step]
+
+    Add the following to your `server.cfg` (after ox\_inventory):
+
+    ```bash
+    ensure ox_lib
+    ensure ox_inventory
+    ensure sleepless_inventory_addons
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Configure Addons [#configure-addons-step]
+
+    Each addon has its own configuration file in its respective subfolder. See the individual addon pages for details:
+
+    * [Back Items](/docs/inventoryaddons/back-items) — `backitems/config.lua`
+    * [Drag Craft](/docs/inventoryaddons/drag-craft) — `dragcraft/config.lua`
+    * [Item Carry](/docs/inventoryaddons/item-carry) — `itemcarry/config.lua`
+  </div>
+</div>
+
+## Addons Overview [#addons-overview]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Back Items [#back-items-step]
+
+    Configure item attachments to player models with bone-specific positioning. Supports weapons, backpacks, and custom items with priority-based slot management. Items visually display on the player's back (or other bones) when in their inventory.
+  </div>
+
+  <div className="fd-step">
+    ### Drag Craft [#drag-craft-step]
+
+    Create crafting recipes that work with ox\_inventory's drag-and-drop system. Drag one item onto another to trigger a craft. Supports multi-item recipes, durability costs, and client/server-side callbacks for custom logic.
+  </div>
+
+  <div className="fd-step">
+    ### Item Carry [#item-carry-step]
+
+    Automatically attach props and play animations when players receive specific items. Includes options for vehicle blocking and walk-only mode for realistic item carrying behavior.
+
+    <Callout type="info">
+      Each addon can be configured independently. You only need to set up the addons you want to use — unused addons can be left with their default (empty) configurations.
+    </Callout>
+  </div>
+</div>
+
+## Support [#support]
+
+If you need help or have questions:
+
+* [Discord](https://discord.gg/A2bDPbfgNP)
+* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_inventory_addons/issues)
+
+
+# Item Carry (/docs/inventoryaddons/item-carry)
+
+
+
+Automatically attach props and play animations when players receive specific items using `ox_inventory`. Includes vehicle blocking and walk-only options for realistic item carrying.
+
+## Configuration [#configuration]
+
+The configuration file is located at `itemcarry/config.lua`. Each entry in the config table maps an inventory item name to its carry behavior.
+
+### Config Properties [#config-properties]
+
+| Property       | Type      | Required | Description                                                                   |
+| -------------- | --------- | -------- | ----------------------------------------------------------------------------- |
+| `walkOnly`     | `boolean` | No       | Whether the player can only walk while carrying this item                     |
+| `blockVehicle` | `boolean` | No       | Whether the player is blocked from entering vehicles while carrying this item |
+| `anim`         | `table`   | Yes      | Animation data for the carrying animation                                     |
+| `prop`         | `table`   | Yes      | Prop attachment data for the carried item                                     |
+
+### Animation Properties [#animation-properties]
+
+| Property | Type     | Required | Description                                       |
+| -------- | -------- | -------- | ------------------------------------------------- |
+| `dict`   | `string` | Yes      | Animation dictionary name                         |
+| `clip`   | `string` | Yes      | Animation clip name                               |
+| `flag`   | `number` | No       | Animation flag (controls looping, movement, etc.) |
+
+### Prop Properties [#prop-properties]
+
+| Property        | Type               | Required | Description                                            |
+| --------------- | ------------------ | -------- | ------------------------------------------------------ |
+| `bone`          | `number`           | Yes      | Bone index to attach the prop to                       |
+| `model`         | `number \| string` | Yes      | Model hash or string for the prop                      |
+| `placement`     | `table`            | Yes      | Position and rotation of the prop relative to the bone |
+| `placement.pos` | `vec3`             | Yes      | Position offset relative to the bone                   |
+| `placement.rot` | `vec3`             | Yes      | Rotation offset relative to the bone                   |
+
+## Examples [#examples]
+
+### Box Carry (Walk Only, No Vehicles) [#box-carry-walk-only-no-vehicles]
+
+```lua
+['box'] = {
+    walkOnly = true,
+    blockVehicle = true,
+    anim = {
+        dict = 'anim@heists@box_carry@',
+        clip = 'idle',
+        flag = 51,
+    },
+    prop = {
+        bone = 60309,
+        model = joaat('hei_prop_heist_box'),
+        placement = {
+            pos = vec3(0.025000, 0.080000, 0.255000),
+            rot = vec3(-145.000000, 290.000000, 0.000000),
+        },
+    },
+},
+```
+
+### Briefcase Carry (Free Movement) [#briefcase-carry-free-movement]
+
+```lua
+['briefcase'] = {
+    anim = {
+        dict = 'anim@heists@briefcase@',
+        clip = 'idle',
+        flag = 52,
+    },
+    prop = {
+        bone = 60310,
+        model = 'prop_briefcase_02',
+        placement = {
+            pos = vec3(0.035000, 0.070000, 0.240000),
+            rot = vec3(-135.000000, 280.000000, 0.000000),
+        },
+    },
+},
+```
+
+## Complete Config Example [#complete-config-example]
+
+```lua
+local config = {
+    ['box'] = {
+        walkOnly = true,
+        blockVehicle = true,
+        anim = {
+            dict = 'anim@heists@box_carry@',
+            clip = 'idle',
+            flag = 51,
+        },
+        prop = {
+            bone = 60309,
+            model = joaat('hei_prop_heist_box'),
+            placement = {
+                pos = vec3(0.025000, 0.080000, 0.255000),
+                rot = vec3(-145.000000, 290.000000, 0.000000),
+            },
+        },
+    },
+    ['briefcase'] = {
+        anim = {
+            dict = 'anim@heists@briefcase@',
+            clip = 'idle',
+            flag = 52,
+        },
+        prop = {
+            bone = 60310,
+            model = 'prop_briefcase_02',
+            placement = {
+                pos = vec3(0.035000, 0.070000, 0.240000),
+                rot = vec3(-135.000000, 280.000000, 0.000000),
+            },
+        },
+    },
+}
+```
+
+<Callout type="info">
+  The config key (e.g., `'box'`, `'briefcase'`) must match the item name in your `ox_inventory` item definitions. When a player receives the item, the carry behavior activates automatically.
+</Callout>
+
+<Callout type="warn">
+  Ensure the animation dictionaries and prop models you reference are valid and available in the game. Invalid references will result in the carry behavior not displaying correctly.
+</Callout>
+
+
 # Sleepless Ped Manager (/docs/pedmanager)
 
 
@@ -3918,147 +4358,6 @@ If you need help or have questions:
 
 * [Discord](https://discord.gg/A2bDPbfgNP)
 * [GitHub Issues](https://github.com/Sleepless-Development/sleepless_pedmanager/issues)
-
-
-# Sleepless Routing (/docs/routing)
-
-
-
-
-
-A server-side routing bucket helper. Give an instance a name, move a player into it, and read the result from replicated player state.
-
-<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_routing" />
-
-## Features [#features]
-
-* **Named buckets** so callers store a name instead of a raw bucket id
-* **Reserved buckets** for the shared world and a hidden instance
-* **Replicated player state** for `currentBucket`, `oldBucket`, and `currentBucketName`
-* **Entities follow the player**: the occupied vehicle and objects attached to the ped move too
-* **Population control** on each named bucket
-
-## Buckets [#buckets]
-
-| Id   | Role                                                                                    |
-| ---- | --------------------------------------------------------------------------------------- |
-| `0`  | Global world. `routePlayerToGlobalBucket` sends a player here.                          |
-| `1`  | Hidden bucket. Population is disabled. `routePlayerToHiddenBucket` sends a player here. |
-| `2+` | Named buckets from `createBucketId` or `requestBucketId`.                               |
-
-`currentBucketName` is `nil` for the global and hidden buckets.
-
-<Callout type="warn">
-  Restarting `sleepless_routing` moves every online player back to bucket `0` and clears `currentBucketName`.
-</Callout>
-
-## Player state [#player-state]
-
-Moving a player replicates three state bag fields on that player:
-
-| Field               | Type            | Meaning                                               |
-| ------------------- | --------------- | ----------------------------------------------------- |
-| `currentBucket`     | `number`        | Bucket they were moved into                           |
-| `oldBucket`         | `number`        | Bucket they were in before that move                  |
-| `currentBucketName` | `string \| nil` | Registered name, or `nil` when the bucket has no name |
-
-`0` is a real bucket. Check `== nil` when you need to know whether the state has been set.
-
-```lua
-AddStateBagChangeHandler('currentBucket', ('player:%s'):format(cache.serverId), function(_, _, bucket)
-    local name = LocalPlayer.state.currentBucketName
-    lib.print.info(bucket, name)
-end)
-```
-
-## Dependencies [#dependencies]
-
-* [ox\_lib](https://github.com/communityox/ox_lib) (required)
-
-No framework resource is required. On join, bucket state is published for ox\_core, ESX, QBCore, and Qbox, and for any player who joins before those events fire.
-
-## Installation [#installation]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Download the Resource [#download-the-resource-step]
-
-    Download a [release](https://github.com/Sleepless-Development/sleepless_routing/releases) from GitHub.
-  </div>
-
-  <div className="fd-step">
-    ### Add to Server [#add-to-server-step]
-
-    Place the `sleepless_routing` folder in your server's resources directory. Keep the folder name so `exports.sleepless_routing` resolves.
-  </div>
-
-  <div className="fd-step">
-    ### Configure Your Server [#configure-your-server-step]
-
-    Add the following to your `server.cfg`:
-
-    ```bash
-    ensure ox_lib
-    ensure sleepless_routing
-    ```
-  </div>
-</div>
-
-## Quick Start [#quick-start]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Open a named instance [#open-a-named-instance-step]
-
-    `requestBucketId` creates the bucket the first time and returns the same id after that. The second argument is population. `false` keeps ambient peds and traffic out of the instance. The third argument is an optional lockdown mode (`inactive`, `relaxed`, `strict`, `no_dummy`, `full`). Leave it unset when something inside the instance spawns networked entities from the client. `strict` blocks those spawns.
-
-    Other players in the same vehicle move with the player. A later `setBucketOptions` call can change population or lockdown on a bucket that already exists. `getPlayersInBucket` returns whoever is in it right now. `triggerClientEventForBucket` sends one client event to those players through `lib.triggerClientEvent`.
-
-    `currentBucket` stays aligned when another resource moves the player with `SetPlayerRoutingBucket`. The state bag updates from `onPlayerBucketChange`.
-
-    ```lua
-    lib.callback.register('myresource:enterHouse', function(source, propertyId)
-        local bucketId = exports.sleepless_routing:requestBucketId(('house_%s'):format(propertyId), false)
-        if not bucketId then return false end
-
-        return exports.sleepless_routing:addPlayerToBucket(source, bucketId, true)
-    end)
-    ```
-  </div>
-
-  <div className="fd-step">
-    ### Return to the world [#return-to-the-world-step]
-
-    ```lua
-    RegisterNetEvent('myresource:leftHouse', function()
-        exports.sleepless_routing:routePlayerToGlobalBucket(source)
-    end)
-    ```
-  </div>
-
-  <div className="fd-step">
-    ### Hide a player [#hide-a-player-step]
-
-    ```lua
-    exports.sleepless_routing:routePlayerToHiddenBucket(source)
-    ```
-  </div>
-</div>
-
-## Debug [#debug]
-
-`/setroute` is registered only when `debug` is true in `config.lua`. The command is ACE restricted to `command.setroute`. With no argument, the player returns to the global bucket. With a name, they move into that named bucket (population off).
-
-```lua
-debug = true,
-```
-
-`versionCheckEnabled` checks GitHub for a newer release when the resource starts. Leave it `true` unless the server has no outbound access.
-
-## Support [#support]
-
-* [Discord](https://discord.gg/A2bDPbfgNP)
-* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_routing/issues)
 
 
 # Configuration (/docs/prompts/configuration)
@@ -4782,6 +5081,147 @@ Arrays draw combo keys:
 ```
 
 
+# Sleepless Routing (/docs/routing)
+
+
+
+
+
+A server-side routing bucket helper. Give an instance a name, move a player into it, and read the result from replicated player state.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_routing" />
+
+## Features [#features]
+
+* **Named buckets** so callers store a name instead of a raw bucket id
+* **Reserved buckets** for the shared world and a hidden instance
+* **Replicated player state** for `currentBucket`, `oldBucket`, and `currentBucketName`
+* **Entities follow the player**: the occupied vehicle and objects attached to the ped move too
+* **Population control** on each named bucket
+
+## Buckets [#buckets]
+
+| Id   | Role                                                                                    |
+| ---- | --------------------------------------------------------------------------------------- |
+| `0`  | Global world. `routePlayerToGlobalBucket` sends a player here.                          |
+| `1`  | Hidden bucket. Population is disabled. `routePlayerToHiddenBucket` sends a player here. |
+| `2+` | Named buckets from `createBucketId` or `requestBucketId`.                               |
+
+`currentBucketName` is `nil` for the global and hidden buckets.
+
+<Callout type="warn">
+  Restarting `sleepless_routing` moves every online player back to bucket `0` and clears `currentBucketName`.
+</Callout>
+
+## Player state [#player-state]
+
+Moving a player replicates three state bag fields on that player:
+
+| Field               | Type            | Meaning                                               |
+| ------------------- | --------------- | ----------------------------------------------------- |
+| `currentBucket`     | `number`        | Bucket they were moved into                           |
+| `oldBucket`         | `number`        | Bucket they were in before that move                  |
+| `currentBucketName` | `string \| nil` | Registered name, or `nil` when the bucket has no name |
+
+`0` is a real bucket. Check `== nil` when you need to know whether the state has been set.
+
+```lua
+AddStateBagChangeHandler('currentBucket', ('player:%s'):format(cache.serverId), function(_, _, bucket)
+    local name = LocalPlayer.state.currentBucketName
+    lib.print.info(bucket, name)
+end)
+```
+
+## Dependencies [#dependencies]
+
+* [ox\_lib](https://github.com/communityox/ox_lib) (required)
+
+No framework resource is required. On join, bucket state is published for ox\_core, ESX, QBCore, and Qbox, and for any player who joins before those events fire.
+
+## Installation [#installation]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Download the Resource [#download-the-resource-step]
+
+    Download a [release](https://github.com/Sleepless-Development/sleepless_routing/releases) from GitHub.
+  </div>
+
+  <div className="fd-step">
+    ### Add to Server [#add-to-server-step]
+
+    Place the `sleepless_routing` folder in your server's resources directory. Keep the folder name so `exports.sleepless_routing` resolves.
+  </div>
+
+  <div className="fd-step">
+    ### Configure Your Server [#configure-your-server-step]
+
+    Add the following to your `server.cfg`:
+
+    ```bash
+    ensure ox_lib
+    ensure sleepless_routing
+    ```
+  </div>
+</div>
+
+## Quick Start [#quick-start]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Open a named instance [#open-a-named-instance-step]
+
+    `requestBucketId` creates the bucket the first time and returns the same id after that. The second argument is population. `false` keeps ambient peds and traffic out of the instance. The third argument is an optional lockdown mode (`inactive`, `relaxed`, `strict`, `no_dummy`, `full`). Leave it unset when something inside the instance spawns networked entities from the client. `strict` blocks those spawns.
+
+    Other players in the same vehicle move with the player. A later `setBucketOptions` call can change population or lockdown on a bucket that already exists. `getPlayersInBucket` returns whoever is in it right now. `triggerClientEventForBucket` sends one client event to those players through `lib.triggerClientEvent`.
+
+    `currentBucket` stays aligned when another resource moves the player with `SetPlayerRoutingBucket`. The state bag updates from `onPlayerBucketChange`.
+
+    ```lua
+    lib.callback.register('myresource:enterHouse', function(source, propertyId)
+        local bucketId = exports.sleepless_routing:requestBucketId(('house_%s'):format(propertyId), false)
+        if not bucketId then return false end
+
+        return exports.sleepless_routing:addPlayerToBucket(source, bucketId, true)
+    end)
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Return to the world [#return-to-the-world-step]
+
+    ```lua
+    RegisterNetEvent('myresource:leftHouse', function()
+        exports.sleepless_routing:routePlayerToGlobalBucket(source)
+    end)
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Hide a player [#hide-a-player-step]
+
+    ```lua
+    exports.sleepless_routing:routePlayerToHiddenBucket(source)
+    ```
+  </div>
+</div>
+
+## Debug [#debug]
+
+`/setroute` is registered only when `debug` is true in `config.lua`. The command is ACE restricted to `command.setroute`. With no argument, the player returns to the global bucket. With a name, they move into that named bucket (population off).
+
+```lua
+debug = true,
+```
+
+`versionCheckEnabled` checks GitHub for a newer release when the resource starts. Leave it `true` unless the server has no outbound access.
+
+## Support [#support]
+
+* [Discord](https://discord.gg/A2bDPbfgNP)
+* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_routing/issues)
+
+
 # Configuration (/docs/waypoints/configuration)
 
 
@@ -5337,6 +5777,112 @@ function properties.getPropertyId(src)
     return nil
 end
 ```
+
+
+# Client Exports (/docs/gizmo/exports/Client)
+
+
+
+Client exports for opening the gizmo and reading the transform the player settled on. Option fields are documented on [Call Options](/docs/gizmo/options).
+
+The resource also emits local events. They are not networked.
+
+| Event                              | Arguments | When                                                          |
+| ---------------------------------- | --------- | ------------------------------------------------------------- |
+| `object_gizmo:client:editStarted`  | `entity`  | The gizmo has opened.                                         |
+| `object_gizmo:client:editFinished` | `result`  | The gizmo has closed. `result` matches the `useGizmo` return. |
+
+```lua
+AddEventHandler('object_gizmo:client:editFinished', function(result)
+    if not result.confirmed then return end
+    TriggerServerEvent('myresource:server:savedPlacement', result.position, result.rotation)
+end)
+```
+
+***
+
+## useGizmo [#usegizmo]
+
+Opens the gizmo on an entity and blocks until the player finishes, cancels, or the entity disappears.
+
+```lua
+local result = exports.object_gizmo:useGizmo(entity)
+local result = exports.object_gizmo:useGizmo(entity, options)
+local result = exports.object_gizmo:useGizmo(entity, distanceLimit)
+```
+
+### Parameters [#parameters]
+
+| Parameter | Type              | Description                                                         |
+| --------- | ----------------- | ------------------------------------------------------------------- |
+| `entity`  | `number`          | Entity handle to edit.                                              |
+| `options` | `table \| number` | [Call options](/docs/gizmo/options), or a distance limit in metres. |
+
+### Returns [#returns]
+
+Always a table.
+
+| Field       | Type      | Description                                                                                           |
+| ----------- | --------- | ----------------------------------------------------------------------------------------------------- |
+| `handle`    | `number`  | The entity that was edited.                                                                           |
+| `position`  | `vector3` | Entity coordinates when the gizmo closed. After a cancel with restore, this is the original position. |
+| `rotation`  | `vector3` | Entity rotation when the gizmo closed.                                                                |
+| `cancelled` | `boolean` | `true` when the player cancelled, the gizmo was already open, or the entity was invalid.              |
+| `confirmed` | `boolean` | `true` when the player finished with the confirm control.                                             |
+
+Calling `useGizmo` while one is already open returns immediately with `cancelled = true` and does not change the open edit.
+
+### Example [#example]
+
+```lua
+local result = exports.object_gizmo:useGizmo(object, {
+    camera = 'gameplay',
+    pivot = 'center',
+    bounds = roomZone,
+})
+
+if result.confirmed then
+    lib.print.info(result.position, result.rotation)
+end
+```
+
+***
+
+## isGizmoActive [#isgizmoactive]
+
+```lua
+local active = exports.object_gizmo:isGizmoActive()
+```
+
+### Returns [#returns-1]
+
+| Type      | Description                           |
+| --------- | ------------------------------------- |
+| `boolean` | `true` while a gizmo session is open. |
+
+***
+
+## cancelGizmo [#cancelgizmo]
+
+Cancels the open gizmo. When restore-on-cancel is enabled, the entity returns to the transform it had when the gizmo opened.
+
+```lua
+exports.object_gizmo:cancelGizmo()
+```
+
+Does nothing if no gizmo is open.
+
+***
+
+## confirmGizmo [#confirmgizmo]
+
+Finishes the open gizmo and keeps the current transform.
+
+```lua
+exports.object_gizmo:confirmGizmo()
+```
+
+Does nothing if no gizmo is open.
 
 
 # Client Exports (/docs/interact/exports/Client)
@@ -6380,460 +6926,6 @@ local pedPoints = exports.sleepless_pedmanager:addPed({
 </Callout>
 
 
-# Server Exports (/docs/routing/exports/Server)
-
-
-
-All of these exports are server-side. Call them with `exports.sleepless_routing`.
-
-Bucket `0` is the global world. Bucket `1` is the hidden bucket. Named buckets start at `2`.
-
-***
-
-## getPlayerBucket [#getplayerbucket]
-
-Returns the replicated state and the live routing bucket for a player.
-
-```lua
-local state = exports.sleepless_routing:getPlayerBucket(playerId)
-```
-
-### Parameters [#parameters]
-
-| Parameter  | Type     | Description             |
-| ---------- | -------- | ----------------------- |
-| `playerId` | `number` | Server id of the player |
-
-### Returns [#returns]
-
-| Type                       | Description                         |
-| -------------------------- | ----------------------------------- |
-| `PlayerBucketState \| nil` | `nil` when the player is not online |
-
-### PlayerBucketState [#playerbucketstate]
-
-| Field           | Type            | Description                              |
-| --------------- | --------------- | ---------------------------------------- |
-| `currentBucket` | `number \| nil` | Replicated `currentBucket` state         |
-| `oldBucket`     | `number \| nil` | Replicated `oldBucket` state             |
-| `bucket`        | `number`        | Live value from `GetPlayerRoutingBucket` |
-
-`currentBucket` is the last bucket this resource published. `bucket` is the routing bucket the game is using right now.
-
-### Example [#example]
-
-```lua
-local state = exports.sleepless_routing:getPlayerBucket(source)
-if not state then return end
-
-print(state.currentBucket, state.oldBucket, state.bucket)
-```
-
-***
-
-## addPlayerToBucket [#addplayertobucket]
-
-Moves a player into a bucket. The vehicle they are sitting in moves with them, including the other players in that vehicle and any non-player peds in its seats. Objects attached to the ped move too.
-
-Replicates `oldBucket`, `currentBucket`, and `currentBucketName` on that player. `currentBucketName` is the registered name, or `nil` for buckets `0` and `1`.
-
-```lua
-local ok = exports.sleepless_routing:addPlayerToBucket(playerId, bucket, force)
-```
-
-### Parameters [#parameters-1]
-
-| Parameter  | Type       | Description                                                                                   |
-| ---------- | ---------- | --------------------------------------------------------------------------------------------- |
-| `playerId` | `number`   | Server id of the player                                                                       |
-| `bucket`   | `number`   | Target routing bucket. `0` is valid                                                           |
-| `force`    | `boolean?` | When `true`, apply the move even if the player is already in that bucket. Defaults to `false` |
-
-### Returns [#returns-1]
-
-| Type      | Description                                                 |
-| --------- | ----------------------------------------------------------- |
-| `boolean` | `true` when the player is in the requested bucket afterward |
-
-Pass `true` for `force` when the caller needs attached entities moved again, or when the replicated state may be stale.
-
-### Example [#example-1]
-
-```lua
-local bucketId = exports.sleepless_routing:requestBucketId('apartment_4b', false)
-if not bucketId then return end
-
-exports.sleepless_routing:addPlayerToBucket(source, bucketId, true)
-```
-
-***
-
-## routePlayerToHiddenBucket [#routeplayertohiddenbucket]
-
-Moves a player into bucket `1`. Population in that bucket is disabled for the life of the resource.
-
-```lua
-local ok = exports.sleepless_routing:routePlayerToHiddenBucket(playerId)
-```
-
-### Parameters [#parameters-2]
-
-| Parameter  | Type     | Description             |
-| ---------- | -------- | ----------------------- |
-| `playerId` | `number` | Server id of the player |
-
-### Returns [#returns-2]
-
-| Type      | Description                                    |
-| --------- | ---------------------------------------------- |
-| `boolean` | `true` when the player is in the hidden bucket |
-
-### Example [#example-2]
-
-```lua
-exports.sleepless_routing:routePlayerToHiddenBucket(source)
-```
-
-***
-
-## routePlayerToGlobalBucket [#routeplayertoglobalbucket]
-
-Moves a player into bucket `0`, the shared world.
-
-```lua
-local ok = exports.sleepless_routing:routePlayerToGlobalBucket(playerId)
-```
-
-### Parameters [#parameters-3]
-
-| Parameter  | Type     | Description             |
-| ---------- | -------- | ----------------------- |
-| `playerId` | `number` | Server id of the player |
-
-### Returns [#returns-3]
-
-| Type      | Description                                    |
-| --------- | ---------------------------------------------- |
-| `boolean` | `true` when the player is in the global bucket |
-
-### Example [#example-3]
-
-```lua
-RegisterNetEvent('myresource:leftInterior', function()
-    exports.sleepless_routing:routePlayerToGlobalBucket(source)
-end)
-```
-
-***
-
-## createBucketId [#createbucketid]
-
-Registers a new named bucket. If the name already exists, the existing id is returned and the population and lockdown arguments are ignored.
-
-Population and lockdown apply only on the first create. An omitted population value defaults to `false`. An omitted lockdown leaves FiveM's default, `inactive`.
-
-```lua
-local bucketId = exports.sleepless_routing:createBucketId(name, population, lockdown)
-```
-
-### Parameters [#parameters-4]
-
-| Parameter    | Type                                                           | Description                                                                         |
-| ------------ | -------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `name`       | `string`                                                       | Non-empty bucket name                                                               |
-| `population` | `boolean?`                                                     | `SetRoutingBucketPopulationEnabled` for the new bucket. Defaults to `false`         |
-| `lockdown`   | `'inactive' \| 'relaxed' \| 'strict' \| 'no_dummy' \| 'full'?` | `SetRoutingBucketEntityLockdownMode`. An unknown string makes the call return `nil` |
-
-`strict` blocks client-created entities. Leave lockdown unset when a script inside the instance spawns networked entities from the client.
-
-### Returns [#returns-4]
-
-| Type            | Description                                                                |
-| --------------- | -------------------------------------------------------------------------- |
-| `number \| nil` | Bucket id, or `nil` when `name` is empty or `lockdown` is not a known mode |
-
-### Example [#example-4]
-
-```lua
-local quiet = exports.sleepless_routing:createBucketId('intro', false, 'strict')
-local city = exports.sleepless_routing:createBucketId('public_event', true)
-```
-
-***
-
-## requestBucketId [#requestbucketid]
-
-Returns the id for a name. Creates the bucket when the name is not registered yet.
-
-```lua
-local bucketId = exports.sleepless_routing:requestBucketId(name, population, lockdown)
-```
-
-### Parameters [#parameters-5]
-
-| Parameter    | Type                                                           | Description                                                                                |
-| ------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `name`       | `string`                                                       | Non-empty bucket name                                                                      |
-| `population` | `boolean?`                                                     | Used only when this call creates the bucket. Defaults to `false`                           |
-| `lockdown`   | `'inactive' \| 'relaxed' \| 'strict' \| 'no_dummy' \| 'full'?` | Used only when this call creates the bucket. An unknown string makes the call return `nil` |
-
-### Returns [#returns-5]
-
-| Type            | Description                                                                |
-| --------------- | -------------------------------------------------------------------------- |
-| `number \| nil` | Bucket id, or `nil` when `name` is empty or `lockdown` is not a known mode |
-
-### Example [#example-5]
-
-```lua
-local bucketId = exports.sleepless_routing:requestBucketId(('house_%s'):format(propertyId), false)
-exports.sleepless_routing:addPlayerToBucket(source, bucketId, true)
-```
-
-***
-
-## getBucketId [#getbucketid]
-
-Looks up a name and returns its id when that name is already registered.
-
-```lua
-local bucketId = exports.sleepless_routing:getBucketId(name)
-```
-
-### Parameters [#parameters-6]
-
-| Parameter | Type     | Description |
-| --------- | -------- | ----------- |
-| `name`    | `string` | Bucket name |
-
-### Returns [#returns-6]
-
-| Type            | Description                                         |
-| --------------- | --------------------------------------------------- |
-| `number \| nil` | Bucket id, or `nil` when the name is not registered |
-
-### Example [#example-6]
-
-```lua
-local bucketId = exports.sleepless_routing:getBucketId('house_12')
-if not bucketId then return end
-```
-
-***
-
-## getBucketName [#getbucketname]
-
-Looks up the name for a bucket id. Buckets `0` and `1` are unnamed.
-
-```lua
-local name = exports.sleepless_routing:getBucketName(bucketId)
-```
-
-### Parameters [#parameters-7]
-
-| Parameter  | Type     | Description       |
-| ---------- | -------- | ----------------- |
-| `bucketId` | `number` | Routing bucket id |
-
-### Returns [#returns-7]
-
-| Type            | Description               |
-| --------------- | ------------------------- |
-| `string \| nil` | Registered name, or `nil` |
-
-### Example [#example-7]
-
-```lua
-local state = exports.sleepless_routing:getPlayerBucket(source)
-local name = state and exports.sleepless_routing:getBucketName(state.bucket)
-```
-
-***
-
-## removeBucketId [#removebucketid]
-
-Forgets a registered name. The numeric bucket is not deleted, and players still inside it stay there. Their `currentBucketName` state is cleared.
-
-A later `requestBucketId` with the same name allocates a new id.
-
-```lua
-local removed = exports.sleepless_routing:removeBucketId(name)
-```
-
-### Parameters [#parameters-8]
-
-| Parameter | Type     | Description |
-| --------- | -------- | ----------- |
-| `name`    | `string` | Bucket name |
-
-### Returns [#returns-8]
-
-| Type      | Description                         |
-| --------- | ----------------------------------- |
-| `boolean` | `true` when the name was registered |
-
-### Example [#example-8]
-
-```lua
-exports.sleepless_routing:routePlayerToGlobalBucket(source)
-exports.sleepless_routing:removeBucketId(('house_%s'):format(propertyId))
-```
-
-***
-
-## setBucketOptions [#setbucketoptions]
-
-Changes population, lockdown, or both on a bucket that already exists. Pass a bucket id or a registered name. Bucket `0` and bucket `1` accept a numeric id.
-
-```lua
-local ok = exports.sleepless_routing:setBucketOptions(bucket, options)
-```
-
-### Parameters [#parameters-9]
-
-| Parameter            | Type                                                           | Description                                 |
-| -------------------- | -------------------------------------------------------------- | ------------------------------------------- |
-| `bucket`             | `number \| string`                                             | Bucket id, or a name from `requestBucketId` |
-| `options.population` | `boolean?`                                                     | `SetRoutingBucketPopulationEnabled`         |
-| `options.lockdown`   | `'inactive' \| 'relaxed' \| 'strict' \| 'no_dummy' \| 'full'?` | `SetRoutingBucketEntityLockdownMode`        |
-
-### Returns [#returns-9]
-
-| Type      | Description                                                           |
-| --------- | --------------------------------------------------------------------- |
-| `boolean` | `true` when the bucket resolved and every supplied option was applied |
-
-### Example [#example-9]
-
-```lua
-exports.sleepless_routing:setBucketOptions('house_12', {
-    lockdown = 'strict',
-})
-```
-
-***
-
-## getPlayersInBucket [#getplayersinbucket]
-
-Returns the server ids of players whose live routing bucket matches. This reads `GetPlayerRoutingBucket`, so it includes players moved by another resource.
-
-```lua
-local playerIds = exports.sleepless_routing:getPlayersInBucket(bucket)
-```
-
-### Parameters [#parameters-10]
-
-| Parameter | Type               | Description                                 |
-| --------- | ------------------ | ------------------------------------------- |
-| `bucket`  | `number \| string` | Bucket id, or a name from `requestBucketId` |
-
-### Returns [#returns-10]
-
-| Type              | Description                                                                                           |
-| ----------------- | ----------------------------------------------------------------------------------------------------- |
-| `number[] \| nil` | Server ids. `{}` when the bucket is empty. `nil` when the name is not registered or the id is invalid |
-
-### Example [#example-10]
-
-```lua
-local playerIds = exports.sleepless_routing:getPlayersInBucket(('house_%s'):format(propertyId)) or {}
-
-for i = 1, #playerIds do
-    exports.sleepless_routing:routePlayerToGlobalBucket(playerIds[i])
-end
-```
-
-***
-
-## triggerClientEventForBucket [#triggerclienteventforbucket]
-
-Sends one client event to every player currently in the bucket. This wraps `lib.triggerClientEvent`, so the payload is packed once and delivered to each player in that bucket.
-
-The argument order matches `lib.triggerClientEvent`: event name, then the target, then the payload. The target is a bucket id or a registered name instead of a server id.
-
-```lua
-local sent = exports.sleepless_routing:triggerClientEventForBucket(eventName, bucket, ...)
-```
-
-### Parameters [#parameters-11]
-
-| Parameter   | Type               | Description                                 |
-| ----------- | ------------------ | ------------------------------------------- |
-| `eventName` | `string`           | Client event name                           |
-| `bucket`    | `number \| string` | Bucket id, or a name from `requestBucketId` |
-| `...`       | `any`              | Arguments forwarded to the client event     |
-
-### Returns [#returns-11]
-
-| Type      | Description                                                                                                                                                                                                        |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `boolean` | `true` when the bucket resolved and the event was handed to `lib.triggerClientEvent`. An empty bucket still returns `true`. `false` when the event name is empty, the name is not registered, or the id is invalid |
-
-### Example [#example-11]
-
-```lua
-exports.sleepless_routing:triggerClientEventForBucket('myresource:client:houseUpdated', ('house_%s'):format(propertyId), furniture)
-```
-
-***
-
-## moveEntityToBucket [#moveentitytobucket]
-
-Moves one entity into a bucket. Pass a bucket id, or the name used with `requestBucketId`. Use `addPlayerToBucket` for players.
-
-```lua
-local ok = exports.sleepless_routing:moveEntityToBucket(entityId, bucket)
-```
-
-### Parameters [#parameters-12]
-
-| Parameter  | Type               | Description                     |
-| ---------- | ------------------ | ------------------------------- |
-| `entityId` | `number`           | Entity handle                   |
-| `bucket`   | `number \| string` | Bucket id, or a registered name |
-
-### Returns [#returns-12]
-
-| Type      | Description                                                                            |
-| --------- | -------------------------------------------------------------------------------------- |
-| `boolean` | `true` when the entity exists, the bucket resolved, and the entity ends in that bucket |
-
-### Example [#example-12]
-
-```lua
-local bucketId = exports.sleepless_routing:requestBucketId(('garage_%s'):format(propertyId), false)
-exports.sleepless_routing:moveEntityToBucket(vehicle, bucketId)
-```
-
-***
-
-## moveEntityToGlobalBucket [#moveentitytoglobalbucket]
-
-Moves one entity into bucket `0`. Use `addPlayerToBucket` for players.
-
-```lua
-local ok = exports.sleepless_routing:moveEntityToGlobalBucket(entityId)
-```
-
-### Parameters [#parameters-13]
-
-| Parameter  | Type     | Description   |
-| ---------- | -------- | ------------- |
-| `entityId` | `number` | Entity handle |
-
-### Returns [#returns-13]
-
-| Type      | Description                                          |
-| --------- | ---------------------------------------------------- |
-| `boolean` | `true` when the entity exists and ends in bucket `0` |
-
-### Example [#example-13]
-
-```lua
-exports.sleepless_routing:moveEntityToGlobalBucket(vehicle)
-```
-
-
 # Client Exports (/docs/prompts/exports/Client)
 
 
@@ -7391,6 +7483,460 @@ exports.sleepless_prompts:addGlobalPlayer({
 
 ```lua
 exports.sleepless_prompts:removeGlobalPlayer('trade')
+```
+
+
+# Server Exports (/docs/routing/exports/Server)
+
+
+
+All of these exports are server-side. Call them with `exports.sleepless_routing`.
+
+Bucket `0` is the global world. Bucket `1` is the hidden bucket. Named buckets start at `2`.
+
+***
+
+## getPlayerBucket [#getplayerbucket]
+
+Returns the replicated state and the live routing bucket for a player.
+
+```lua
+local state = exports.sleepless_routing:getPlayerBucket(playerId)
+```
+
+### Parameters [#parameters]
+
+| Parameter  | Type     | Description             |
+| ---------- | -------- | ----------------------- |
+| `playerId` | `number` | Server id of the player |
+
+### Returns [#returns]
+
+| Type                       | Description                         |
+| -------------------------- | ----------------------------------- |
+| `PlayerBucketState \| nil` | `nil` when the player is not online |
+
+### PlayerBucketState [#playerbucketstate]
+
+| Field           | Type            | Description                              |
+| --------------- | --------------- | ---------------------------------------- |
+| `currentBucket` | `number \| nil` | Replicated `currentBucket` state         |
+| `oldBucket`     | `number \| nil` | Replicated `oldBucket` state             |
+| `bucket`        | `number`        | Live value from `GetPlayerRoutingBucket` |
+
+`currentBucket` is the last bucket this resource published. `bucket` is the routing bucket the game is using right now.
+
+### Example [#example]
+
+```lua
+local state = exports.sleepless_routing:getPlayerBucket(source)
+if not state then return end
+
+print(state.currentBucket, state.oldBucket, state.bucket)
+```
+
+***
+
+## addPlayerToBucket [#addplayertobucket]
+
+Moves a player into a bucket. The vehicle they are sitting in moves with them, including the other players in that vehicle and any non-player peds in its seats. Objects attached to the ped move too.
+
+Replicates `oldBucket`, `currentBucket`, and `currentBucketName` on that player. `currentBucketName` is the registered name, or `nil` for buckets `0` and `1`.
+
+```lua
+local ok = exports.sleepless_routing:addPlayerToBucket(playerId, bucket, force)
+```
+
+### Parameters [#parameters-1]
+
+| Parameter  | Type       | Description                                                                                   |
+| ---------- | ---------- | --------------------------------------------------------------------------------------------- |
+| `playerId` | `number`   | Server id of the player                                                                       |
+| `bucket`   | `number`   | Target routing bucket. `0` is valid                                                           |
+| `force`    | `boolean?` | When `true`, apply the move even if the player is already in that bucket. Defaults to `false` |
+
+### Returns [#returns-1]
+
+| Type      | Description                                                 |
+| --------- | ----------------------------------------------------------- |
+| `boolean` | `true` when the player is in the requested bucket afterward |
+
+Pass `true` for `force` when the caller needs attached entities moved again, or when the replicated state may be stale.
+
+### Example [#example-1]
+
+```lua
+local bucketId = exports.sleepless_routing:requestBucketId('apartment_4b', false)
+if not bucketId then return end
+
+exports.sleepless_routing:addPlayerToBucket(source, bucketId, true)
+```
+
+***
+
+## routePlayerToHiddenBucket [#routeplayertohiddenbucket]
+
+Moves a player into bucket `1`. Population in that bucket is disabled for the life of the resource.
+
+```lua
+local ok = exports.sleepless_routing:routePlayerToHiddenBucket(playerId)
+```
+
+### Parameters [#parameters-2]
+
+| Parameter  | Type     | Description             |
+| ---------- | -------- | ----------------------- |
+| `playerId` | `number` | Server id of the player |
+
+### Returns [#returns-2]
+
+| Type      | Description                                    |
+| --------- | ---------------------------------------------- |
+| `boolean` | `true` when the player is in the hidden bucket |
+
+### Example [#example-2]
+
+```lua
+exports.sleepless_routing:routePlayerToHiddenBucket(source)
+```
+
+***
+
+## routePlayerToGlobalBucket [#routeplayertoglobalbucket]
+
+Moves a player into bucket `0`, the shared world.
+
+```lua
+local ok = exports.sleepless_routing:routePlayerToGlobalBucket(playerId)
+```
+
+### Parameters [#parameters-3]
+
+| Parameter  | Type     | Description             |
+| ---------- | -------- | ----------------------- |
+| `playerId` | `number` | Server id of the player |
+
+### Returns [#returns-3]
+
+| Type      | Description                                    |
+| --------- | ---------------------------------------------- |
+| `boolean` | `true` when the player is in the global bucket |
+
+### Example [#example-3]
+
+```lua
+RegisterNetEvent('myresource:leftInterior', function()
+    exports.sleepless_routing:routePlayerToGlobalBucket(source)
+end)
+```
+
+***
+
+## createBucketId [#createbucketid]
+
+Registers a new named bucket. If the name already exists, the existing id is returned and the population and lockdown arguments are ignored.
+
+Population and lockdown apply only on the first create. An omitted population value defaults to `false`. An omitted lockdown leaves FiveM's default, `inactive`.
+
+```lua
+local bucketId = exports.sleepless_routing:createBucketId(name, population, lockdown)
+```
+
+### Parameters [#parameters-4]
+
+| Parameter    | Type                                                           | Description                                                                         |
+| ------------ | -------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `name`       | `string`                                                       | Non-empty bucket name                                                               |
+| `population` | `boolean?`                                                     | `SetRoutingBucketPopulationEnabled` for the new bucket. Defaults to `false`         |
+| `lockdown`   | `'inactive' \| 'relaxed' \| 'strict' \| 'no_dummy' \| 'full'?` | `SetRoutingBucketEntityLockdownMode`. An unknown string makes the call return `nil` |
+
+`strict` blocks client-created entities. Leave lockdown unset when a script inside the instance spawns networked entities from the client.
+
+### Returns [#returns-4]
+
+| Type            | Description                                                                |
+| --------------- | -------------------------------------------------------------------------- |
+| `number \| nil` | Bucket id, or `nil` when `name` is empty or `lockdown` is not a known mode |
+
+### Example [#example-4]
+
+```lua
+local quiet = exports.sleepless_routing:createBucketId('intro', false, 'strict')
+local city = exports.sleepless_routing:createBucketId('public_event', true)
+```
+
+***
+
+## requestBucketId [#requestbucketid]
+
+Returns the id for a name. Creates the bucket when the name is not registered yet.
+
+```lua
+local bucketId = exports.sleepless_routing:requestBucketId(name, population, lockdown)
+```
+
+### Parameters [#parameters-5]
+
+| Parameter    | Type                                                           | Description                                                                                |
+| ------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `name`       | `string`                                                       | Non-empty bucket name                                                                      |
+| `population` | `boolean?`                                                     | Used only when this call creates the bucket. Defaults to `false`                           |
+| `lockdown`   | `'inactive' \| 'relaxed' \| 'strict' \| 'no_dummy' \| 'full'?` | Used only when this call creates the bucket. An unknown string makes the call return `nil` |
+
+### Returns [#returns-5]
+
+| Type            | Description                                                                |
+| --------------- | -------------------------------------------------------------------------- |
+| `number \| nil` | Bucket id, or `nil` when `name` is empty or `lockdown` is not a known mode |
+
+### Example [#example-5]
+
+```lua
+local bucketId = exports.sleepless_routing:requestBucketId(('house_%s'):format(propertyId), false)
+exports.sleepless_routing:addPlayerToBucket(source, bucketId, true)
+```
+
+***
+
+## getBucketId [#getbucketid]
+
+Looks up a name and returns its id when that name is already registered.
+
+```lua
+local bucketId = exports.sleepless_routing:getBucketId(name)
+```
+
+### Parameters [#parameters-6]
+
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `name`    | `string` | Bucket name |
+
+### Returns [#returns-6]
+
+| Type            | Description                                         |
+| --------------- | --------------------------------------------------- |
+| `number \| nil` | Bucket id, or `nil` when the name is not registered |
+
+### Example [#example-6]
+
+```lua
+local bucketId = exports.sleepless_routing:getBucketId('house_12')
+if not bucketId then return end
+```
+
+***
+
+## getBucketName [#getbucketname]
+
+Looks up the name for a bucket id. Buckets `0` and `1` are unnamed.
+
+```lua
+local name = exports.sleepless_routing:getBucketName(bucketId)
+```
+
+### Parameters [#parameters-7]
+
+| Parameter  | Type     | Description       |
+| ---------- | -------- | ----------------- |
+| `bucketId` | `number` | Routing bucket id |
+
+### Returns [#returns-7]
+
+| Type            | Description               |
+| --------------- | ------------------------- |
+| `string \| nil` | Registered name, or `nil` |
+
+### Example [#example-7]
+
+```lua
+local state = exports.sleepless_routing:getPlayerBucket(source)
+local name = state and exports.sleepless_routing:getBucketName(state.bucket)
+```
+
+***
+
+## removeBucketId [#removebucketid]
+
+Forgets a registered name. The numeric bucket is not deleted, and players still inside it stay there. Their `currentBucketName` state is cleared.
+
+A later `requestBucketId` with the same name allocates a new id.
+
+```lua
+local removed = exports.sleepless_routing:removeBucketId(name)
+```
+
+### Parameters [#parameters-8]
+
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `name`    | `string` | Bucket name |
+
+### Returns [#returns-8]
+
+| Type      | Description                         |
+| --------- | ----------------------------------- |
+| `boolean` | `true` when the name was registered |
+
+### Example [#example-8]
+
+```lua
+exports.sleepless_routing:routePlayerToGlobalBucket(source)
+exports.sleepless_routing:removeBucketId(('house_%s'):format(propertyId))
+```
+
+***
+
+## setBucketOptions [#setbucketoptions]
+
+Changes population, lockdown, or both on a bucket that already exists. Pass a bucket id or a registered name. Bucket `0` and bucket `1` accept a numeric id.
+
+```lua
+local ok = exports.sleepless_routing:setBucketOptions(bucket, options)
+```
+
+### Parameters [#parameters-9]
+
+| Parameter            | Type                                                           | Description                                 |
+| -------------------- | -------------------------------------------------------------- | ------------------------------------------- |
+| `bucket`             | `number \| string`                                             | Bucket id, or a name from `requestBucketId` |
+| `options.population` | `boolean?`                                                     | `SetRoutingBucketPopulationEnabled`         |
+| `options.lockdown`   | `'inactive' \| 'relaxed' \| 'strict' \| 'no_dummy' \| 'full'?` | `SetRoutingBucketEntityLockdownMode`        |
+
+### Returns [#returns-9]
+
+| Type      | Description                                                           |
+| --------- | --------------------------------------------------------------------- |
+| `boolean` | `true` when the bucket resolved and every supplied option was applied |
+
+### Example [#example-9]
+
+```lua
+exports.sleepless_routing:setBucketOptions('house_12', {
+    lockdown = 'strict',
+})
+```
+
+***
+
+## getPlayersInBucket [#getplayersinbucket]
+
+Returns the server ids of players whose live routing bucket matches. This reads `GetPlayerRoutingBucket`, so it includes players moved by another resource.
+
+```lua
+local playerIds = exports.sleepless_routing:getPlayersInBucket(bucket)
+```
+
+### Parameters [#parameters-10]
+
+| Parameter | Type               | Description                                 |
+| --------- | ------------------ | ------------------------------------------- |
+| `bucket`  | `number \| string` | Bucket id, or a name from `requestBucketId` |
+
+### Returns [#returns-10]
+
+| Type              | Description                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
+| `number[] \| nil` | Server ids. `{}` when the bucket is empty. `nil` when the name is not registered or the id is invalid |
+
+### Example [#example-10]
+
+```lua
+local playerIds = exports.sleepless_routing:getPlayersInBucket(('house_%s'):format(propertyId)) or {}
+
+for i = 1, #playerIds do
+    exports.sleepless_routing:routePlayerToGlobalBucket(playerIds[i])
+end
+```
+
+***
+
+## triggerClientEventForBucket [#triggerclienteventforbucket]
+
+Sends one client event to every player currently in the bucket. This wraps `lib.triggerClientEvent`, so the payload is packed once and delivered to each player in that bucket.
+
+The argument order matches `lib.triggerClientEvent`: event name, then the target, then the payload. The target is a bucket id or a registered name instead of a server id.
+
+```lua
+local sent = exports.sleepless_routing:triggerClientEventForBucket(eventName, bucket, ...)
+```
+
+### Parameters [#parameters-11]
+
+| Parameter   | Type               | Description                                 |
+| ----------- | ------------------ | ------------------------------------------- |
+| `eventName` | `string`           | Client event name                           |
+| `bucket`    | `number \| string` | Bucket id, or a name from `requestBucketId` |
+| `...`       | `any`              | Arguments forwarded to the client event     |
+
+### Returns [#returns-11]
+
+| Type      | Description                                                                                                                                                                                                        |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `boolean` | `true` when the bucket resolved and the event was handed to `lib.triggerClientEvent`. An empty bucket still returns `true`. `false` when the event name is empty, the name is not registered, or the id is invalid |
+
+### Example [#example-11]
+
+```lua
+exports.sleepless_routing:triggerClientEventForBucket('myresource:client:houseUpdated', ('house_%s'):format(propertyId), furniture)
+```
+
+***
+
+## moveEntityToBucket [#moveentitytobucket]
+
+Moves one entity into a bucket. Pass a bucket id, or the name used with `requestBucketId`. Use `addPlayerToBucket` for players.
+
+```lua
+local ok = exports.sleepless_routing:moveEntityToBucket(entityId, bucket)
+```
+
+### Parameters [#parameters-12]
+
+| Parameter  | Type               | Description                     |
+| ---------- | ------------------ | ------------------------------- |
+| `entityId` | `number`           | Entity handle                   |
+| `bucket`   | `number \| string` | Bucket id, or a registered name |
+
+### Returns [#returns-12]
+
+| Type      | Description                                                                            |
+| --------- | -------------------------------------------------------------------------------------- |
+| `boolean` | `true` when the entity exists, the bucket resolved, and the entity ends in that bucket |
+
+### Example [#example-12]
+
+```lua
+local bucketId = exports.sleepless_routing:requestBucketId(('garage_%s'):format(propertyId), false)
+exports.sleepless_routing:moveEntityToBucket(vehicle, bucketId)
+```
+
+***
+
+## moveEntityToGlobalBucket [#moveentitytoglobalbucket]
+
+Moves one entity into bucket `0`. Use `addPlayerToBucket` for players.
+
+```lua
+local ok = exports.sleepless_routing:moveEntityToGlobalBucket(entityId)
+```
+
+### Parameters [#parameters-13]
+
+| Parameter  | Type     | Description   |
+| ---------- | -------- | ------------- |
+| `entityId` | `number` | Entity handle |
+
+### Returns [#returns-13]
+
+| Type      | Description                                          |
+| --------- | ---------------------------------------------------- |
+| `boolean` | `true` when the entity exists and ends in bucket `0` |
+
+### Example [#example-13]
+
+```lua
+exports.sleepless_routing:moveEntityToGlobalBucket(vehicle)
 ```
 
 
