@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "postbuild": "node scripts/fix-rsc-aliases.mjs",
     "dev": "next dev",
     "start": "serve out",
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",

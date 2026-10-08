@@ -2,6 +2,7 @@
   "title": "Waypoints",
   "pages": [
     "index",
+    "timers",
     "configuration",
     "exports"
   ]

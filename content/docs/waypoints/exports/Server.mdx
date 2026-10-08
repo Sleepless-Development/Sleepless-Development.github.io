@@ -492,3 +492,107 @@ RegisterNetEvent('mission:accept', function(missionId)
     })
 end)
 ```
+
+---
+
+## createTimer
+
+Creates a timer for one player, a list of players, or `-1` for everyone currently online.
+
+```lua
+local id = exports.sleepless_waypoints:createTimer(target, data)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `target` | `number \| number[]` | A server id, a list of server ids, or `-1` |
+| `data` | `TimerData` | Timer fields. See [Timers](/docs/waypoints/timers#timer-data). |
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `number` | Server timer id. This is not the id on the client. |
+
+```lua
+local id = exports.sleepless_waypoints:createTimer(source, {
+    coords = vec3(100.0, 200.0, 30.4),
+    style = 'bar',
+    label = 'Brewing',
+    duration = 15000,
+})
+```
+
+`onEnd` is client only. A function passed from the server is dropped on the way to the client. Each client still fires `sleepless_waypoints:client:timerEnded` when its own countdown hits zero.
+
+<Callout type="info">
+  Players who join later do not receive a timer that already exists. Each client starts the countdown when the timer arrives.
+</Callout>
+
+---
+
+## updateTimer
+
+Patches a server timer and forwards the change to its targets.
+
+```lua
+exports.sleepless_waypoints:updateTimer(id, {
+    label = 'Almost done',
+    progress = 0.8,
+})
+```
+
+---
+
+## removeTimer
+
+Removes a server timer from every player who can see it.
+
+```lua
+exports.sleepless_waypoints:removeTimer(id)
+```
+
+---
+
+## removeAllTimers
+
+With no argument, removes every server timer. With a player id, removes timers that were created for that player alone. Global timers stay up for everyone else.
+
+```lua
+exports.sleepless_waypoints:removeAllTimers()
+exports.sleepless_waypoints:removeAllTimers(playerId)
+```
+
+Disconnects drop that player's server timers on their own. A global timer stays until you remove it.
+
+---
+
+## getTimer
+
+```lua
+local timer = exports.sleepless_waypoints:getTimer(id)
+```
+
+Returns the server record `{ target, data }`, or `nil`.
+
+---
+
+## getAllTimers
+
+```lua
+local timers = exports.sleepless_waypoints:getAllTimers()
+```
+
+Returns every server timer keyed by server id.
+
+---
+
+## getTimersForPlayer
+
+```lua
+local timers = exports.sleepless_waypoints:getTimersForPlayer(playerId)
+```
+
+Returns the server timers tracked for that player, keyed by server id.

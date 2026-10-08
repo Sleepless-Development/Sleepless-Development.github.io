@@ -1,0 +1,147 @@
+---
+title: Timers
+---
+
+import { TimerBuilder } from "@/components/timer-builder";
+
+Timers are small DUI plates that sit on a coordinate, the same way a [small marker](/docs/waypoints/configuration#small) does. Use one for a cook, a fill, a brew, or any countdown you want in the world.
+
+Give it a `duration` and it counts down on its own. Omit `duration` and push `progress` from your script. A duration timer removes itself at zero, calls `onEnd` if you passed one, and fires `sleepless_waypoints:client:timerEnded`.
+
+<TimerBuilder />
+
+## Styles
+
+| Style | Reads as |
+|-------|----------|
+| `pill` | Label, remaining time, segmented bar |
+| `bar` | Label, remaining time, continuous bar |
+| `chip` | Compact label and clock time |
+| `stack` | Caption over a large value |
+| `dial` | Segmented ring with the time in the middle |
+| `pie` | Filled wedge with the time underneath |
+| `donut` | Ring with the time in the hole |
+| `gauge` | Arc with the time inside the opening |
+| `clock` | Tick ring with the time in the middle |
+| `dots` | Five dots that fill from the left |
+| `signal` | Five bars that step up from the left |
+
+Pill and bar show `8s left` while a timer is running. The other styles show `0:08`. In script mode every style shows a percent.
+
+## Timer data
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `coords` | `vector3` | *required* | World position. The plate is centered on this point. |
+| `style` | `TimerStyle` | `'pill'` | One of the styles above |
+| `label` | `string` | `'TIMER'` | Caption on the plate |
+| `showLabel` | `boolean` | `true` | Draw the caption. `false` hides it. |
+| `showValue` | `boolean` | `true` | Draw the remaining time, or the percent in script mode. `false` hides it. |
+| `duration` | `number` | | Countdown length in milliseconds. Omit this to drive the timer yourself. |
+| `progress` | `number` | `0.0` | `0.0` to `1.0`. Sets a script timer, or seeks a duration timer. |
+| `color` | `string` | `'#31a4fc'` | Progress colour as `#rrggbb`. Left unused while `colors` is set. |
+| `colors` | `TimerColorStop[]` | | `{ at = 0.0 to 1.0, color = '#rrggbb' }`. The fill keeps a colour until progress reaches the next stop. |
+| `blend` | `boolean` | `false` | Ease into the next colour as progress gets close to that stop. `false` switches hard at the stop. |
+| `background` | `boolean` | `true` | Draw the black plate |
+| `paused` | `boolean` | `false` | Freeze a duration timer on spawn |
+| `size` | `number` | `1.0` | Scale multiplier |
+| `drawDistance` | `number` | `12.0` | Metres before the timer hides |
+| `fadeDistance` | `number` | `9.0` | Metres before it starts fading |
+| `removeOnComplete` | `boolean` | `true` | Remove a duration timer when it hits zero |
+| `onEnd` | `function` | | Client only. Called with the timer id when a duration timer hits zero |
+
+Place `coords` a little above the prop. Twelve metres is enough for something you walk up to. Raise `drawDistance` if the timer should read from further away.
+
+`showLabel` and `showValue` only hide text. The bar, ring, dots, and other fills stay. Chip and stack are only those two texts, so hiding both leaves an empty plate.
+
+## Duration timer
+
+```lua
+local id = exports.sleepless_waypoints:createTimer({
+    coords = vec3(100.0, 200.0, 30.4),
+    style = 'pill',
+    label = 'Cooking',
+    duration = 8000,
+    onEnd = function(timerId)
+        -- The plate is removed after this returns. Grant the result here.
+    end,
+})
+
+AddEventHandler('sleepless_waypoints:client:timerEnded', function(timerId)
+    if timerId ~= id then return end
+end)
+```
+
+`onEnd` runs on the client that created the timer, before the plate is removed. The local event still fires after it, which is useful when another resource needs to hear about every timer.
+
+`updateTimer` changes only the fields you pass. Passing `duration` starts that timer over. Passing `progress` on a duration timer jumps the fill.
+
+```lua
+exports.sleepless_waypoints:updateTimer(id, { paused = true })
+exports.sleepless_waypoints:updateTimer(id, { label = 'Resting', color = '#f5a623' })
+exports.sleepless_waypoints:removeTimer(id)
+```
+
+`colors` replaces that flat colour. Leave `blend` out, or set it `false`, and the fill switches the moment progress reaches a stop. `blend = true` holds the current colour, then eases into the next one on the way into the stop. Pass `colors = {}` to `updateTimer` to go back to `color`.
+
+```lua
+exports.sleepless_waypoints:createTimer({
+    coords = vec3(100.0, 200.0, 30.4),
+    style = 'signal',
+    label = 'Heat',
+    duration = 20000,
+    colors = {
+        { at = 0.0, color = '#31a4fc' },
+        { at = 0.55, color = '#f5a623' },
+        { at = 0.85, color = '#b83e3e' },
+    },
+    blend = true,
+})
+```
+
+Set `removeOnComplete` to `false` if the plate should stay full until you remove it. `onEnd` and the ended event still run.
+
+`onEnd` does not cross the network. A timer created on the server still fires `sleepless_waypoints:client:timerEnded` on each client that has it. Keep the reward on the server with your own timeout, the same way the example below removes the timer.
+
+## Script timer
+
+Leave `duration` out and set `progress` whenever your script moves.
+
+```lua
+local id = exports.sleepless_waypoints:createTimer({
+    coords = vec3(100.0, 200.0, 31.2),
+    style = 'stack',
+    label = 'Filling',
+    progress = 0.0,
+    color = '#31a4fc',
+})
+
+exports.sleepless_waypoints:updateTimer(id, { progress = 0.4 })
+```
+
+Script timers do not end on their own. Remove them when the action is done.
+
+## Server
+
+```lua
+local id = exports.sleepless_waypoints:createTimer(source, {
+    coords = vec3(100.0, 200.0, 30.4),
+    style = 'bar',
+    label = 'Brewing',
+    duration = 15000,
+})
+
+SetTimeout(15000, function()
+    exports.sleepless_waypoints:removeTimer(id)
+end)
+```
+
+`source` can be one player id, a list of ids, or `-1` for everyone online. The id you get back is the server id. Use it with `updateTimer` and `removeTimer` on the server. It is not the id the client uses locally.
+
+`removeAllTimers()` drops every server timer. `removeAllTimers(playerId)` drops timers that were aimed at that one player. Global timers stay up for everyone else.
+
+<Callout type="info">
+  A player who joins after you create a timer does not receive it. Each client runs the countdown from the moment the timer arrives, and each client fires `sleepless_waypoints:client:timerEnded` on its own. If the server created the timer, remove it there when the interaction is over.
+</Callout>
+
+Client exports are documented on [Client](/docs/waypoints/exports/Client). Server exports are documented on [Server](/docs/waypoints/exports/Server). Defaults live in [Configuration](/docs/waypoints/configuration#timers).

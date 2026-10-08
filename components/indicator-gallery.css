@@ -1,0 +1,122 @@
+.indicator-gallery {
+  --ig-ink: #000;
+  --ig-text: #fff;
+  --ig-muted: #a8a8a8;
+  --ig-line: rgba(255, 255, 255, 0.16);
+  --ig-blue: #31a4fc;
+  margin: 1.25rem 0 1.75rem;
+  color: var(--ig-text);
+  font-family: DINPRO, "Segoe UI", sans-serif;
+}
+
+.indicator-gallery * {
+  box-sizing: border-box;
+}
+
+.indicator-gallery-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.indicator-gallery-bar p {
+  margin: 0;
+  color: var(--ig-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.indicator-gallery-bar label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--ig-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.indicator-gallery-bar input[type="color"] {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0.1rem solid var(--ig-line);
+  border-radius: 0.4rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+.indicator-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.75rem;
+}
+
+.indicator-gallery article {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  background: var(--ig-ink);
+  border: 0.1rem solid var(--ig-line);
+  border-radius: 0.6rem;
+  overflow: hidden;
+}
+
+.indicator-gallery-stage {
+  display: grid;
+  place-items: center;
+  height: 148px;
+  overflow: hidden;
+  background: #111;
+}
+
+.indicator-gallery-frame {
+  width: 148px;
+  height: 148px;
+  overflow: hidden;
+}
+
+.indicator-gallery iframe {
+  width: 256px;
+  height: 256px;
+  border: 0;
+  transform: scale(0.578125);
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.indicator-gallery button {
+  margin: 0;
+  padding: 0.55rem 0.7rem 0.7rem;
+  border: 0;
+  border-top: 0.1rem solid var(--ig-line);
+  background: transparent;
+  color: var(--ig-text);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.indicator-gallery button:hover {
+  background: #fff;
+  color: #000;
+}
+
+.indicator-gallery button:focus-visible {
+  outline: 2px solid var(--ig-blue);
+  outline-offset: -2px;
+}
+
+.indicator-gallery button.is-copied {
+  background: var(--ig-blue);
+  color: #000;
+}

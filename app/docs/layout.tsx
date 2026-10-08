@@ -10,7 +10,7 @@ export default function Layout({ children }: LayoutProps<"/docs">) {
       {...baseOptions()}
       sidebar={{
         collapsible: false,
-        defaultOpenLevel: 1,
+        defaultOpenLevel: 0,
       }}
     >
       {children}
