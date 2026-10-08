@@ -148,7 +148,7 @@ Same filters as [Interact](/docs/interact/interact-options). A prompt is hidden 
 | `{ 'lockpick', 'advancedlockpick' }` | All of these (or any if `anyItem = true`) |
 | `{ lockpick = 1, repairkit = 2 }`    | At least these counts                     |
 
-Jobs and gangs come from the running framework (qbx, qb, esx, ox\_core, ND). Item counts use ox\_inventory when it is started.
+Jobs and gangs come from the running framework (qbx, qb, esx, ox\_core, ND). Item counts use wasabi\_inventory when it is started, otherwise ox\_inventory.
 
 `canInteract` is called as `canInteract(entity, distance, coords, name)`, same as Interact. Set `entity` or `coords` on the group or the prompt so `distance` is measured from the player to that point. If neither is set, `entity` is `0` and `coords` is the player.
 

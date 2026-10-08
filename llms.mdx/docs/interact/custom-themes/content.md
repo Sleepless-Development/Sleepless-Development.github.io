@@ -35,7 +35,7 @@ Each look is a CSS file. The Lua config only picks an id and an accent. Copy a b
     }
     ```
 
-    `themeColors` is the default HUD accent. Leave `config.themeColor = nil` so this color is not forced onto every other theme. The distant marker is white unless you set `config.IndicatorSprite.color`.
+    `themeColors` is the default HUD accent. Leave `config.themeColor = nil` so this color is not forced onto every other theme. CSS distant markers use that same accent as their second color. The `sprite` marker uses `config.IndicatorSprite.color`.
   </div>
 
   <div className="fd-step">
@@ -115,12 +115,12 @@ Root `font-size` is `1vh`, so `1rem` is 1% of the viewport height. Size the E ke
 
 Copy `web/themes/modern.css` or `web/themes/minimal.css` and rename `[data-theme="..."]`. At minimum, cover:
 
-1. **`#interact-container` / `#interact-key`** — size, border, background, letter
-2. **`#interact-progress`** — usually `left/right/bottom: 0; width: 100%; height: 0` with `background: rgb(var(--primary))`. JS only changes `height`.
-3. **`.option-container`** — row chrome
-4. **`.option-container.highlighted`** — selected row. Put `--primary` here, not on every idle row.
-5. **`.option-icon`, `.option-label`, `.option-hold`** — idle and `.highlighted` colors
-6. **`body.is-cooldown`** — dim the key so the hourglass reads as blocked
+1. **`#interact-container` / `#interact-key`**: size, border, background, letter
+2. **`#interact-progress`**: usually `left/right/bottom: 0; width: 100%; height: 0` with `background: rgb(var(--primary))`. JS sets `height` while the player holds E. `modern` also strokes `.hold-ring`.
+3. **`.option-container`**: row chrome
+4. **`.option-container.highlighted`**: selected row. Put `--primary` here, not on every idle row.
+5. **`.option-icon`, `.option-label`, `.option-hold`**: idle and `.highlighted` colors
+6. **`body.is-cooldown`**: dim the key so the hourglass reads as blocked
 
 `.animated-background` is a full-row fill used by `legacy` and `retro`. Most themes hide it with `display: none`.
 
@@ -278,5 +278,5 @@ This prompt is a world sprite, not a fullscreen NUI overlay.
 DINPRO is self-hosted in `web/fonts/`. To use another face, add an `@font-face` in your theme file (see `legacy.css`) and set `--font`.
 
 <Callout type="info">
-  Built-in themes live in `web/themes/`. `modern.css` is the default HUD. `cyber.css`, `vice.css`, and `noir.css` show how far you can push shape without changing the HTML.
+  Built-in themes live in `web/themes/`. `modern.css` is the default HUD. `cyber.css`, `vice.css`, and `kawaii.css` show how far you can push shape without changing the HTML.
 </Callout>

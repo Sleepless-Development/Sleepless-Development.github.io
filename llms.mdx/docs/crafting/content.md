@@ -15,7 +15,7 @@ A flexible and modern crafting system for FiveM servers with a React-based UI, u
 ## Features [#features]
 
 * 🔧 **Multi-Framework** - Supports ESX, QBCore, Qbox, and ox\_core
-* 📦 **Inventory Support** - Compatible with ox\_inventory and qb-inventory
+* 📦 **Inventory Support** - Compatible with ox\_inventory, qb-inventory, and wasabi\_inventory
 * 🎨 **Modern UI** - React-based with 3D item previews and smooth animations
 * 🏗️ **Custom Stations** - Unlimited station types with unique recipes and props
 * ⬆️ **Upgradable Benches** - Unlock new recipes and change appearance
@@ -31,7 +31,7 @@ A flexible and modern crafting system for FiveM servers with a React-based UI, u
 * [ox\_lib](https://github.com/communityox/ox_lib)
 * [oxmysql](https://github.com/communityox/oxmysql)
 * A supported framework (ESX, QB-Core, QBX, or OX\_Core)
-* A supported inventory (ox\_inventory or qb-inventory)
+* A supported inventory (ox\_inventory, qb-inventory, or wasabi\_inventory)
 
 ## Preview [#preview]
 

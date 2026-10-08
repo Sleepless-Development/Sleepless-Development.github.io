@@ -38,6 +38,7 @@
     - [Client Exports](/docs/pedmanager/exports/Client)
 - Waypoints
   - [Sleepless Waypoints](/docs/waypoints)
+  - [Timers](/docs/waypoints/timers)
   - [Configuration](/docs/waypoints/configuration)
   - Exports
     - [Client Exports](/docs/waypoints/exports/Client)

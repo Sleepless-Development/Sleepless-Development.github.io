@@ -50,7 +50,7 @@ Config.orbit = {
 
 ## Highlight [#highlight]
 
-Objects get an outline. Peds cannot be outlined, so they fade instead.
+Objects get an outline. Peds are faded with `pedAlpha`. `SetEntityDrawOutline` is not used on a ped.
 
 ```lua
 Config.outlineColor = { r = 255, g = 255, b = 255, a = 255 }

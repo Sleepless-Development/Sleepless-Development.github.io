@@ -16,16 +16,16 @@ local id = exports.sleepless_interact:addCoords(coords, options)
 
 ### Parameters [#parameters]
 
-| Parameter | Type                   | Description                                                                      |
-| --------- | ---------------------- | -------------------------------------------------------------------------------- |
-| `coords`  | `vector3 \| vector3[]` | Single coordinate or array of coordinates                                        |
-| `options` | `Option \| Option[]`   | Single option or array of interaction [options](/docs/interact/interact-options) |
+| Parameter | Type                              | Description                                                                      |
+| --------- | --------------------------------- | -------------------------------------------------------------------------------- |
+| `coords`  | `vector3 \| vector4 \| vector3[]` | Single coordinate or array of coordinates. A `vector4` uses x, y, and z          |
+| `options` | `Option \| Option[]`              | Single option or array of interaction [options](/docs/interact/interact-options) |
 
 ### Returns [#returns]
 
-| Type     | Description                                                |
-| -------- | ---------------------------------------------------------- |
-| `string` | The unique identifier for the added coordinate interaction |
+| Type                 | Description                                                       |
+| -------------------- | ----------------------------------------------------------------- |
+| `string \| string[]` | One id, or an array of ids when you pass more than one coordinate |
 
 ### Example [#example]
 
@@ -42,7 +42,7 @@ local id = exports.sleepless_interact:addCoords(vec3(100.0, 200.0, 30.0), {
 })
 
 -- Multiple coordinates
-local id = exports.sleepless_interact:addCoords({
+local ids = exports.sleepless_interact:addCoords({
     vec3(100.0, 200.0, 30.0),
     vec3(150.0, 250.0, 30.0)
 }, {
@@ -52,7 +52,7 @@ local id = exports.sleepless_interact:addCoords({
 ```
 
 <Callout type="warn">
-  When using multiple coordinates, each option maintains the same ID but is tracked separately in the system.
+  Several coordinates return one id per point. Each id is derived from that coordinate.
 </Callout>
 
 ***
@@ -62,16 +62,15 @@ local id = exports.sleepless_interact:addCoords({
 Removes coordinate-based interactions from the game.
 
 ```lua
-exports.sleepless_interact:removeCoords(id, options?, suppressWarning?)
+exports.sleepless_interact:removeCoords(id, options?)
 ```
 
 ### Parameters [#parameters-1]
 
-| Parameter         | Type                  | Description                                                     |
-| ----------------- | --------------------- | --------------------------------------------------------------- |
-| `id`              | `string`              | The coordinate ID to remove                                     |
-| `options`         | `string \| string[]?` | Specific option names to remove (optional — omit to remove all) |
-| `suppressWarning` | `boolean?`            | Suppress warning if ID doesn't exist                            |
+| Parameter | Type                  | Description                                                             |
+| --------- | --------------------- | ----------------------------------------------------------------------- |
+| `id`      | `string`              | The coordinate ID to remove                                             |
+| `options` | `string \| string[]?` | Option names to remove. Omit to remove every option your resource added |
 
 ### Example [#example-1]
 
@@ -86,7 +85,7 @@ local id = exports.sleepless_interact:addCoords(vec3(100.0, 200.0, 30.0), {
 -- Remove specific options by name
 exports.sleepless_interact:removeCoords(id, { "option1" })
 
--- Remove all options for this coordinate
+-- Remove every option this resource added at this coordinate
 exports.sleepless_interact:removeCoords(id)
 ```
 
@@ -129,10 +128,10 @@ exports.sleepless_interact:removeLocalEntity(arr, options?)
 
 ### Parameters [#parameters-3]
 
-| Parameter | Type                  | Description                                              |
-| --------- | --------------------- | -------------------------------------------------------- |
-| `arr`     | `number \| number[]`  | Entity ID or array of entity IDs                         |
-| `options` | `string \| string[]?` | Option name(s) to remove (optional — omit to remove all) |
+| Parameter | Type                  | Description                                                             |
+| --------- | --------------------- | ----------------------------------------------------------------------- |
+| `arr`     | `number \| number[]`  | Entity ID or array of entity IDs                                        |
+| `options` | `string \| string[]?` | Option names to remove. Omit to remove every option your resource added |
 
 ### Example [#example-3]
 
@@ -140,7 +139,7 @@ exports.sleepless_interact:removeLocalEntity(arr, options?)
 -- Remove specific options by name
 exports.sleepless_interact:removeLocalEntity(entityId, "local_interaction")
 
--- Remove all options from the entity
+-- Remove every option this resource added to the entity
 exports.sleepless_interact:removeLocalEntity(entityId)
 ```
 
@@ -185,10 +184,10 @@ exports.sleepless_interact:removeEntity(arr, options?)
 
 ### Parameters [#parameters-5]
 
-| Parameter | Type                  | Description                                              |
-| --------- | --------------------- | -------------------------------------------------------- |
-| `arr`     | `number \| number[]`  | Network ID or array of network IDs                       |
-| `options` | `string \| string[]?` | Option name(s) to remove (optional — omit to remove all) |
+| Parameter | Type                  | Description                                                             |
+| --------- | --------------------- | ----------------------------------------------------------------------- |
+| `arr`     | `number \| number[]`  | Network ID or array of network IDs                                      |
+| `options` | `string \| string[]?` | Option names to remove. Omit to remove every option your resource added |
 
 ### Example [#example-5]
 
@@ -198,7 +197,7 @@ local NetId = NetworkGetNetworkIdFromEntity(entity)
 -- Remove specific options by name
 exports.sleepless_interact:removeEntity(NetId, "networked_interaction")
 
--- Remove all options from the entity
+-- Remove every option this resource added to the entity
 exports.sleepless_interact:removeEntity(NetId)
 ```
 
@@ -241,10 +240,10 @@ exports.sleepless_interact:removeModel(arr, options?)
 
 ### Parameters [#parameters-7]
 
-| Parameter | Type                                       | Description                                              |
-| --------- | ------------------------------------------ | -------------------------------------------------------- |
-| `arr`     | `number \| string \| (number \| string)[]` | Model hash/name or array of models                       |
-| `options` | `string \| string[]?`                      | Option name(s) to remove (optional — omit to remove all) |
+| Parameter | Type                                       | Description                                                             |
+| --------- | ------------------------------------------ | ----------------------------------------------------------------------- |
+| `arr`     | `number \| string \| (number \| string)[]` | Model hash/name or array of models                                      |
+| `options` | `string \| string[]?`                      | Option names to remove. Omit to remove every option your resource added |
 
 ### Example [#example-7]
 
@@ -252,7 +251,7 @@ exports.sleepless_interact:removeModel(arr, options?)
 -- Remove specific options by name
 exports.sleepless_interact:removeModel("prop_boxpile_01a", "box_interact")
 
--- Remove all options for this model
+-- Remove every option this resource added for this model
 exports.sleepless_interact:removeModel("prop_boxpile_01a")
 ```
 

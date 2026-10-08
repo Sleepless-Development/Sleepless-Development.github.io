@@ -4,7 +4,7 @@
 
 ## addPed [#addped]
 
-Add a new ped to be handled by the manager. Supports target options, interact options, animations, props, scenarios, and lifecycle callbacks.
+Add a new ped to be handled by the manager. Supports target options, interact options, prompt options, animations, props, scenarios, and lifecycle callbacks.
 
 ```lua
 local pedPoint = exports.sleepless_pedmanager:addPed(data)
@@ -18,18 +18,20 @@ local pedPoint = exports.sleepless_pedmanager:addPed(data)
 
 ### PedConfig Properties [#pedconfig-properties]
 
-| Property          | Type                     | Required | Description                                                                         |
-| ----------------- | ------------------------ | -------- | ----------------------------------------------------------------------------------- |
-| `model`           | `string \| number`       | Yes      | A hash or string for the ped model                                                  |
-| `coords`          | `vec4 \| vec4[]`         | Yes      | The coordinates/heading where the ped(s) will be located                            |
-| `scenario`        | `string`                 | No       | The name of a scenario for the ped to play when spawned                             |
-| `animation`       | `table`                  | No       | Animation data (see below)                                                          |
-| `prop`            | `table`                  | No       | Prop attachment data (see below)                                                    |
-| `targetOptions`   | `table`                  | No       | An array of [ox\_target options](https://overextended.dev/ox_target)                |
-| `interactOptions` | `table`                  | No       | A [sleepless\_interact Option or array of Options](/docs/interact/interact-options) |
-| `renderDistance`  | `number`                 | No       | Distance from the player at which the ped spawns                                    |
-| `onSpawn`         | `function(ped?: number)` | No       | Callback called right **after** the ped is spawned                                  |
-| `onDespawn`       | `function(ped?: number)` | No       | Callback called right **before** the ped is despawned                               |
+| Property          | Type                     | Required | Description                                                                                                                                    |
+| ----------------- | ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `model`           | `string \| number`       | Yes      | A hash or string for the ped model                                                                                                             |
+| `coords`          | `vec4 \| vec4[]`         | Yes      | The coordinates/heading where the ped(s) will be located                                                                                       |
+| `scenario`        | `string`                 | No       | The name of a scenario for the ped to play when spawned                                                                                        |
+| `animation`       | `table`                  | No       | Animation data (see below)                                                                                                                     |
+| `prop`            | `table`                  | No       | Prop attachment data (see below)                                                                                                               |
+| `targetOptions`   | `table`                  | No       | An array of [ox\_target options](https://overextended.dev/ox_target)                                                                           |
+| `interactOptions` | `table`                  | No       | A [sleepless\_interact Option or array of Options](/docs/interact/interact-options)                                                            |
+| `promptOptions`   | `table`                  | No       | A [sleepless\_prompts entry or array of entries](/docs/prompts/prompt-options). Registered on the ped while it is spawned                      |
+| `promptSettings`  | `table`                  | No       | Optional [world target settings](/docs/prompts/exports/Client#world-targets): `position`, `layout`, `separator`, `offset`, `order`, `distance` |
+| `renderDistance`  | `number`                 | No       | Distance from the player at which the ped spawns                                                                                               |
+| `onSpawn`         | `function(ped?: number)` | No       | Callback called right **after** the ped is spawned                                                                                             |
+| `onDespawn`       | `function(ped?: number)` | No       | Callback called right **before** the ped is despawned                                                                                          |
 
 ### Animation Properties [#animation-properties]
 
@@ -151,6 +153,45 @@ local pedPoints = exports.sleepless_pedmanager:addPed({
     onDespawn = function(ped)
         -- cleanup logic here
     end,
+})
+```
+
+### Example: Prompt Options [#example-prompt-options]
+
+`promptOptions` is passed to `sleepless_prompts:addLocalEntity` when the ped spawns, and removed when it despawns. `sleepless_prompts` has to be started. Each entry needs a `label` and a `control`, `keybind`, `key`, or `icon`.
+
+`export` runs on the resource that called `addPed`. `onSelect` wins when both are set, same as prompts.
+
+```lua
+local pedPoint = exports.sleepless_pedmanager:addPed({
+    model = "a_m_m_business_01",
+    coords = vec4(200.0, -900.0, 30.0, 180.0),
+    scenario = "WORLD_HUMAN_CLIPBOARD",
+    renderDistance = 15.0,
+    promptOptions = {
+        {
+            name = "talk",
+            label = "Talk",
+            control = 38,
+            distance = 2.5,
+            onSelect = function(data)
+                print(data.entity, data.distance)
+            end,
+        },
+        {
+            name = "trade",
+            label = "Trade",
+            control = 47,
+            distance = 2.5,
+            onSelect = function(data)
+                print("Trading with ped")
+            end,
+        },
+    },
+    promptSettings = {
+        position = "bottom-center",
+        distance = 2.5,
+    },
 })
 ```
 

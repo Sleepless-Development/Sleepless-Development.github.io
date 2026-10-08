@@ -21,12 +21,12 @@ config.registerUsableItems = true
 
 ### Options Explained [#options-explained]
 
-| Option                | Type      | Description                                                                                                                           |
-| --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `debug`               | `boolean` | Enable debug mode for development. Enables test commands.                                                                             |
-| `imageExtension`      | `string`  | File extension for item images in the UI (e.g., `'webp'`, `'png'`)                                                                    |
-| `imagePath`           | `string`  | Base path for item icon images. Defaults to `'nui://ox_inventory/web/images'`. Adjust this if your inventory stores images elsewhere. |
-| `registerUsableItems` | `boolean` | When `true`, lootboxes defined in config are automatically registered as usable items                                                 |
+| Option                | Type      | Description                                                                                                                                                                                                                  |
+| --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `debug`               | `boolean` | Enable debug mode for development. Enables test commands.                                                                                                                                                                    |
+| `imageExtension`      | `string`  | File extension for item images in the UI (e.g., `'webp'`, `'png'`)                                                                                                                                                           |
+| `imagePath`           | `string`  | Base path for item icon images. Defaults to `'nui://ox_inventory/web/images'`. wasabi\_inventory is detected on its own and reads `nui://wasabi_inventory/ui/images`. Adjust this if your inventory stores images elsewhere. |
+| `registerUsableItems` | `boolean` | When `true`, lootboxes defined in config are automatically registered as usable items                                                                                                                                        |
 
 ## Rarity Configuration [#rarity-configuration]
 

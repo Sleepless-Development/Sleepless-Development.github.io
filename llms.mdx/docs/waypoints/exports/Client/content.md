@@ -348,3 +348,106 @@ if waypoint and waypoint.active then
     print('Draw Distance:', data.drawDistance)
 end
 ```
+
+***
+
+## createTimer [#createtimer]
+
+Creates a world-space DUI timer on this client. The plate is centered on `coords`.
+
+```lua
+local id = exports.sleepless_waypoints:createTimer(data)
+```
+
+### Parameters [#parameters-4]
+
+| Parameter | Type        | Description                                                    |
+| --------- | ----------- | -------------------------------------------------------------- |
+| `data`    | `TimerData` | Timer fields. See [Timers](/docs/waypoints/timers#timer-data). |
+
+### Returns [#returns-2]
+
+| Type     | Description     |
+| -------- | --------------- |
+| `number` | Client timer id |
+
+Pass `duration` in milliseconds to run a countdown. Omit it and set `progress` from `0.0` to `1.0` when your script should move the fill.
+
+```lua
+local id = exports.sleepless_waypoints:createTimer({
+    coords = vec3(100.0, 200.0, 30.4),
+    style = 'pill',
+    label = 'Cooking',
+    duration = 8000,
+    color = '#31a4fc',
+    drawDistance = 12.0,
+    onEnd = function(id)
+        print('Timer finished', id)
+    end,
+})
+```
+
+`onEnd` runs when a duration timer hits zero, before the plate is removed. `updateTimer` can replace it. Script timers never call it.
+
+***
+
+## updateTimer [#updatetimer]
+
+Changes the fields you pass. Anything you leave out stays as it is.
+
+```lua
+exports.sleepless_waypoints:updateTimer(id, data)
+```
+
+Passing `duration` starts that countdown over. Passing `progress` on a duration timer jumps the fill. `paused = true` freezes a countdown, and `paused = false` resumes it.
+
+```lua
+exports.sleepless_waypoints:updateTimer(id, {
+    paused = true,
+    label = 'Resting',
+})
+```
+
+***
+
+## removeTimer [#removetimer]
+
+Removes one timer and releases its DUI back to the pool.
+
+```lua
+exports.sleepless_waypoints:removeTimer(id)
+```
+
+***
+
+## removeAllTimers [#removealltimers]
+
+Removes every timer on this client, including timers the server created for this player.
+
+```lua
+exports.sleepless_waypoints:removeAllTimers()
+```
+
+***
+
+## getTimer [#gettimer]
+
+Returns the timer table for a client id, or `nil` when it is already gone.
+
+```lua
+local timer = exports.sleepless_waypoints:getTimer(id)
+```
+
+***
+
+## timerEnded [#timerended]
+
+A duration timer fires this local event when it reaches zero. `onEnd`, when you passed one to `createTimer`, runs first. Then this event fires. Then `removeOnComplete` removes the plate.
+
+```lua
+AddEventHandler('sleepless_waypoints:client:timerEnded', function(id)
+    print('Timer finished', id)
+end)
+```
+
+Script timers do not fire this event.

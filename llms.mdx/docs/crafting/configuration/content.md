@@ -11,8 +11,6 @@ local config = {}
 
 config.DEBUG = false              -- Enable debug mode for development
 
-config.inventory = 'ox'           -- Options: 'ox', 'qb'
-
 config.interact = 'drawtext'      -- Options: 'ox_target', 'qb-target', 'sleepless_interact', 'drawtext'
 
 config.UIColor = {                -- RGB colors for UI theme
@@ -36,14 +34,7 @@ All database SQL (schema, insert, delete, save metadata, fetch) lives in `config
 
 When set to `true`, enables debug mode which provides additional console output for troubleshooting. Keep this `false` in production.
 
-### `config.inventory` [#configinventory]
-
-Specifies which inventory system your server uses:
-
-| Value  | Inventory System |
-| ------ | ---------------- |
-| `'ox'` | ox\_inventory    |
-| `'qb'` | qb-inventory     |
+Inventory is detected from the running resource. ox\_inventory, qb-inventory, and wasabi\_inventory are supported. wasabi\_inventory is used when it is started, because it provides ox\_inventory. When jaksam\_inventory is providing both ox\_inventory and qb-inventory, the ox bridge is the one that loads.
 
 ### `config.interact` [#configinteract]
 

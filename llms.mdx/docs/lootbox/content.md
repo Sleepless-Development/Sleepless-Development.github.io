@@ -15,7 +15,7 @@ A CS:GO-style lootbox/case opening system for FiveM with a polished React UI, we
 * 👀 **Preview system** - Players can view case contents and drop chances before opening
 * 🎨 **Rarity system** - Visual rarity tiers (Common, Uncommon, Rare, Epic, Legendary)
 * 🔧 **Framework agnostic** - Supports ESX, QBCore, Qbox, and ox\_core out of the box
-* 📦 **Multiple inventory support** - Works with ox\_inventory, qb-inventoryy
+* 📦 **Multiple inventory support** - Works with ox\_inventory, qb-inventory, and wasabi\_inventory
 * 🎁 **Metadata support** - Items can include custom metadata
 * 📝 **Config + Runtime API** - Define lootboxes in config or register them dynamically via exports
 * 🎀 **Bonus items** - Award hidden bonus items alongside the main reward (e.g., ammo with weapons)
@@ -25,7 +25,7 @@ A CS:GO-style lootbox/case opening system for FiveM with a polished React UI, we
 
 * [ox\_lib](https://github.com/overextended/ox_lib) (required)
 * A supported framework (ESX, QBCore, Qbox, or ox\_core)
-* A supported inventory system (ox\_inventory, qb-inventory)
+* A supported inventory system (ox\_inventory, qb-inventory, or wasabi\_inventory)
 
 ## Installation [#installation]
 

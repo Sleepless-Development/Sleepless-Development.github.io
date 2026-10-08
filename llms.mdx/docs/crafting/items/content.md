@@ -241,6 +241,7 @@ You'll need to add images for your items to your inventory's image folder:
 
 * **ox\_inventory**: `ox_inventory/web/images/`
 * **qb-inventory**: `qb-inventory/html/images/`
+* **wasabi\_inventory**: `wasabi_inventory/ui/images/` (png). Item definitions use the same fields as ox\_inventory.
 
 <Callout type="info">
   For best results, use PNG images with a transparent background. The recommended size is 100x100 pixels.

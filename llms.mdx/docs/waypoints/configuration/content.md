@@ -75,6 +75,8 @@ config.dui = {
 | `width`  | `number` | `512`   | DUI texture width in pixels  |
 | `height` | `number` | `1024`  | DUI texture height in pixels |
 
+Timers use a second texture, `config.timerDui`, at 512 by 512. Wide and round timer styles share that texture. The game crops the quad to the style, so changing `config.dui` does not change timers.
+
 <Callout type="warn">
   Increasing DUI resolution improves visual quality but uses more VRAM. The default values provide a good balance for most setups.
 </Callout>
@@ -92,18 +94,57 @@ config.rendering = {
     checkpointAspectRatio = 2.0,
     smallMinScale = 1.0,
     smallAspectRatio = 2.0,
+    timerPixelScale = 0.0012,
+    timerMinScale = 1.0,
+    timerPerspectiveDivisor = 14.0,
 }
 ```
 
-| Option                     | Type     | Default | Description                                     |
-| -------------------------- | -------- | ------- | ----------------------------------------------- |
-| `updateInterval`           | `number` | `100`   | Main loop update interval in milliseconds       |
-| `perspectiveDivisor`       | `number` | `20.0`  | Camera distance divisor for perspective scaling |
-| `checkpointBaseMultiplier` | `number` | `4.0`   | Multiplier for checkpoint base size             |
-| `checkpointMinScale`       | `number` | `0.1`   | Minimum perspective scale for checkpoints       |
-| `checkpointAspectRatio`    | `number` | `2.0`   | Height-to-width ratio for checkpoint quads      |
-| `smallMinScale`            | `number` | `1.0`   | Minimum perspective scale for small markers     |
-| `smallAspectRatio`         | `number` | `2.0`   | Height-to-width ratio for small marker quads    |
+| Option                     | Type     | Default  | Description                                     |
+| -------------------------- | -------- | -------- | ----------------------------------------------- |
+| `updateInterval`           | `number` | `100`    | Main loop update interval in milliseconds       |
+| `perspectiveDivisor`       | `number` | `20.0`   | Camera distance divisor for perspective scaling |
+| `checkpointBaseMultiplier` | `number` | `4.0`    | Multiplier for checkpoint base size             |
+| `checkpointMinScale`       | `number` | `0.1`    | Minimum perspective scale for checkpoints       |
+| `checkpointAspectRatio`    | `number` | `2.0`    | Height-to-width ratio for checkpoint quads      |
+| `smallMinScale`            | `number` | `1.0`    | Minimum perspective scale for small markers     |
+| `smallAspectRatio`         | `number` | `2.0`    | Height-to-width ratio for small marker quads    |
+| `timerPixelScale`          | `number` | `0.0012` | Metres per timer pixel at the minimum scale     |
+| `timerMinScale`            | `number` | `1.0`    | Minimum perspective scale for timers            |
+| `timerPerspectiveDivisor`  | `number` | `14.0`   | Camera distance divisor for timer scaling       |
+
+## Timers [#timers]
+
+Defaults for [`createTimer`](/docs/waypoints/timers). Per-timer fields override these.
+
+```lua
+config.timer = {
+    drawDistance = 12.0,
+    fadeDistance = 9.0,
+    size = 1.0,
+    color = '#31a4fc',
+    label = 'TIMER',
+    background = true,
+    removeOnComplete = true,
+}
+
+config.timerDui = {
+    width = 512,
+    height = 512,
+}
+```
+
+| Option             | Type      | Default     | Description                          |
+| ------------------ | --------- | ----------- | ------------------------------------ |
+| `drawDistance`     | `number`  | `12.0`      | Metres before the timer hides        |
+| `fadeDistance`     | `number`  | `9.0`       | Metres before it starts fading       |
+| `size`             | `number`  | `1.0`       | Scale multiplier                     |
+| `color`            | `string`  | `'#31a4fc'` | Progress colour, `#rrggbb`           |
+| `label`            | `string`  | `'TIMER'`   | Caption used when `label` is omitted |
+| `background`       | `boolean` | `true`      | Draw the black plate                 |
+| `removeOnComplete` | `boolean` | `true`      | Remove a duration timer at zero      |
+| `timerDui.width`   | `number`  | `512`       | Timer texture width                  |
+| `timerDui.height`  | `number`  | `512`       | Timer texture height                 |
 
 ## Server Settings [#server-settings]
 

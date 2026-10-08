@@ -109,12 +109,15 @@ Enter from the chat command that opened the gizmo is ignored. Press Enter again 
 
 ## Test Command [#test-command]
 
-`/testGizmo` is registered only when `Config.debug` is `true`. Leave that off on a live server. The command spawns a prop in front of the player.
+`/testGizmo` is registered only when `Config.debug` is `true`. Leave that off on a live server. The command spawns a prop, or a ped, in front of the player.
 
 ```lua
 /testGizmo
 /testGizmo prop_bench_01a
+/testGizmo ped
+/testGizmo ped a_f_y_business_01
 /testGizmo orbit
+/testGizmo orbit ped
 /testGizmo gameplay prop_barrier_work05
 ```
 

@@ -18,8 +18,6 @@ local config = {}
 
 config.DEBUG = false              -- Enable debug mode for development
 
-config.inventory = 'ox'           -- Options: 'ox', 'qb'
-
 config.interact = 'drawtext'      -- Options: 'ox_target', 'qb-target', 'sleepless_interact', 'drawtext'
 
 config.UIColor = {                -- RGB colors for UI theme
@@ -43,14 +41,7 @@ All database SQL (schema, insert, delete, save metadata, fetch) lives in `config
 
 When set to `true`, enables debug mode which provides additional console output for troubleshooting. Keep this `false` in production.
 
-### `config.inventory` [#configinventory]
-
-Specifies which inventory system your server uses:
-
-| Value  | Inventory System |
-| ------ | ---------------- |
-| `'ox'` | ox\_inventory    |
-| `'qb'` | qb-inventory     |
+Inventory is detected from the running resource. ox\_inventory, qb-inventory, and wasabi\_inventory are supported. wasabi\_inventory is used when it is started, because it provides ox\_inventory. When jaksam\_inventory is providing both ox\_inventory and qb-inventory, the ox bridge is the one that loads.
 
 ### `config.interact` [#configinteract]
 
@@ -142,7 +133,7 @@ A flexible and modern crafting system for FiveM servers with a React-based UI, u
 ## Features [#features]
 
 * 🔧 **Multi-Framework** - Supports ESX, QBCore, Qbox, and ox\_core
-* 📦 **Inventory Support** - Compatible with ox\_inventory and qb-inventory
+* 📦 **Inventory Support** - Compatible with ox\_inventory, qb-inventory, and wasabi\_inventory
 * 🎨 **Modern UI** - React-based with 3D item previews and smooth animations
 * 🏗️ **Custom Stations** - Unlimited station types with unique recipes and props
 * ⬆️ **Upgradable Benches** - Unlock new recipes and change appearance
@@ -158,7 +149,7 @@ A flexible and modern crafting system for FiveM servers with a React-based UI, u
 * [ox\_lib](https://github.com/communityox/ox_lib)
 * [oxmysql](https://github.com/communityox/oxmysql)
 * A supported framework (ESX, QB-Core, QBX, or OX\_Core)
-* A supported inventory (ox\_inventory or qb-inventory)
+* A supported inventory (ox\_inventory, qb-inventory, or wasabi\_inventory)
 
 ## Preview [#preview]
 
@@ -463,6 +454,7 @@ You'll need to add images for your items to your inventory's image folder:
 
 * **ox\_inventory**: `ox_inventory/web/images/`
 * **qb-inventory**: `qb-inventory/html/images/`
+* **wasabi\_inventory**: `wasabi_inventory/ui/images/` (png). Item definitions use the same fields as ox\_inventory.
 
 <Callout type="info">
   For best results, use PNG images with a transparent background. The recommended size is 100x100 pixels.
@@ -1142,7 +1134,7 @@ Config.orbit = {
 
 ## Highlight [#highlight]
 
-Objects get an outline. Peds cannot be outlined, so they fade instead.
+Objects get an outline. Peds are faded with `pedAlpha`. `SetEntityDrawOutline` is not used on a ped.
 
 ```lua
 Config.outlineColor = { r = 255, g = 255, b = 255, a = 255 }
@@ -1342,12 +1334,15 @@ Enter from the chat command that opened the gizmo is ignored. Press Enter again 
 
 ## Test Command [#test-command]
 
-`/testGizmo` is registered only when `Config.debug` is `true`. Leave that off on a live server. The command spawns a prop in front of the player.
+`/testGizmo` is registered only when `Config.debug` is `true`. Leave that off on a live server. The command spawns a prop, or a ped, in front of the player.
 
 ```lua
 /testGizmo
 /testGizmo prop_bench_01a
+/testGizmo ped
+/testGizmo ped a_f_y_business_01
 /testGizmo orbit
+/testGizmo orbit ped
 /testGizmo gameplay prop_barrier_work05
 ```
 
@@ -1534,6 +1529,8 @@ exports.object_gizmo:useGizmo(entity, {
 
 
 
+
+
 The configuration file is located at `client/modules/config.lua`. This file controls the world prompt, visual theme, compact menu, and keybinds.
 
 ## General Settings [#general-settings]
@@ -1551,7 +1548,7 @@ config.maxIndicators = 8
 config.requireLookAt = true
 
 -- How close to the reticle the target must be.
-config.lookRadius = 0.08
+config.lookRadius = 0.05
 
 -- Place unoffset entity options at the model center.
 config.autoCenter = true
@@ -1564,6 +1561,9 @@ config.losFlags = 17
 
 -- How far collision in front of an ATM can be and still count as visible.
 config.losShellDepth = 2.0
+
+-- Draw line-of-sight debug.
+config.debug = false
 
 -- Hide the indicator when an interact type has no valid options.
 config.hideWhenEmpty = {
@@ -1578,10 +1578,10 @@ config.hideWhenEmpty = {
 }
 
 -- Size of the world prompt.
-config.duiScale = 0.12
+config.duiScale = 0.2
 
 -- Maximum size of the prompt texture.
-config.duiResolution = 1024
+config.duiResolution = 2048
 
 -- Prompt theme.
 config.theme = 'modern'
@@ -1589,13 +1589,13 @@ config.theme = 'modern'
 -- Accent color for each theme.
 config.themeColors = {
     legacy = { 28, 100, 184, 200 },
-    modern = { 49, 164, 252, 255 },
+    modern = { 255, 255, 255, 255 },
     minimal = { 168, 186, 204, 255 },
     light = { 37, 99, 235, 255 },
     retro = { 255, 176, 32, 255 },
     cyber = { 0, 229, 255, 255 },
     vice = { 255, 64, 180, 255 },
-    noir = { 240, 240, 236, 255 },
+    kawaii = { 255, 111, 168, 255 },
     industrial = { 212, 168, 48, 255 },
     fantasy = { 212, 175, 110, 255 },
 }
@@ -1612,14 +1612,19 @@ config.compactIdleMs = 2500
 -- Default interact key.
 config.defaultInteractKey = 'E'
 
--- Distant indicator sprite.
+-- Distant indicator. sprite, or an id in web/indicators.
+config.indicator = 'ripple'
+
+-- World size of a CSS indicator.
+config.indicatorScale = 0.02
+
+-- GTA texture used when the indicator is sprite.
 config.IndicatorSprite = {
-    dict = 'slp_ind',
-    txt = 'radio',
-    file = 'web/indicator.png',
+    dict = 'mpcarhud',
+    txt = 'leaderboard_car_colour_icon_singlecolour',
     rotation = 0.0,
-    color = { 255, 255, 255 },
-    scale = 0.016,
+    color = { 255, 255, 255, 220 },
+    scale = 0.0085,
 }
 
 -- Dot drawn at the center of the screen.
@@ -1628,7 +1633,7 @@ config.CenterDot = {
     dict = 'mpcarhud',
     txt = 'leaderboard_car_colour_icon_singlecolour',
     color = { 255, 255, 255, 255 },
-    scale = 0.002,
+    scale = 0.004,
     x = 0.5,
     y = 0.5,
 }
@@ -1650,21 +1655,24 @@ config.showKeyBindBehavior = 'toggle'
 | `maxInteractDistance` | `number`          | `5.0`                          | Maximum distance at which interact indicator sprites are rendered. Keep low for performance.                                                                                                                                                                                                                    |
 | `maxIndicators`       | `number`          | `8`                            | Max distant marker sprites drawn per frame. The active prompt is not counted. Raise it in busy areas if dots vanish when many targets are nearby.                                                                                                                                                               |
 | `requireLookAt`       | `boolean`         | `true`                         | If true, the prompt only opens when the target is inside `lookRadius` of the reticle. If false, the closest valid nearby interact opens without aiming.                                                                                                                                                         |
-| `lookRadius`          | `number`          | `0.08`                         | How close to screen center a target must be to open the prompt. Units are a fraction of screen height. Raise it to aim looser. Ignored when `requireLookAt` is false.                                                                                                                                           |
+| `lookRadius`          | `number`          | `0.05`                         | How close to screen center a target must be to open the prompt. Units are a fraction of screen height. Raise it to aim looser. Ignored when `requireLookAt` is false.                                                                                                                                           |
 | `autoCenter`          | `boolean`         | `true`                         | If true, entity options without `offset`, `offsetAbsolute`, or `bones` are placed at the model bounding-box center instead of the entity origin.                                                                                                                                                                |
 | `requireLos`          | `boolean`         | `true`                         | Hide interacts the player cannot see.                                                                                                                                                                                                                                                                           |
 | `losFlags`            | `number`          | `17`                           | What blocks line of sight. `1` world, `2` vehicles, `4` peds, `16` objects.                                                                                                                                                                                                                                     |
 | `losShellDepth`       | `number`          | `2.0`                          | How far collision in front of an ATM can be and still count as visible.                                                                                                                                                                                                                                         |
+| `debug`               | `boolean`         | `false`                        | Draw the line-of-sight probe. `/interact_debug` toggles it. `/interact_los` prints that probe while it is on.                                                                                                                                                                                                   |
 | `hideWhenEmpty`       | `table`           | globals `true`, others `false` | Per interact type: hide the distant marker when every option on that target is currently invalid (`canInteract`, distance, groups, items, in-vehicle). Globals default to hide so nearby peds/vehicles/objects do not spam sprites. Models, entities, and coords keep the marker unless you set them to `true`. |
-| `duiScale`            | `number`          | `0.12`                         | World size of the prompt sprite. The prompt fills the DUI texture, so this is the on-screen size of the prompt itself. Raise it to make the prompt larger in the world.                                                                                                                                         |
+| `duiScale`            | `number`          | `0.2`                          | World size of the prompt sprite. The prompt fills the DUI texture, so this is the on-screen size of the prompt itself. Raise it to make the prompt larger in the world.                                                                                                                                         |
 | `duiResolution`       | `number`          | `2048`                         | Cap on the DUI texture long edge. The texture is sized to 2x the on-screen sprite so type stays sharp. This only clamps very large resolutions.                                                                                                                                                                 |
 | `theme`               | `string`          | `'modern'`                     | Visual look of the world prompt. Must match a file in `web/themes/<id>.css`.                                                                                                                                                                                                                                    |
-| `themeColors`         | `table`           | see above                      | Per-theme RGBA accent `{ r, g, b, a }` (0–255). Drives the HUD highlight.                                                                                                                                                                                                                                       |
+| `themeColors`         | `table`           | see above                      | Per-theme RGBA accent `{ r, g, b, a }` (0–255). Each theme uses it as its live color.                                                                                                                                                                                                                           |
 | `themeColor`          | `number[] \| nil` | `nil`                          | Optional global accent override. When set, every theme uses this color instead of `themeColors`.                                                                                                                                                                                                                |
 | `compactOptions`      | `boolean`         | `true`                         | Compact multi-option prompt. See [Compact prompt](#compact-prompt).                                                                                                                                                                                                                                             |
 | `compactIdleMs`       | `number`          | `2500`                         | Idle time in milliseconds before a compact list collapses. Minimum `500`.                                                                                                                                                                                                                                       |
 | `defaultInteractKey`  | `string`          | `'E'`                          | Default mapping for the interact action. Players can rebind it in GTA Settings; the prompt shows the live key.                                                                                                                                                                                                  |
-| `IndicatorSprite`     | `table`           | radio PNG, white               | Distant marker. `file` is a PNG in this resource. `color` tints it (`{ 255, 255, 255 }` stays white). `scale` is world size. Omit `file` and set `dict` / `txt` to use a GTA texture instead.                                                                                                                   |
+| `indicator`           | `string`          | `'ripple'`                     | Distant marker. `sprite` uses `IndicatorSprite`. Any other id loads `web/indicators/<id>.css`. A missing id falls back to the sprite.                                                                                                                                                                           |
+| `indicatorScale`      | `number`          | `0.02`                         | World size of a CSS marker. Every CSS id uses this same scale.                                                                                                                                                                                                                                                  |
+| `IndicatorSprite`     | `table`           | white circle                   | Streamed marker used when `indicator` is `sprite`, and the fallback when a CSS id is missing. `dict` and `txt` are a GTA texture. `color` tints it. `scale` is its world size.                                                                                                                                  |
 | `CenterDot`           | `table`           | `mpcarhud` colour icon         | Screen-center circle while at least one usable interact is nearby. Set `enabled` to `false` to hide it. `color` tints the sprite. `scale` is screen size, `x` / `y` are 0–1 screen position. Optional `file` loads a PNG instead of `dict` / `txt`.                                                             |
 | `useShowKeyBind`      | `boolean`         | `false`                        | Whether a keybind is required to show/hide interactions.                                                                                                                                                                                                                                                        |
 | `defaultShowKeyBind`  | `string`          | `'LMENU'`                      | The default key mapping for toggling interaction visibility.                                                                                                                                                                                                                                                    |
@@ -1682,22 +1690,34 @@ config.showKeyBindBehavior = 'toggle'
   Interact is registered as a FiveM keybind (`interact_action`). Players rebind it in GTA Settings → Key Bindings → FiveM. The prompt reads the live mapping, so the keycap updates after they leave the pause menu.
 </Callout>
 
+## Distant indicator [#distant-indicator]
+
+`config.indicator` is the mark on targets that are in range but are not the open prompt. Set it to `sprite` for `IndicatorSprite`, or to an id from the gallery. Click a name to copy it.
+
+The marker stays white. Its second color is the theme accent, or `config.themeColor` when that is set. `wedge` does not take the accent.
+
+<IndicatorGallery />
+
+`indicatorScale` sizes every CSS marker the same way. `IndicatorSprite.scale` sizes only the sprite.
+
+A custom marker is a file at `web/indicators/<id>.css` whose loader is a `<span class="loader">`. `--color-1` is white and `--color-2` is the accent.
+
 ## Themes [#themes]
 
 `config.theme` selects the prompt skin. Each built-in look has its own accent in `config.themeColors`. Leave `config.themeColor` as `nil` unless you want one color on every theme.
 
-| Id           | Description                              |
-| ------------ | ---------------------------------------- |
-| `legacy`     | Original sleepless\_interact prompt      |
-| `modern`     | Night HUD with frost panels              |
-| `minimal`    | Quiet hairline frames                    |
-| `light`      | Light panels, dark type                  |
-| `retro`      | CRT amber with scanlines                 |
-| `cyber`      | Angular HUD with a clipped corner        |
-| `vice`       | Magenta-to-cyan neon rim                 |
-| `noir`       | Circular iris key, letterbox title cards |
-| `industrial` | Riveted plates, hazard stripe on select  |
-| `fantasy`    | Manuscript corner brackets               |
+| Id           | Description                                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `legacy`     | Original prompt. Dark rows, Roboto, and a blue fill on the selected row                                          |
+| `modern`     | Black plates and white type. The selected row is a white plate with black type. Hold draws a ring around the key |
+| `minimal`    | Square key and hairline frames. The selected row only brightens the border                                       |
+| `light`      | White plates and black type. The selected row is a black plate. Blue accent                                      |
+| `retro`      | Square amber plates with scanlines. The selected row fills amber                                                 |
+| `cyber`      | Cyan HUD with a clipped corner. The selected row fills cyan                                                      |
+| `vice`       | Dark plates with a magenta-to-cyan rim. The selected row glows                                                   |
+| `kawaii`     | Pale plates and rose type. The key is a circle with a pink ring. The selected row is solid pink                  |
+| `industrial` | Square riveted plates. A hazard stripe runs along the bottom of the selected row                                 |
+| `fantasy`    | Dark plates, serif type, and gold corner brackets                                                                |
 
 An option's `color` field still overrides the accent for that row only. See [Interact Options](/docs/interact/interact-options).
 
@@ -1709,7 +1729,7 @@ When `compactOptions` is `true` (the default), a target with **more than one opt
 
 * Press E once to open the list.
 * Press E again to select the highlighted option. Hold E for options with `holdTime`.
-* Scroll to move the highlight. The list stays still; the highlight moves.
+* Scroll moves the highlight. The list follows when the highlight leaves the visible rows.
 * After a selection, or after `compactIdleMs` with no activity, the list collapses back to `INTERACT`.
 * A hold in progress will not collapse.
 
@@ -1777,7 +1797,7 @@ Each look is a CSS file. The Lua config only picks an id and an accent. Copy a b
     }
     ```
 
-    `themeColors` is the default HUD accent. Leave `config.themeColor = nil` so this color is not forced onto every other theme. The distant marker is white unless you set `config.IndicatorSprite.color`.
+    `themeColors` is the default HUD accent. Leave `config.themeColor = nil` so this color is not forced onto every other theme. CSS distant markers use that same accent as their second color. The `sprite` marker uses `config.IndicatorSprite.color`.
   </div>
 
   <div className="fd-step">
@@ -1857,12 +1877,12 @@ Root `font-size` is `1vh`, so `1rem` is 1% of the viewport height. Size the E ke
 
 Copy `web/themes/modern.css` or `web/themes/minimal.css` and rename `[data-theme="..."]`. At minimum, cover:
 
-1. **`#interact-container` / `#interact-key`** — size, border, background, letter
-2. **`#interact-progress`** — usually `left/right/bottom: 0; width: 100%; height: 0` with `background: rgb(var(--primary))`. JS only changes `height`.
-3. **`.option-container`** — row chrome
-4. **`.option-container.highlighted`** — selected row. Put `--primary` here, not on every idle row.
-5. **`.option-icon`, `.option-label`, `.option-hold`** — idle and `.highlighted` colors
-6. **`body.is-cooldown`** — dim the key so the hourglass reads as blocked
+1. **`#interact-container` / `#interact-key`**: size, border, background, letter
+2. **`#interact-progress`**: usually `left/right/bottom: 0; width: 100%; height: 0` with `background: rgb(var(--primary))`. JS sets `height` while the player holds E. `modern` also strokes `.hold-ring`.
+3. **`.option-container`**: row chrome
+4. **`.option-container.highlighted`**: selected row. Put `--primary` here, not on every idle row.
+5. **`.option-icon`, `.option-label`, `.option-hold`**: idle and `.highlighted` colors
+6. **`body.is-cooldown`**: dim the key so the hourglass reads as blocked
 
 `.animated-background` is a full-row fill used by `legacy` and `retro`. Most themes hide it with `display: none`.
 
@@ -2020,7 +2040,7 @@ This prompt is a world sprite, not a fullscreen NUI overlay.
 DINPRO is self-hosted in `web/fonts/`. To use another face, add an `@font-face` in your theme file (see `legacy.css`) and set `--font`.
 
 <Callout type="info">
-  Built-in themes live in `web/themes/`. `modern.css` is the default HUD. `cyber.css`, `vice.css`, and `noir.css` show how far you can push shape without changing the HTML.
+  Built-in themes live in `web/themes/`. `modern.css` is the default HUD. `cyber.css`, `vice.css`, and `kawaii.css` show how far you can push shape without changing the HTML.
 </Callout>
 
 
@@ -2142,7 +2162,7 @@ All interact actions are formatted as an array containing objects with the follo
 ---@field label string The display label for the option.
 ---@field icon? string The icon associated with the option.
 ---@field iconColor? string The CSS color for the icon.
----@field distance? number The maximum distance at which the option is available.
+---@field distance? number The maximum distance at which the option is available. Defaults to 2.
 ---@field holdTime? number Makes the option a press and hold and sets how long it should be held for (milliseconds).
 ---@field canInteract? fun(entity: number, distance: number, coords: vector3, name: string): boolean? A function to determine if the option can be interacted with.
 ---@field hideWhenEmpty? boolean Override `config.hideWhenEmpty` for this option. True hides the distant marker when this option is invalid. False keeps it.
@@ -2151,10 +2171,13 @@ All interact actions are formatted as an array containing objects with the follo
 ---@field offset? vector3 A relative offset from the entity's position.
 ---@field offsetAbsolute? vector3 An absolute offset in world coordinates.
 ---@field color? number[] 4 numbers in an array used for RGBA, overwriting the theme accent for that option.
+---@field groups? string | string[] | table<string, number> Job, gang, or group filter. Hidden when the player does not match.
+---@field items? string | string[] | table<string, number> Item the player must have. A table of name to count requires each amount.
+---@field anyItem? boolean When true, one matching item is enough.
 ---@field bones? string | string[] An array of bone IDs associated with the option.
 ---@field allowInVehicle? boolean Marks the option as being usable inside a vehicle.
 ---@field onSelect? fun(data: InteractResponse) A function to execute when the option is selected.
----@field cooldown? number Number of milliseconds the interact system should cooldown for after this option is selected. Prevents spam.
+---@field cooldown? number Milliseconds to wait after this option is selected. Defaults to 1500. 0 skips the wait.
 ---@field export? string Optional export function name.
 ---@field event? string Client-side event to trigger.
 ---@field serverEvent? string Server-side event to trigger.
@@ -2166,31 +2189,34 @@ All interact actions are formatted as an array containing objects with the follo
 
 ### Properties [#properties]
 
-| Property         | Type                 | Required | Description                                                                                                                                                           |
-| ---------------- | -------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `label`          | `string`             | Yes      | The display label for the option                                                                                                                                      |
-| `icon`           | `string`             | No       | FontAwesome icon name                                                                                                                                                 |
-| `iconColor`      | `string`             | No       | CSS color for the icon                                                                                                                                                |
-| `distance`       | `number`             | No       | Maximum distance at which the option is available                                                                                                                     |
-| `holdTime`       | `number`             | No       | Press-and-hold duration in milliseconds                                                                                                                               |
-| `canInteract`    | `function`           | No       | Function to determine if the option can be interacted with                                                                                                            |
-| `hideWhenEmpty`  | `boolean`            | No       | Overrides `config.hideWhenEmpty` for this option. `true` hides the distant marker when the option is invalid. `false` keeps it. Takes priority over the type default. |
-| `name`           | `string`             | No       | A unique identifier for the option                                                                                                                                    |
-| `resource`       | `string`             | No       | The resource that registered the option                                                                                                                               |
-| `offset`         | `vector3`            | No       | Relative offset from the entity's position                                                                                                                            |
-| `offsetAbsolute` | `vector3`            | No       | Absolute offset in world coordinates                                                                                                                                  |
-| `color`          | `number[]`           | No       | RGBA array `{r, g, b, a}` overriding the theme accent for that option                                                                                                 |
-| `bones`          | `string \| string[]` | No       | Bone ID(s) associated with the option                                                                                                                                 |
-| `allowInVehicle` | `boolean`            | No       | Allow usage inside a vehicle                                                                                                                                          |
-| `onSelect`       | `function`           | No       | Callback when the option is selected                                                                                                                                  |
-| `cooldown`       | `number`             | No       | Cooldown in milliseconds after selection                                                                                                                              |
-| `export`         | `string`             | No       | Export function name to call                                                                                                                                          |
-| `event`          | `string`             | No       | Client-side event to trigger                                                                                                                                          |
-| `serverEvent`    | `string`             | No       | Server-side event to trigger                                                                                                                                          |
-| `command`        | `string`             | No       | Command to execute                                                                                                                                                    |
-| `onActive`       | `function`           | No       | Callback when the option becomes active                                                                                                                               |
-| `onInactive`     | `function`           | No       | Callback when the option becomes inactive                                                                                                                             |
-| `whileActive`    | `function`           | No       | Callback that runs in a loop while the option is active                                                                                                               |
+| Property         | Type                          | Required | Description                                                                                                                                                           |
+| ---------------- | ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `label`          | `string`                      | Yes      | The display label for the option                                                                                                                                      |
+| `icon`           | `string`                      | No       | FontAwesome icon name                                                                                                                                                 |
+| `iconColor`      | `string`                      | No       | CSS color for the icon                                                                                                                                                |
+| `distance`       | `number`                      | No       | Maximum distance at which the option is available. Defaults to `2`                                                                                                    |
+| `holdTime`       | `number`                      | No       | Press-and-hold duration in milliseconds                                                                                                                               |
+| `canInteract`    | `function`                    | No       | Function to determine if the option can be interacted with                                                                                                            |
+| `hideWhenEmpty`  | `boolean`                     | No       | Overrides `config.hideWhenEmpty` for this option. `true` hides the distant marker when the option is invalid. `false` keeps it. Takes priority over the type default. |
+| `name`           | `string`                      | No       | A unique identifier for the option                                                                                                                                    |
+| `resource`       | `string`                      | No       | The resource that registered the option                                                                                                                               |
+| `offset`         | `vector3`                     | No       | Relative offset from the entity's position                                                                                                                            |
+| `offsetAbsolute` | `vector3`                     | No       | Absolute offset in world coordinates                                                                                                                                  |
+| `color`          | `number[]`                    | No       | RGBA array `{r, g, b, a}` overriding the theme accent for that option                                                                                                 |
+| `groups`         | `string \| string[] \| table` | No       | Job, gang, or group filter. The option is hidden when the player does not match. The running framework decides the shape                                              |
+| `items`          | `string \| string[] \| table` | No       | Item the player must carry. A name-to-count table requires each amount                                                                                                |
+| `anyItem`        | `boolean`                     | No       | When `true`, one matching item is enough                                                                                                                              |
+| `bones`          | `string \| string[]`          | No       | Bone ID(s) associated with the option                                                                                                                                 |
+| `allowInVehicle` | `boolean`                     | No       | Allow usage inside a vehicle                                                                                                                                          |
+| `onSelect`       | `function`                    | No       | Callback when the option is selected                                                                                                                                  |
+| `cooldown`       | `number`                      | No       | Cooldown in milliseconds after selection. Defaults to `1500`. Set `0` to skip it                                                                                      |
+| `export`         | `string`                      | No       | Export function name to call                                                                                                                                          |
+| `event`          | `string`                      | No       | Client-side event to trigger                                                                                                                                          |
+| `serverEvent`    | `string`                      | No       | Server-side event to trigger                                                                                                                                          |
+| `command`        | `string`                      | No       | Command to execute                                                                                                                                                    |
+| `onActive`       | `function`                    | No       | Callback when the option becomes active                                                                                                                               |
+| `onInactive`     | `function`                    | No       | Callback when the option becomes inactive                                                                                                                             |
+| `whileActive`    | `function`                    | No       | Callback that runs in a loop while the option is active                                                                                                               |
 
 ## Callback Response [#callback-response]
 
@@ -2202,14 +2228,14 @@ When a player selects an option, a single action is triggered in the following p
 4. `serverEvent`
 5. `command`
 
-The callback or event receives an `InteractResponse` table:
+The callback or event receives a copy of the option. `icon`, `groups`, `items`, and the callbacks are removed. These fields describe the current target:
 
-| Property   | Type      | Description                                                                                        |
-| ---------- | --------- | -------------------------------------------------------------------------------------------------- |
-| `entity`   | `number`  | The entity ID hit by the shape test. If triggering a server event, this is the network ID instead. |
-| `coords`   | `vector3` | The resulting coordinates where the shape test hit a collision                                     |
-| `distance` | `number`  | The player's distance from the coords                                                              |
-| `zone`     | `number?` | The ID of the selected zone, if applicable                                                         |
+| Property   | Type      | Description                                                                                    |
+| ---------- | --------- | ---------------------------------------------------------------------------------------------- |
+| `entity`   | `number`  | Entity handle. A server event receives the network id, or `0` when the entity is not networked |
+| `coords`   | `vector3` | Interaction point                                                                              |
+| `distance` | `number`  | The player's distance from the coords                                                          |
+| `coordsId` | `string?` | Id of the coordinate target, when the option was added with `addCoords`                        |
 
 <Callout type="info">
   When using `serverEvent`, the `entity` value is automatically converted to a network ID so it can be resolved on the server.
@@ -2244,6 +2270,601 @@ local options = {
 ```
 
 
+# Back Items (/docs/inventoryaddons/back-items)
+
+
+
+Attach items to player models with customizable bone positions and rotations. Supports weapons, backpacks, and custom items with priority-based slot management.
+
+You can find the configuration in `backitems/config.lua`.
+
+## Configuration Overview [#configuration-overview]
+
+The Back Items module has two main configuration sections:
+
+1. **Default Slots** (`Config.defaultSlots`) — Defines available attachment slots with bone positions and rotations
+2. **Back Items** (`Config.BackItems`) — Defines which items can be attached and how they display
+
+***
+
+## Default Slots [#default-slots]
+
+Default slots define the available positions for item attachment, each linked to a specific bone, position, and rotation.
+
+```lua
+Config.defaultSlots = {
+    ['back'] = {
+        { bone = 24818, pos = vec3(0.09, -0.16, 0.12), rot = vec3(0.0, 180.0, 0.0) },
+        -- Add more slots to allow multiple items on the back
+    }
+}
+```
+
+### Slot Properties [#slot-properties]
+
+| Property | Type     | Description                            |
+| -------- | -------- | -------------------------------------- |
+| `bone`   | `number` | The bone ID where the slot is attached |
+| `pos`    | `vec3`   | Position offset relative to the bone   |
+| `rot`    | `vec3`   | Rotation offset relative to the bone   |
+
+<Callout type="info">
+  Each slot group (e.g., `'back'`) can contain multiple slots, allowing multiple items to be displayed simultaneously based on priority.
+</Callout>
+
+***
+
+## Back Items [#back-items]
+
+Back items define which inventory items can be attached to the player model and how they are displayed. The **index** for each entry should match the **item name** in your inventory system.
+
+```lua
+Config.BackItems = {
+    ['WEAPON_CARBINERIFLE'] = {
+        prio = 3,
+        group = 'back',
+    },
+}
+```
+
+### BackItem Properties [#backitem-properties]
+
+| Property       | Type      | Required | Description                                                  |
+| -------------- | --------- | -------- | ------------------------------------------------------------ |
+| `prio`         | `number`  | Yes      | Display priority of the item (lower = higher priority)       |
+| `group`        | `string`  | No       | Slot group for the item (defaults to `'back'`)               |
+| `model`        | `number`  | No       | Model hash for non-weapon items or alternative weapon models |
+| `customPos`    | `table`   | No       | Custom position override (see below)                         |
+| `ignoreLimits` | `boolean` | No       | When `true`, the item attaches regardless of available slots |
+
+### Custom Position Properties [#custom-position-properties]
+
+| Property | Type     | Required | Description                   |
+| -------- | -------- | -------- | ----------------------------- |
+| `bone`   | `number` | No\*     | Bone ID for custom attachment |
+| `pos`    | `vec3`   | No\*     | Custom position offset        |
+| `rot`    | `vec3`   | No\*     | Custom rotation offset        |
+
+<Callout type="warn">
+  When using `ignoreLimits = true`, a complete `customPos` with `bone`, `pos`, and `rot` is **required**.
+</Callout>
+
+***
+
+## Examples [#examples]
+
+### Normal Weapon Back Item [#normal-weapon-back-item]
+
+Standard weapon that uses the default slot group and positioning:
+
+```lua
+Config.BackItems = {
+    ['WEAPON_CARBINERIFLE'] = {
+        prio = 3,
+        group = 'back',
+    },
+}
+```
+
+### Non-Weapon Back Item [#non-weapon-back-item]
+
+Non-weapon items require a `model` property since they don't have an inherent weapon model:
+
+```lua
+Config.BackItems = {
+    ['cone'] = {
+        prio = 3,
+        model = `prop_roadcone02a`,
+        group = 'back',
+    },
+}
+```
+
+### Weapon with Alternative Model [#weapon-with-alternative-model]
+
+Use a custom model instead of the default weapon model:
+
+```lua
+Config.BackItems = {
+    ['katana'] = {
+        prio = 3,
+        model = `sheathed_katana`,
+        group = 'back',
+    },
+}
+```
+
+### Weapon with Custom Position [#weapon-with-custom-position]
+
+Override the default slot position with partial custom offsets:
+
+```lua
+Config.BackItems = {
+    ['WEAPON_BAT'] = {
+        prio = 3,
+        group = 'back',
+        customPos = {
+            pos = { x = 0.4, y = -0.15 },
+            rot = { y = 270.0 },
+        },
+    },
+}
+```
+
+### Item with `ignoreLimits` [#item-with-ignorelimits]
+
+Items with `ignoreLimits` will **always** equip when in the inventory, regardless of available slots. A complete `customPos` is required.
+
+This example places a cone on the player's head:
+
+```lua
+Config.BackItems = {
+    ['cone'] = {
+        ignoreLimits = true,
+        model = `prop_roadcone02a`,
+        customPos = {
+            bone = 12844,
+            pos = vec3(0.06, 0.0, 0.0),
+            rot = vec3(0.0, 90.0, 0.0),
+        },
+    },
+}
+```
+
+<Callout type="info">
+  Items with `ignoreLimits` don't use a slot group or priority — they bypass the slot system entirely.
+</Callout>
+
+***
+
+## Customization Tips [#customization-tips]
+
+* Ensure correct bone IDs, positions, and rotations for desired item placements
+* Use `ignoreLimits` only with a complete `customPos` (bone, pos, and rot)
+* The `model` field is **required** for non-weapon items or when using an alternative weapon model
+* Lower `prio` values take precedence when multiple items compete for the same slot
+
+
+# Drag Craft (/docs/inventoryaddons/drag-craft)
+
+
+
+A simple crafting system using `ox_inventory` drag-and-drop hooks. Players craft items by dragging one item onto another in their inventory.
+
+## Configuration [#configuration]
+
+Recipes are defined in `dragcraft/config.lua`. Each recipe key is a pair of item names separated by a space — these are the two items the player drags onto each other.
+
+### Recipe Properties [#recipe-properties]
+
+| Property   | Type     | Required | Description                                                        |
+| ---------- | -------- | -------- | ------------------------------------------------------------------ |
+| `duration` | `number` | Yes      | Duration in milliseconds for the craft to complete                 |
+| `client`   | `table`  | No       | Client-side callbacks (`before` and `after`)                       |
+| `server`   | `table`  | No       | Server-side callbacks (`before`, `after`, and optional `metadata`) |
+| `costs`    | `table`  | Yes      | Items required and whether they are consumed                       |
+| `result`   | `table`  | Yes      | Array of resulting items from the craft                            |
+
+### Cost Properties [#cost-properties]
+
+Each entry in the `costs` table is keyed by item name:
+
+| Property | Type      | Description                                                                                                       |
+| -------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
+| `need`   | `number`  | Quantity required in the dragged slot. If between `0.0` and `1.0`, removes that percentage of durability instead. |
+| `remove` | `boolean` | Whether the item should be removed/consumed upon completion                                                       |
+
+<Callout type="info">
+  A `need` value of `0.1` with `remove = true` removes 10% durability per craft, allowing up to 10 uses before the item breaks.
+</Callout>
+
+<Callout type="warn">
+  Ingredient counts are checked against the **dragged slots**, not the player's total item count. The items are also removed from those slots on success.
+</Callout>
+
+### Result Properties [#result-properties]
+
+Each entry in the `result` array:
+
+| Property | Type     | Required | Description                                          |
+| -------- | -------- | -------- | ---------------------------------------------------- |
+| `name`   | `string` | Yes      | Item name to give the player                         |
+| `amount` | `number` | No       | Fixed quantity to give (use this **or** `min`/`max`) |
+| `min`    | `number` | No       | Minimum random quantity                              |
+| `max`    | `number` | No       | Maximum random quantity                              |
+
+### Callback Functions [#callback-functions]
+
+The `client` table supports `before` and `after`. The `server` table supports `before`, `after`, and `metadata`:
+
+| Callback                                 | Context         | Description                                                                                                    |
+| ---------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------- |
+| `before(recipeData)`                     | Client / Server | Runs before crafting starts. Return `false` to cancel the craft. Returning `true` or `nil` continues normally. |
+| `after(recipeData)`                      | Client / Server | Runs after crafting completes successfully.                                                                    |
+| `metadata(resultName, fromSlot, toSlot)` | Server          | Optional. Return a metadata table applied to that result item.                                                 |
+
+<Callout type="warn">
+  The `recipeData` parameter passed to `before` / `after` contains all the properties defined for that specific recipe.
+</Callout>
+
+### Complete Example [#complete-example]
+
+```lua
+RECIPES = {
+    ['garbage scrapmetal'] = {
+        duration = 2000,
+        client = {
+            before = function(recipeData)
+                -- Client logic before crafting
+                -- Return false to cancel the craft
+            end,
+            after = function(recipeData)
+                -- Client logic after successfully crafting
+            end,
+        },
+        server = {
+            before = function(recipeData)
+                -- Server logic before crafting
+                -- Return false to cancel the craft
+            end,
+            after = function(recipeData)
+                -- Server logic after successfully crafting
+            end,
+            metadata = function(resultName, fromSlot, toSlot)
+                -- Optional metadata for the resulting item
+                -- return { quality = 100 }
+            end,
+        },
+        costs = {
+            ['garbage'] = { need = 1, remove = true },
+            ['scrapmetal'] = { need = 0.1, remove = true },
+        },
+        result = {
+            { name = 'lockpick', amount = 1 },
+        },
+    },
+}
+```
+
+## Exports [#exports]
+
+### addRecipe [#addrecipe]
+
+Register a recipe externally from another resource.
+
+Craftable recipes (&#x2A;*`costs`*&#x2A;, &#x2A;*`result`*&#x2A;, &#x2A;*`duration`**, and server callbacks) must be registered on the **server**. The client export only stores client callbacks and cannot create a working craft.
+
+```lua
+-- server
+local success = exports.sleepless_inventory_addons:addRecipe(key, data, target?)
+
+-- client (callbacks only)
+exports.sleepless_inventory_addons:addRecipe(key, data)
+```
+
+#### Server Parameters [#server-parameters]
+
+| Parameter | Type      | Description                                                                           |
+| --------- | --------- | ------------------------------------------------------------------------------------- |
+| `key`     | `string`  | The recipe key — two item names separated by a space (e.g., `'garbage scrapmetal'`)   |
+| `data`    | `table`   | The recipe data. Must include `costs` and `result`                                    |
+| `target`  | `number?` | Optional player id to sync the recipe UI to. Omit (or pass `nil`) to sync all players |
+
+#### Server Returns [#server-returns]
+
+| Type      | Description                         |
+| --------- | ----------------------------------- |
+| `boolean` | `true` if the recipe was registered |
+
+#### Client Parameters [#client-parameters]
+
+| Parameter | Type     | Description                                                       |
+| --------- | -------- | ----------------------------------------------------------------- |
+| `key`     | `string` | The same recipe key used on the server                            |
+| `data`    | `table`  | Client-side data. Only `client` callbacks are used from this call |
+
+<Callout type="error">
+  A client-only `addRecipe` call does **not** register the recipe on the server. Players will not be able to craft it unless the same key is also registered from a server resource.
+</Callout>
+
+<Callout type="warn">
+  Callbacks only work in the context you register them. A client-side call can only register `client` callbacks, and a server-side call can only register `server` callbacks. Functions cannot be sent over the network.
+</Callout>
+
+<Tabs items="['Server', 'Client']">
+  <Tab value="Server">
+    ```lua
+    local success = exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
+        duration = 2000,
+        server = {
+            before = function(recipeData)
+                -- Server logic before crafting
+                -- Return false to cancel
+            end,
+            after = function(recipeData)
+                -- Server logic after crafting
+            end,
+            metadata = function(resultName, fromSlot, toSlot)
+                -- Optional metadata for the resulting item
+            end,
+        },
+        costs = {
+            ['garbage'] = { need = 1, remove = true },
+            ['scrapmetal'] = { need = 0.1, remove = true },
+        },
+        result = {
+            { name = 'lockpick', amount = 1 },
+        },
+    })
+    ```
+  </Tab>
+
+  <Tab value="Client">
+    ```lua
+    -- Only registers client callbacks. The craftable recipe must already
+    -- exist in config or be registered from the server export.
+    exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
+        client = {
+            before = function(recipeData)
+                -- Client logic before crafting
+                -- Return false to cancel
+            end,
+            after = function(recipeData)
+                -- Client logic after crafting
+            end,
+        },
+    })
+    ```
+  </Tab>
+</Tabs>
+
+
+# Sleepless Inventory Addons (/docs/inventoryaddons)
+
+
+
+
+
+Addon modules for ox\_inventory that enhance its utility with back items, drag crafting, and item carrying systems. Each addon can be used independently or together.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_inventory_addons" />
+
+## Features [#features]
+
+* 🎒 **Back Items** - Attach items to player models with customizable bone positions and rotations
+* 🔨 **Drag Craft** - Simple crafting system using ox\_inventory drag-and-drop mechanics
+* 📦 **Item Carry** - Automatic item carrying with animations and prop attachments
+
+## Dependencies [#dependencies]
+
+* [ox\_lib](https://github.com/overextended/ox_lib) (required)
+* [ox\_inventory](https://github.com/overextended/ox_inventory) (required)
+
+## Installation [#installation]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Download the Resource [#download-the-resource-step]
+
+    Download a [release](https://github.com/Sleepless-Development/sleepless_inventory_addons/releases) or clone the repository:
+
+    ```bash
+    git clone https://github.com/Sleepless-Development/sleepless_inventory_addons.git
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Add to Server [#add-to-server-step]
+
+    Place the `sleepless_inventory_addons` folder in your server's resources directory.
+  </div>
+
+  <div className="fd-step">
+    ### Configure Your Server [#configure-your-server-step]
+
+    Add the following to your `server.cfg` (after ox\_inventory):
+
+    ```bash
+    ensure ox_lib
+    ensure ox_inventory
+    ensure sleepless_inventory_addons
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Configure Addons [#configure-addons-step]
+
+    Each addon has its own configuration file in its respective subfolder. See the individual addon pages for details:
+
+    * [Back Items](/docs/inventoryaddons/back-items) — `backitems/config.lua`
+    * [Drag Craft](/docs/inventoryaddons/drag-craft) — `dragcraft/config.lua`
+    * [Item Carry](/docs/inventoryaddons/item-carry) — `itemcarry/config.lua`
+  </div>
+</div>
+
+## Addons Overview [#addons-overview]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Back Items [#back-items-step]
+
+    Configure item attachments to player models with bone-specific positioning. Supports weapons, backpacks, and custom items with priority-based slot management. Items visually display on the player's back (or other bones) when in their inventory.
+  </div>
+
+  <div className="fd-step">
+    ### Drag Craft [#drag-craft-step]
+
+    Create crafting recipes that work with ox\_inventory's drag-and-drop system. Drag one item onto another to trigger a craft. Supports multi-item recipes, durability costs, and client/server-side callbacks for custom logic.
+  </div>
+
+  <div className="fd-step">
+    ### Item Carry [#item-carry-step]
+
+    Automatically attach props and play animations when players receive specific items. Includes options for vehicle blocking and walk-only mode for realistic item carrying behavior.
+
+    <Callout type="info">
+      Each addon can be configured independently. You only need to set up the addons you want to use — unused addons can be left with their default (empty) configurations.
+    </Callout>
+  </div>
+</div>
+
+## Support [#support]
+
+If you need help or have questions:
+
+* [Discord](https://discord.gg/A2bDPbfgNP)
+* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_inventory_addons/issues)
+
+
+# Item Carry (/docs/inventoryaddons/item-carry)
+
+
+
+Automatically attach props and play animations when players receive specific items using `ox_inventory`. Includes vehicle blocking and walk-only options for realistic item carrying.
+
+## Configuration [#configuration]
+
+The configuration file is located at `itemcarry/config.lua`. Each entry in the config table maps an inventory item name to its carry behavior.
+
+### Config Properties [#config-properties]
+
+| Property       | Type      | Required | Description                                                                   |
+| -------------- | --------- | -------- | ----------------------------------------------------------------------------- |
+| `walkOnly`     | `boolean` | No       | Whether the player can only walk while carrying this item                     |
+| `blockVehicle` | `boolean` | No       | Whether the player is blocked from entering vehicles while carrying this item |
+| `anim`         | `table`   | Yes      | Animation data for the carrying animation                                     |
+| `prop`         | `table`   | Yes      | Prop attachment data for the carried item                                     |
+
+### Animation Properties [#animation-properties]
+
+| Property | Type     | Required | Description                                       |
+| -------- | -------- | -------- | ------------------------------------------------- |
+| `dict`   | `string` | Yes      | Animation dictionary name                         |
+| `clip`   | `string` | Yes      | Animation clip name                               |
+| `flag`   | `number` | No       | Animation flag (controls looping, movement, etc.) |
+
+### Prop Properties [#prop-properties]
+
+| Property        | Type               | Required | Description                                            |
+| --------------- | ------------------ | -------- | ------------------------------------------------------ |
+| `bone`          | `number`           | Yes      | Bone index to attach the prop to                       |
+| `model`         | `number \| string` | Yes      | Model hash or string for the prop                      |
+| `placement`     | `table`            | Yes      | Position and rotation of the prop relative to the bone |
+| `placement.pos` | `vec3`             | Yes      | Position offset relative to the bone                   |
+| `placement.rot` | `vec3`             | Yes      | Rotation offset relative to the bone                   |
+
+## Examples [#examples]
+
+### Box Carry (Walk Only, No Vehicles) [#box-carry-walk-only-no-vehicles]
+
+```lua
+['box'] = {
+    walkOnly = true,
+    blockVehicle = true,
+    anim = {
+        dict = 'anim@heists@box_carry@',
+        clip = 'idle',
+        flag = 51,
+    },
+    prop = {
+        bone = 60309,
+        model = joaat('hei_prop_heist_box'),
+        placement = {
+            pos = vec3(0.025000, 0.080000, 0.255000),
+            rot = vec3(-145.000000, 290.000000, 0.000000),
+        },
+    },
+},
+```
+
+### Briefcase Carry (Free Movement) [#briefcase-carry-free-movement]
+
+```lua
+['briefcase'] = {
+    anim = {
+        dict = 'anim@heists@briefcase@',
+        clip = 'idle',
+        flag = 52,
+    },
+    prop = {
+        bone = 60310,
+        model = 'prop_briefcase_02',
+        placement = {
+            pos = vec3(0.035000, 0.070000, 0.240000),
+            rot = vec3(-135.000000, 280.000000, 0.000000),
+        },
+    },
+},
+```
+
+## Complete Config Example [#complete-config-example]
+
+```lua
+local config = {
+    ['box'] = {
+        walkOnly = true,
+        blockVehicle = true,
+        anim = {
+            dict = 'anim@heists@box_carry@',
+            clip = 'idle',
+            flag = 51,
+        },
+        prop = {
+            bone = 60309,
+            model = joaat('hei_prop_heist_box'),
+            placement = {
+                pos = vec3(0.025000, 0.080000, 0.255000),
+                rot = vec3(-145.000000, 290.000000, 0.000000),
+            },
+        },
+    },
+    ['briefcase'] = {
+        anim = {
+            dict = 'anim@heists@briefcase@',
+            clip = 'idle',
+            flag = 52,
+        },
+        prop = {
+            bone = 60310,
+            model = 'prop_briefcase_02',
+            placement = {
+                pos = vec3(0.035000, 0.070000, 0.240000),
+                rot = vec3(-135.000000, 280.000000, 0.000000),
+            },
+        },
+    },
+}
+```
+
+<Callout type="info">
+  The config key (e.g., `'box'`, `'briefcase'`) must match the item name in your `ox_inventory` item definitions. When a player receives the item, the carry behavior activates automatically.
+</Callout>
+
+<Callout type="warn">
+  Ensure the animation dictionaries and prop models you reference are valid and available in the game. Invalid references will result in the carry behavior not displaying correctly.
+</Callout>
+
+
 # Configuration (/docs/lootbox/configuration)
 
 
@@ -2267,12 +2888,12 @@ config.registerUsableItems = true
 
 ### Options Explained [#options-explained]
 
-| Option                | Type      | Description                                                                                                                           |
-| --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `debug`               | `boolean` | Enable debug mode for development. Enables test commands.                                                                             |
-| `imageExtension`      | `string`  | File extension for item images in the UI (e.g., `'webp'`, `'png'`)                                                                    |
-| `imagePath`           | `string`  | Base path for item icon images. Defaults to `'nui://ox_inventory/web/images'`. Adjust this if your inventory stores images elsewhere. |
-| `registerUsableItems` | `boolean` | When `true`, lootboxes defined in config are automatically registered as usable items                                                 |
+| Option                | Type      | Description                                                                                                                                                                                                                  |
+| --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `debug`               | `boolean` | Enable debug mode for development. Enables test commands.                                                                                                                                                                    |
+| `imageExtension`      | `string`  | File extension for item images in the UI (e.g., `'webp'`, `'png'`)                                                                                                                                                           |
+| `imagePath`           | `string`  | Base path for item icon images. Defaults to `'nui://ox_inventory/web/images'`. wasabi\_inventory is detected on its own and reads `nui://wasabi_inventory/ui/images`. Adjust this if your inventory stores images elsewhere. |
+| `registerUsableItems` | `boolean` | When `true`, lootboxes defined in config are automatically registered as usable items                                                                                                                                        |
 
 ## Rarity Configuration [#rarity-configuration]
 
@@ -3242,7 +3863,7 @@ A CS:GO-style lootbox/case opening system for FiveM with a polished React UI, we
 * 👀 **Preview system** - Players can view case contents and drop chances before opening
 * 🎨 **Rarity system** - Visual rarity tiers (Common, Uncommon, Rare, Epic, Legendary)
 * 🔧 **Framework agnostic** - Supports ESX, QBCore, Qbox, and ox\_core out of the box
-* 📦 **Multiple inventory support** - Works with ox\_inventory, qb-inventoryy
+* 📦 **Multiple inventory support** - Works with ox\_inventory, qb-inventory, and wasabi\_inventory
 * 🎁 **Metadata support** - Items can include custom metadata
 * 📝 **Config + Runtime API** - Define lootboxes in config or register them dynamically via exports
 * 🎀 **Bonus items** - Award hidden bonus items alongside the main reward (e.g., ammo with weapons)
@@ -3252,7 +3873,7 @@ A CS:GO-style lootbox/case opening system for FiveM with a polished React UI, we
 
 * [ox\_lib](https://github.com/overextended/ox_lib) (required)
 * A supported framework (ESX, QBCore, Qbox, or ox\_core)
-* A supported inventory system (ox\_inventory, qb-inventory)
+* A supported inventory system (ox\_inventory, qb-inventory, or wasabi\_inventory)
 
 ## Installation [#installation]
 
@@ -3648,716 +4269,6 @@ The resource includes a `_items.lua` reference file in its root directory contai
 * For ox\_inventory: Ensure `server.export` is set to `"sleepless_lootbox.<item_name>"`
 * For qb-inventory: Ensure `useable = true` in the item definition
 * See the [Framework Setup](/docs/lootbox/framework-setup) page for detailed troubleshooting
-
-
-# Back Items (/docs/inventoryaddons/back-items)
-
-
-
-Attach items to player models with customizable bone positions and rotations. Supports weapons, backpacks, and custom items with priority-based slot management.
-
-You can find the configuration in `backitems/config.lua`.
-
-## Configuration Overview [#configuration-overview]
-
-The Back Items module has two main configuration sections:
-
-1. **Default Slots** (`Config.defaultSlots`) — Defines available attachment slots with bone positions and rotations
-2. **Back Items** (`Config.BackItems`) — Defines which items can be attached and how they display
-
-***
-
-## Default Slots [#default-slots]
-
-Default slots define the available positions for item attachment, each linked to a specific bone, position, and rotation.
-
-```lua
-Config.defaultSlots = {
-    ['back'] = {
-        { bone = 24818, pos = vec3(0.09, -0.16, 0.12), rot = vec3(0.0, 180.0, 0.0) },
-        -- Add more slots to allow multiple items on the back
-    }
-}
-```
-
-### Slot Properties [#slot-properties]
-
-| Property | Type     | Description                            |
-| -------- | -------- | -------------------------------------- |
-| `bone`   | `number` | The bone ID where the slot is attached |
-| `pos`    | `vec3`   | Position offset relative to the bone   |
-| `rot`    | `vec3`   | Rotation offset relative to the bone   |
-
-<Callout type="info">
-  Each slot group (e.g., `'back'`) can contain multiple slots, allowing multiple items to be displayed simultaneously based on priority.
-</Callout>
-
-***
-
-## Back Items [#back-items]
-
-Back items define which inventory items can be attached to the player model and how they are displayed. The **index** for each entry should match the **item name** in your inventory system.
-
-```lua
-Config.BackItems = {
-    ['WEAPON_CARBINERIFLE'] = {
-        prio = 3,
-        group = 'back',
-    },
-}
-```
-
-### BackItem Properties [#backitem-properties]
-
-| Property       | Type      | Required | Description                                                  |
-| -------------- | --------- | -------- | ------------------------------------------------------------ |
-| `prio`         | `number`  | Yes      | Display priority of the item (lower = higher priority)       |
-| `group`        | `string`  | No       | Slot group for the item (defaults to `'back'`)               |
-| `model`        | `number`  | No       | Model hash for non-weapon items or alternative weapon models |
-| `customPos`    | `table`   | No       | Custom position override (see below)                         |
-| `ignoreLimits` | `boolean` | No       | When `true`, the item attaches regardless of available slots |
-
-### Custom Position Properties [#custom-position-properties]
-
-| Property | Type     | Required | Description                   |
-| -------- | -------- | -------- | ----------------------------- |
-| `bone`   | `number` | No\*     | Bone ID for custom attachment |
-| `pos`    | `vec3`   | No\*     | Custom position offset        |
-| `rot`    | `vec3`   | No\*     | Custom rotation offset        |
-
-<Callout type="warn">
-  When using `ignoreLimits = true`, a complete `customPos` with `bone`, `pos`, and `rot` is **required**.
-</Callout>
-
-***
-
-## Examples [#examples]
-
-### Normal Weapon Back Item [#normal-weapon-back-item]
-
-Standard weapon that uses the default slot group and positioning:
-
-```lua
-Config.BackItems = {
-    ['WEAPON_CARBINERIFLE'] = {
-        prio = 3,
-        group = 'back',
-    },
-}
-```
-
-### Non-Weapon Back Item [#non-weapon-back-item]
-
-Non-weapon items require a `model` property since they don't have an inherent weapon model:
-
-```lua
-Config.BackItems = {
-    ['cone'] = {
-        prio = 3,
-        model = `prop_roadcone02a`,
-        group = 'back',
-    },
-}
-```
-
-### Weapon with Alternative Model [#weapon-with-alternative-model]
-
-Use a custom model instead of the default weapon model:
-
-```lua
-Config.BackItems = {
-    ['katana'] = {
-        prio = 3,
-        model = `sheathed_katana`,
-        group = 'back',
-    },
-}
-```
-
-### Weapon with Custom Position [#weapon-with-custom-position]
-
-Override the default slot position with partial custom offsets:
-
-```lua
-Config.BackItems = {
-    ['WEAPON_BAT'] = {
-        prio = 3,
-        group = 'back',
-        customPos = {
-            pos = { x = 0.4, y = -0.15 },
-            rot = { y = 270.0 },
-        },
-    },
-}
-```
-
-### Item with `ignoreLimits` [#item-with-ignorelimits]
-
-Items with `ignoreLimits` will **always** equip when in the inventory, regardless of available slots. A complete `customPos` is required.
-
-This example places a cone on the player's head:
-
-```lua
-Config.BackItems = {
-    ['cone'] = {
-        ignoreLimits = true,
-        model = `prop_roadcone02a`,
-        customPos = {
-            bone = 12844,
-            pos = vec3(0.06, 0.0, 0.0),
-            rot = vec3(0.0, 90.0, 0.0),
-        },
-    },
-}
-```
-
-<Callout type="info">
-  Items with `ignoreLimits` don't use a slot group or priority — they bypass the slot system entirely.
-</Callout>
-
-***
-
-## Customization Tips [#customization-tips]
-
-* Ensure correct bone IDs, positions, and rotations for desired item placements
-* Use `ignoreLimits` only with a complete `customPos` (bone, pos, and rot)
-* The `model` field is **required** for non-weapon items or when using an alternative weapon model
-* Lower `prio` values take precedence when multiple items compete for the same slot
-
-
-# Drag Craft (/docs/inventoryaddons/drag-craft)
-
-
-
-A simple crafting system using `ox_inventory` drag-and-drop hooks. Players craft items by dragging one item onto another in their inventory.
-
-## Configuration [#configuration]
-
-Recipes are defined in `dragcraft/config.lua`. Each recipe key is a pair of item names separated by a space — these are the two items the player drags onto each other.
-
-### Recipe Properties [#recipe-properties]
-
-| Property   | Type     | Required | Description                                                        |
-| ---------- | -------- | -------- | ------------------------------------------------------------------ |
-| `duration` | `number` | Yes      | Duration in milliseconds for the craft to complete                 |
-| `client`   | `table`  | No       | Client-side callbacks (`before` and `after`)                       |
-| `server`   | `table`  | No       | Server-side callbacks (`before`, `after`, and optional `metadata`) |
-| `costs`    | `table`  | Yes      | Items required and whether they are consumed                       |
-| `result`   | `table`  | Yes      | Array of resulting items from the craft                            |
-
-### Cost Properties [#cost-properties]
-
-Each entry in the `costs` table is keyed by item name:
-
-| Property | Type      | Description                                                                                                       |
-| -------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
-| `need`   | `number`  | Quantity required in the dragged slot. If between `0.0` and `1.0`, removes that percentage of durability instead. |
-| `remove` | `boolean` | Whether the item should be removed/consumed upon completion                                                       |
-
-<Callout type="info">
-  A `need` value of `0.1` with `remove = true` removes 10% durability per craft, allowing up to 10 uses before the item breaks.
-</Callout>
-
-<Callout type="warn">
-  Ingredient counts are checked against the **dragged slots**, not the player's total item count. The items are also removed from those slots on success.
-</Callout>
-
-### Result Properties [#result-properties]
-
-Each entry in the `result` array:
-
-| Property | Type     | Required | Description                                          |
-| -------- | -------- | -------- | ---------------------------------------------------- |
-| `name`   | `string` | Yes      | Item name to give the player                         |
-| `amount` | `number` | No       | Fixed quantity to give (use this **or** `min`/`max`) |
-| `min`    | `number` | No       | Minimum random quantity                              |
-| `max`    | `number` | No       | Maximum random quantity                              |
-
-### Callback Functions [#callback-functions]
-
-The `client` table supports `before` and `after`. The `server` table supports `before`, `after`, and `metadata`:
-
-| Callback                                 | Context         | Description                                                                                                    |
-| ---------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------- |
-| `before(recipeData)`                     | Client / Server | Runs before crafting starts. Return `false` to cancel the craft. Returning `true` or `nil` continues normally. |
-| `after(recipeData)`                      | Client / Server | Runs after crafting completes successfully.                                                                    |
-| `metadata(resultName, fromSlot, toSlot)` | Server          | Optional. Return a metadata table applied to that result item.                                                 |
-
-<Callout type="warn">
-  The `recipeData` parameter passed to `before` / `after` contains all the properties defined for that specific recipe.
-</Callout>
-
-### Complete Example [#complete-example]
-
-```lua
-RECIPES = {
-    ['garbage scrapmetal'] = {
-        duration = 2000,
-        client = {
-            before = function(recipeData)
-                -- Client logic before crafting
-                -- Return false to cancel the craft
-            end,
-            after = function(recipeData)
-                -- Client logic after successfully crafting
-            end,
-        },
-        server = {
-            before = function(recipeData)
-                -- Server logic before crafting
-                -- Return false to cancel the craft
-            end,
-            after = function(recipeData)
-                -- Server logic after successfully crafting
-            end,
-            metadata = function(resultName, fromSlot, toSlot)
-                -- Optional metadata for the resulting item
-                -- return { quality = 100 }
-            end,
-        },
-        costs = {
-            ['garbage'] = { need = 1, remove = true },
-            ['scrapmetal'] = { need = 0.1, remove = true },
-        },
-        result = {
-            { name = 'lockpick', amount = 1 },
-        },
-    },
-}
-```
-
-## Exports [#exports]
-
-### addRecipe [#addrecipe]
-
-Register a recipe externally from another resource.
-
-Craftable recipes (&#x2A;*`costs`*&#x2A;, &#x2A;*`result`*&#x2A;, &#x2A;*`duration`**, and server callbacks) must be registered on the **server**. The client export only stores client callbacks and cannot create a working craft.
-
-```lua
--- server
-local success = exports.sleepless_inventory_addons:addRecipe(key, data, target?)
-
--- client (callbacks only)
-exports.sleepless_inventory_addons:addRecipe(key, data)
-```
-
-#### Server Parameters [#server-parameters]
-
-| Parameter | Type      | Description                                                                           |
-| --------- | --------- | ------------------------------------------------------------------------------------- |
-| `key`     | `string`  | The recipe key — two item names separated by a space (e.g., `'garbage scrapmetal'`)   |
-| `data`    | `table`   | The recipe data. Must include `costs` and `result`                                    |
-| `target`  | `number?` | Optional player id to sync the recipe UI to. Omit (or pass `nil`) to sync all players |
-
-#### Server Returns [#server-returns]
-
-| Type      | Description                         |
-| --------- | ----------------------------------- |
-| `boolean` | `true` if the recipe was registered |
-
-#### Client Parameters [#client-parameters]
-
-| Parameter | Type     | Description                                                       |
-| --------- | -------- | ----------------------------------------------------------------- |
-| `key`     | `string` | The same recipe key used on the server                            |
-| `data`    | `table`  | Client-side data. Only `client` callbacks are used from this call |
-
-<Callout type="error">
-  A client-only `addRecipe` call does **not** register the recipe on the server. Players will not be able to craft it unless the same key is also registered from a server resource.
-</Callout>
-
-<Callout type="warn">
-  Callbacks only work in the context you register them. A client-side call can only register `client` callbacks, and a server-side call can only register `server` callbacks. Functions cannot be sent over the network.
-</Callout>
-
-<Tabs items="['Server', 'Client']">
-  <Tab value="Server">
-    ```lua
-    local success = exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
-        duration = 2000,
-        server = {
-            before = function(recipeData)
-                -- Server logic before crafting
-                -- Return false to cancel
-            end,
-            after = function(recipeData)
-                -- Server logic after crafting
-            end,
-            metadata = function(resultName, fromSlot, toSlot)
-                -- Optional metadata for the resulting item
-            end,
-        },
-        costs = {
-            ['garbage'] = { need = 1, remove = true },
-            ['scrapmetal'] = { need = 0.1, remove = true },
-        },
-        result = {
-            { name = 'lockpick', amount = 1 },
-        },
-    })
-    ```
-  </Tab>
-
-  <Tab value="Client">
-    ```lua
-    -- Only registers client callbacks. The craftable recipe must already
-    -- exist in config or be registered from the server export.
-    exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
-        client = {
-            before = function(recipeData)
-                -- Client logic before crafting
-                -- Return false to cancel
-            end,
-            after = function(recipeData)
-                -- Client logic after crafting
-            end,
-        },
-    })
-    ```
-  </Tab>
-</Tabs>
-
-
-# Sleepless Inventory Addons (/docs/inventoryaddons)
-
-
-
-
-
-Addon modules for ox\_inventory that enhance its utility with back items, drag crafting, and item carrying systems. Each addon can be used independently or together.
-
-<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_inventory_addons" />
-
-## Features [#features]
-
-* 🎒 **Back Items** - Attach items to player models with customizable bone positions and rotations
-* 🔨 **Drag Craft** - Simple crafting system using ox\_inventory drag-and-drop mechanics
-* 📦 **Item Carry** - Automatic item carrying with animations and prop attachments
-
-## Dependencies [#dependencies]
-
-* [ox\_lib](https://github.com/overextended/ox_lib) (required)
-* [ox\_inventory](https://github.com/overextended/ox_inventory) (required)
-
-## Installation [#installation]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Download the Resource [#download-the-resource-step]
-
-    Download a [release](https://github.com/Sleepless-Development/sleepless_inventory_addons/releases) or clone the repository:
-
-    ```bash
-    git clone https://github.com/Sleepless-Development/sleepless_inventory_addons.git
-    ```
-  </div>
-
-  <div className="fd-step">
-    ### Add to Server [#add-to-server-step]
-
-    Place the `sleepless_inventory_addons` folder in your server's resources directory.
-  </div>
-
-  <div className="fd-step">
-    ### Configure Your Server [#configure-your-server-step]
-
-    Add the following to your `server.cfg` (after ox\_inventory):
-
-    ```bash
-    ensure ox_lib
-    ensure ox_inventory
-    ensure sleepless_inventory_addons
-    ```
-  </div>
-
-  <div className="fd-step">
-    ### Configure Addons [#configure-addons-step]
-
-    Each addon has its own configuration file in its respective subfolder. See the individual addon pages for details:
-
-    * [Back Items](/docs/inventoryaddons/back-items) — `backitems/config.lua`
-    * [Drag Craft](/docs/inventoryaddons/drag-craft) — `dragcraft/config.lua`
-    * [Item Carry](/docs/inventoryaddons/item-carry) — `itemcarry/config.lua`
-  </div>
-</div>
-
-## Addons Overview [#addons-overview]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Back Items [#back-items-step]
-
-    Configure item attachments to player models with bone-specific positioning. Supports weapons, backpacks, and custom items with priority-based slot management. Items visually display on the player's back (or other bones) when in their inventory.
-  </div>
-
-  <div className="fd-step">
-    ### Drag Craft [#drag-craft-step]
-
-    Create crafting recipes that work with ox\_inventory's drag-and-drop system. Drag one item onto another to trigger a craft. Supports multi-item recipes, durability costs, and client/server-side callbacks for custom logic.
-  </div>
-
-  <div className="fd-step">
-    ### Item Carry [#item-carry-step]
-
-    Automatically attach props and play animations when players receive specific items. Includes options for vehicle blocking and walk-only mode for realistic item carrying behavior.
-
-    <Callout type="info">
-      Each addon can be configured independently. You only need to set up the addons you want to use — unused addons can be left with their default (empty) configurations.
-    </Callout>
-  </div>
-</div>
-
-## Support [#support]
-
-If you need help or have questions:
-
-* [Discord](https://discord.gg/A2bDPbfgNP)
-* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_inventory_addons/issues)
-
-
-# Item Carry (/docs/inventoryaddons/item-carry)
-
-
-
-Automatically attach props and play animations when players receive specific items using `ox_inventory`. Includes vehicle blocking and walk-only options for realistic item carrying.
-
-## Configuration [#configuration]
-
-The configuration file is located at `itemcarry/config.lua`. Each entry in the config table maps an inventory item name to its carry behavior.
-
-### Config Properties [#config-properties]
-
-| Property       | Type      | Required | Description                                                                   |
-| -------------- | --------- | -------- | ----------------------------------------------------------------------------- |
-| `walkOnly`     | `boolean` | No       | Whether the player can only walk while carrying this item                     |
-| `blockVehicle` | `boolean` | No       | Whether the player is blocked from entering vehicles while carrying this item |
-| `anim`         | `table`   | Yes      | Animation data for the carrying animation                                     |
-| `prop`         | `table`   | Yes      | Prop attachment data for the carried item                                     |
-
-### Animation Properties [#animation-properties]
-
-| Property | Type     | Required | Description                                       |
-| -------- | -------- | -------- | ------------------------------------------------- |
-| `dict`   | `string` | Yes      | Animation dictionary name                         |
-| `clip`   | `string` | Yes      | Animation clip name                               |
-| `flag`   | `number` | No       | Animation flag (controls looping, movement, etc.) |
-
-### Prop Properties [#prop-properties]
-
-| Property        | Type               | Required | Description                                            |
-| --------------- | ------------------ | -------- | ------------------------------------------------------ |
-| `bone`          | `number`           | Yes      | Bone index to attach the prop to                       |
-| `model`         | `number \| string` | Yes      | Model hash or string for the prop                      |
-| `placement`     | `table`            | Yes      | Position and rotation of the prop relative to the bone |
-| `placement.pos` | `vec3`             | Yes      | Position offset relative to the bone                   |
-| `placement.rot` | `vec3`             | Yes      | Rotation offset relative to the bone                   |
-
-## Examples [#examples]
-
-### Box Carry (Walk Only, No Vehicles) [#box-carry-walk-only-no-vehicles]
-
-```lua
-['box'] = {
-    walkOnly = true,
-    blockVehicle = true,
-    anim = {
-        dict = 'anim@heists@box_carry@',
-        clip = 'idle',
-        flag = 51,
-    },
-    prop = {
-        bone = 60309,
-        model = joaat('hei_prop_heist_box'),
-        placement = {
-            pos = vec3(0.025000, 0.080000, 0.255000),
-            rot = vec3(-145.000000, 290.000000, 0.000000),
-        },
-    },
-},
-```
-
-### Briefcase Carry (Free Movement) [#briefcase-carry-free-movement]
-
-```lua
-['briefcase'] = {
-    anim = {
-        dict = 'anim@heists@briefcase@',
-        clip = 'idle',
-        flag = 52,
-    },
-    prop = {
-        bone = 60310,
-        model = 'prop_briefcase_02',
-        placement = {
-            pos = vec3(0.035000, 0.070000, 0.240000),
-            rot = vec3(-135.000000, 280.000000, 0.000000),
-        },
-    },
-},
-```
-
-## Complete Config Example [#complete-config-example]
-
-```lua
-local config = {
-    ['box'] = {
-        walkOnly = true,
-        blockVehicle = true,
-        anim = {
-            dict = 'anim@heists@box_carry@',
-            clip = 'idle',
-            flag = 51,
-        },
-        prop = {
-            bone = 60309,
-            model = joaat('hei_prop_heist_box'),
-            placement = {
-                pos = vec3(0.025000, 0.080000, 0.255000),
-                rot = vec3(-145.000000, 290.000000, 0.000000),
-            },
-        },
-    },
-    ['briefcase'] = {
-        anim = {
-            dict = 'anim@heists@briefcase@',
-            clip = 'idle',
-            flag = 52,
-        },
-        prop = {
-            bone = 60310,
-            model = 'prop_briefcase_02',
-            placement = {
-                pos = vec3(0.035000, 0.070000, 0.240000),
-                rot = vec3(-135.000000, 280.000000, 0.000000),
-            },
-        },
-    },
-}
-```
-
-<Callout type="info">
-  The config key (e.g., `'box'`, `'briefcase'`) must match the item name in your `ox_inventory` item definitions. When a player receives the item, the carry behavior activates automatically.
-</Callout>
-
-<Callout type="warn">
-  Ensure the animation dictionaries and prop models you reference are valid and available in the game. Invalid references will result in the carry behavior not displaying correctly.
-</Callout>
-
-
-# Sleepless Ped Manager (/docs/pedmanager)
-
-
-
-
-
-A FiveM ped manager for spawning local peds within distance of players and adding target/interact options to them. Uses `ox_lib` points for efficient distance-based spawning and despawning.
-
-<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_pedmanager" />
-
-<Callout type="info">
-  This resource is fully compatible with both `ox_target` and `sleepless_interact` for adding interaction options to managed peds.
-</Callout>
-
-## Features [#features]
-
-* 🧍 **Distance-Based Spawning** - Peds spawn and despawn based on player proximity using `ox_lib` points
-* 🎬 **Animations & Scenarios** - Assign animations or scenarios to peds on spawn
-* 🔧 **Prop Attachments** - Attach props to ped bones with configurable offsets
-* 🎯 **Target Integration** - Built-in support for `ox_target` and `sleepless_interact` options
-* 📍 **Multi-Location Support** - Define multiple spawn coordinates for a single ped configuration
-* 🔄 **Lifecycle Callbacks** - `onSpawn` and `onDespawn` callbacks for custom logic
-
-## Dependencies [#dependencies]
-
-* [ox\_lib](https://github.com/overextended/ox_lib) (required)
-* [ox\_target](https://github.com/overextended/ox_target) (optional — for target options)
-* [sleepless\_interact](https://github.com/Sleepless-Development/sleepless_interact) (optional — for interact options)
-
-## Installation [#installation]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Download the Resource [#download-the-resource-step]
-
-    Download a [release](https://github.com/Sleepless-Development/sleepless_pedmanager/releases) from GitHub.
-  </div>
-
-  <div className="fd-step">
-    ### Add to Server [#add-to-server-step]
-
-    Place the `sleepless_pedmanager` folder in your server's resources directory.
-  </div>
-
-  <div className="fd-step">
-    ### Configure Your Server [#configure-your-server-step]
-
-    Add the following to your `server.cfg`:
-
-    ```bash
-    ensure ox_lib
-    ensure sleepless_pedmanager
-    ```
-  </div>
-</div>
-
-## Quick Start [#quick-start]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Basic Ped with Target Options [#basic-ped-with-target-options-step]
-
-    ```lua
-    local pedPoint = exports.sleepless_pedmanager:addPed({
-        model = "a_m_m_business_01",
-        coords = vec4(200.0, -900.0, 30.0, 180.0),
-        scenario = "WORLD_HUMAN_CLIPBOARD",
-        renderDistance = 15.0,
-        targetOptions = {
-            {
-                icon = "fas fa-comments",
-                label = "Talk",
-                serverEvent = "myresource:talkToNpc",
-            },
-        },
-    })
-    ```
-  </div>
-
-  <div className="fd-step">
-    ### Ped with Animation and Prop [#ped-with-animation-and-prop-step]
-
-    ```lua
-    local pedPoint = exports.sleepless_pedmanager:addPed({
-        model = "u_m_y_zombie_01",
-        coords = vec4(-1665.45, -3143.31, 13.99, 281.13),
-        renderDistance = 8.0,
-        animation = {
-            dict = "amb@code_human_in_bus_passenger_idles@female@tablet@idle_a",
-            anim = "idle_a",
-            flag = 63,
-        },
-        prop = {
-            propModel = "prop_cs_tablet",
-            bone = 28422,
-            rot = vec3(0.0, 0.0, 0.03),
-            pos = vec3(0.0, 0.0, 0.03),
-        },
-    })
-    ```
-
-    <Callout type="info">
-      The `addPed` export returns an `ox_lib` point instance that you can use to manage the ped's lifecycle. See the [Client Exports](/docs/pedmanager/exports/Client) page for the full API reference.
-    </Callout>
-  </div>
-</div>
-
-## Support [#support]
-
-If you need help or have questions:
-
-* [Discord](https://discord.gg/A2bDPbfgNP)
-* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_pedmanager/issues)
 
 
 # Configuration (/docs/prompts/configuration)
@@ -5014,7 +4925,7 @@ Same filters as [Interact](/docs/interact/interact-options). A prompt is hidden 
 | `{ 'lockpick', 'advancedlockpick' }` | All of these (or any if `anyItem = true`) |
 | `{ lockpick = 1, repairkit = 2 }`    | At least these counts                     |
 
-Jobs and gangs come from the running framework (qbx, qb, esx, ox\_core, ND). Item counts use ox\_inventory when it is started.
+Jobs and gangs come from the running framework (qbx, qb, esx, ox\_core, ND). Item counts use wasabi\_inventory when it is started, otherwise ox\_inventory.
 
 `canInteract` is called as `canInteract(entity, distance, coords, name)`, same as Interact. Set `entity` or `coords` on the group or the prompt so `distance` is measured from the player to that point. If neither is set, `entity` is `0` and `coords` is the player.
 
@@ -5079,6 +4990,147 @@ Arrays draw combo keys:
 ```lua
 { keyboard = { 'Ctrl', 'E' }, gamepad = 'A', label = 'Interact' }
 ```
+
+
+# Sleepless Ped Manager (/docs/pedmanager)
+
+
+
+
+
+A FiveM ped manager for spawning local peds within distance of players and adding target, interact, or prompt options to them. Uses `ox_lib` points for efficient distance-based spawning and despawning.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_pedmanager" />
+
+<Callout type="info">
+  This resource is fully compatible with `ox_target`, `sleepless_interact`, and `sleepless_prompts` for adding interaction options to managed peds.
+</Callout>
+
+## Features [#features]
+
+* 🧍 **Distance-Based Spawning** - Peds spawn and despawn based on player proximity using `ox_lib` points
+* 🎬 **Animations & Scenarios** - Assign animations or scenarios to peds on spawn
+* 🔧 **Prop Attachments** - Attach props to ped bones with configurable offsets
+* 🎯 **Target Integration** - Built-in support for `ox_target`, `sleepless_interact`, and `sleepless_prompts` options
+* 📍 **Multi-Location Support** - Define multiple spawn coordinates for a single ped configuration
+* 🔄 **Lifecycle Callbacks** - `onSpawn` and `onDespawn` callbacks for custom logic
+
+## Dependencies [#dependencies]
+
+* [ox\_lib](https://github.com/overextended/ox_lib) (required)
+* [ox\_target](https://github.com/overextended/ox_target) (optional — for target options)
+* [sleepless\_interact](https://github.com/Sleepless-Development/sleepless_interact) (optional — for interact options)
+* [sleepless\_prompts](https://github.com/Sleepless-Development/sleepless_prompts) (optional, for prompt options)
+
+## Installation [#installation]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Download the Resource [#download-the-resource-step]
+
+    Download a [release](https://github.com/Sleepless-Development/sleepless_pedmanager/releases) from GitHub.
+  </div>
+
+  <div className="fd-step">
+    ### Add to Server [#add-to-server-step]
+
+    Place the `sleepless_pedmanager` folder in your server's resources directory.
+  </div>
+
+  <div className="fd-step">
+    ### Configure Your Server [#configure-your-server-step]
+
+    Add the following to your `server.cfg`:
+
+    ```bash
+    ensure ox_lib
+    ensure sleepless_pedmanager
+    ```
+  </div>
+</div>
+
+## Quick Start [#quick-start]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Basic Ped with Target Options [#basic-ped-with-target-options-step]
+
+    ```lua
+    local pedPoint = exports.sleepless_pedmanager:addPed({
+        model = "a_m_m_business_01",
+        coords = vec4(200.0, -900.0, 30.0, 180.0),
+        scenario = "WORLD_HUMAN_CLIPBOARD",
+        renderDistance = 15.0,
+        targetOptions = {
+            {
+                icon = "fas fa-comments",
+                label = "Talk",
+                serverEvent = "myresource:talkToNpc",
+            },
+        },
+    })
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Ped with Animation and Prop [#ped-with-animation-and-prop-step]
+
+    ```lua
+    local pedPoint = exports.sleepless_pedmanager:addPed({
+        model = "u_m_y_zombie_01",
+        coords = vec4(-1665.45, -3143.31, 13.99, 281.13),
+        renderDistance = 8.0,
+        animation = {
+            dict = "amb@code_human_in_bus_passenger_idles@female@tablet@idle_a",
+            anim = "idle_a",
+            flag = 63,
+        },
+        prop = {
+            propModel = "prop_cs_tablet",
+            bone = 28422,
+            rot = vec3(0.0, 0.0, 0.03),
+            pos = vec3(0.0, 0.0, 0.03),
+        },
+    })
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Ped with Prompt Options [#ped-with-prompt-options-step]
+
+    Requires [sleepless\_prompts](/docs/prompts). The prompt shows while the player is within `distance` of the ped.
+
+    ```lua
+    local pedPoint = exports.sleepless_pedmanager:addPed({
+        model = "a_m_m_business_01",
+        coords = vec4(200.0, -900.0, 30.0, 180.0),
+        renderDistance = 15.0,
+        promptOptions = {
+            {
+                name = "talk",
+                label = "Talk",
+                control = 38,
+                distance = 2.5,
+                onSelect = function(data)
+                    print(data.entity)
+                end,
+            },
+        },
+    })
+    ```
+
+    <Callout type="info">
+      The `addPed` export returns an `ox_lib` point instance that you can use to manage the ped's lifecycle. See the [Client Exports](/docs/pedmanager/exports/Client) page for the full API reference.
+    </Callout>
+  </div>
+</div>
+
+## Support [#support]
+
+If you need help or have questions:
+
+* [Discord](https://discord.gg/A2bDPbfgNP)
+* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_pedmanager/issues)
 
 
 # Sleepless Routing (/docs/routing)
@@ -5299,6 +5351,8 @@ config.dui = {
 | `width`  | `number` | `512`   | DUI texture width in pixels  |
 | `height` | `number` | `1024`  | DUI texture height in pixels |
 
+Timers use a second texture, `config.timerDui`, at 512 by 512. Wide and round timer styles share that texture. The game crops the quad to the style, so changing `config.dui` does not change timers.
+
 <Callout type="warn">
   Increasing DUI resolution improves visual quality but uses more VRAM. The default values provide a good balance for most setups.
 </Callout>
@@ -5316,18 +5370,57 @@ config.rendering = {
     checkpointAspectRatio = 2.0,
     smallMinScale = 1.0,
     smallAspectRatio = 2.0,
+    timerPixelScale = 0.0012,
+    timerMinScale = 1.0,
+    timerPerspectiveDivisor = 14.0,
 }
 ```
 
-| Option                     | Type     | Default | Description                                     |
-| -------------------------- | -------- | ------- | ----------------------------------------------- |
-| `updateInterval`           | `number` | `100`   | Main loop update interval in milliseconds       |
-| `perspectiveDivisor`       | `number` | `20.0`  | Camera distance divisor for perspective scaling |
-| `checkpointBaseMultiplier` | `number` | `4.0`   | Multiplier for checkpoint base size             |
-| `checkpointMinScale`       | `number` | `0.1`   | Minimum perspective scale for checkpoints       |
-| `checkpointAspectRatio`    | `number` | `2.0`   | Height-to-width ratio for checkpoint quads      |
-| `smallMinScale`            | `number` | `1.0`   | Minimum perspective scale for small markers     |
-| `smallAspectRatio`         | `number` | `2.0`   | Height-to-width ratio for small marker quads    |
+| Option                     | Type     | Default  | Description                                     |
+| -------------------------- | -------- | -------- | ----------------------------------------------- |
+| `updateInterval`           | `number` | `100`    | Main loop update interval in milliseconds       |
+| `perspectiveDivisor`       | `number` | `20.0`   | Camera distance divisor for perspective scaling |
+| `checkpointBaseMultiplier` | `number` | `4.0`    | Multiplier for checkpoint base size             |
+| `checkpointMinScale`       | `number` | `0.1`    | Minimum perspective scale for checkpoints       |
+| `checkpointAspectRatio`    | `number` | `2.0`    | Height-to-width ratio for checkpoint quads      |
+| `smallMinScale`            | `number` | `1.0`    | Minimum perspective scale for small markers     |
+| `smallAspectRatio`         | `number` | `2.0`    | Height-to-width ratio for small marker quads    |
+| `timerPixelScale`          | `number` | `0.0012` | Metres per timer pixel at the minimum scale     |
+| `timerMinScale`            | `number` | `1.0`    | Minimum perspective scale for timers            |
+| `timerPerspectiveDivisor`  | `number` | `14.0`   | Camera distance divisor for timer scaling       |
+
+## Timers [#timers]
+
+Defaults for [`createTimer`](/docs/waypoints/timers). Per-timer fields override these.
+
+```lua
+config.timer = {
+    drawDistance = 12.0,
+    fadeDistance = 9.0,
+    size = 1.0,
+    color = '#31a4fc',
+    label = 'TIMER',
+    background = true,
+    removeOnComplete = true,
+}
+
+config.timerDui = {
+    width = 512,
+    height = 512,
+}
+```
+
+| Option             | Type      | Default     | Description                          |
+| ------------------ | --------- | ----------- | ------------------------------------ |
+| `drawDistance`     | `number`  | `12.0`      | Metres before the timer hides        |
+| `fadeDistance`     | `number`  | `9.0`       | Metres before it starts fading       |
+| `size`             | `number`  | `1.0`       | Scale multiplier                     |
+| `color`            | `string`  | `'#31a4fc'` | Progress colour, `#rrggbb`           |
+| `label`            | `string`  | `'TIMER'`   | Caption used when `label` is omitted |
+| `background`       | `boolean` | `true`      | Draw the black plate                 |
+| `removeOnComplete` | `boolean` | `true`      | Remove a duration timer at zero      |
+| `timerDui.width`   | `number`  | `512`       | Timer texture width                  |
+| `timerDui.height`  | `number`  | `512`       | Timer texture height                 |
 
 ## Server Settings [#server-settings]
 
@@ -5383,7 +5476,7 @@ A tall beacon-style marker visible from far distances. Features a vertical line 
 
 
 
-A 3D DUI waypoint and marker system for FiveM. Create customizable waypoints with support for different styles, icons, labels, and distance tracking.
+A 3D DUI waypoint and marker system for FiveM. Create customizable waypoints with support for different styles, icons, labels, and distance tracking. The same billboards can also show a [world timer](/docs/waypoints/timers).
 
 <ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_waypoints" />
 
@@ -5392,6 +5485,7 @@ A 3D DUI waypoint and marker system for FiveM. Create customizable waypoints wit
 * 📍 **Two Waypoint Types** - Small markers and checkpoint-style beacons
 * 🎨 **Customizable Appearance** - Colors, icons, labels, and sizes
 * 📏 **Distance Display** - Automatic distance tracking to waypoints
+* ⏱️ **World Timers** - Pill, bar, chip, stack, dial, pie, donut, gauge, clock, dots, and signal plates that count down or follow your script
 * 🗺️ **Map Waypoint Sync** - Automatically creates a 3D marker at the player's map waypoint
 * 🖥️ **Server-side Support** - Create waypoints for specific players or globally from the server
 * ⚡ **Performance Optimized** - Efficient rendering with distance-based culling
@@ -5475,6 +5569,21 @@ A 3D DUI waypoint and marker system for FiveM. Create customizable waypoints wit
   </div>
 
   <div className="fd-step">
+    ### Create a Timer [#create-a-timer-step]
+
+    ```lua
+    local id = exports.sleepless_waypoints:createTimer({
+        coords = vec3(100.0, 200.0, 30.4),
+        style = 'pill',
+        label = 'Cooking',
+        duration = 8000,
+    })
+    ```
+
+    Build and copy a timer from the [timer studio](/docs/waypoints/timers).
+  </div>
+
+  <div className="fd-step">
     ### Create a Server-side Waypoint [#create-a-server-side-waypoint-step]
 
     ```lua
@@ -5525,6 +5634,155 @@ If you need help or have questions:
 
 * [Discord](https://discord.gg/A2bDPbfgNP)
 * [GitHub Issues](https://github.com/Sleepless-Development/sleepless_waypoints/issues)
+
+
+# Timers (/docs/waypoints/timers)
+
+
+
+
+
+Timers are small DUI plates that sit on a coordinate, the same way a [small marker](/docs/waypoints/configuration#small) does. Use one for a cook, a fill, a brew, or any countdown you want in the world.
+
+Give it a `duration` and it counts down on its own. Omit `duration` and push `progress` from your script. A duration timer removes itself at zero, calls `onEnd` if you passed one, and fires `sleepless_waypoints:client:timerEnded`.
+
+<TimerBuilder />
+
+## Styles [#styles]
+
+| Style    | Reads as                                   |
+| -------- | ------------------------------------------ |
+| `pill`   | Label, remaining time, segmented bar       |
+| `bar`    | Label, remaining time, continuous bar      |
+| `chip`   | Compact label and clock time               |
+| `stack`  | Caption over a large value                 |
+| `dial`   | Segmented ring with the time in the middle |
+| `pie`    | Filled wedge with the time underneath      |
+| `donut`  | Ring with the time in the hole             |
+| `gauge`  | Arc with the time inside the opening       |
+| `clock`  | Tick ring with the time in the middle      |
+| `dots`   | Five dots that fill from the left          |
+| `signal` | Five bars that step up from the left       |
+
+Pill and bar show `8s left` while a timer is running. The other styles show `0:08`. In script mode every style shows a percent.
+
+## Timer data [#timer-data]
+
+| Property           | Type               | Default     | Description                                                                                             |
+| ------------------ | ------------------ | ----------- | ------------------------------------------------------------------------------------------------------- |
+| `coords`           | `vector3`          | *required*  | World position. The plate is centered on this point.                                                    |
+| `style`            | `TimerStyle`       | `'pill'`    | One of the styles above                                                                                 |
+| `label`            | `string`           | `'TIMER'`   | Caption on the plate                                                                                    |
+| `showLabel`        | `boolean`          | `true`      | Draw the caption. `false` hides it.                                                                     |
+| `showValue`        | `boolean`          | `true`      | Draw the remaining time, or the percent in script mode. `false` hides it.                               |
+| `duration`         | `number`           |             | Countdown length in milliseconds. Omit this to drive the timer yourself.                                |
+| `progress`         | `number`           | `0.0`       | `0.0` to `1.0`. Sets a script timer, or seeks a duration timer.                                         |
+| `color`            | `string`           | `'#31a4fc'` | Progress colour as `#rrggbb`. Left unused while `colors` is set.                                        |
+| `colors`           | `TimerColorStop[]` |             | `{ at = 0.0 to 1.0, color = '#rrggbb' }`. The fill keeps a colour until progress reaches the next stop. |
+| `blend`            | `boolean`          | `false`     | Ease into the next colour as progress gets close to that stop. `false` switches hard at the stop.       |
+| `background`       | `boolean`          | `true`      | Draw the black plate                                                                                    |
+| `paused`           | `boolean`          | `false`     | Freeze a duration timer on spawn                                                                        |
+| `size`             | `number`           | `1.0`       | Scale multiplier                                                                                        |
+| `drawDistance`     | `number`           | `12.0`      | Metres before the timer hides                                                                           |
+| `fadeDistance`     | `number`           | `9.0`       | Metres before it starts fading                                                                          |
+| `removeOnComplete` | `boolean`          | `true`      | Remove a duration timer when it hits zero                                                               |
+| `onEnd`            | `function`         |             | Client only. Called with the timer id when a duration timer hits zero                                   |
+
+Place `coords` a little above the prop. Twelve metres is enough for something you walk up to. Raise `drawDistance` if the timer should read from further away.
+
+`showLabel` and `showValue` only hide text. The bar, ring, dots, and other fills stay. Chip and stack are only those two texts, so hiding both leaves an empty plate.
+
+## Duration timer [#duration-timer]
+
+```lua
+local id = exports.sleepless_waypoints:createTimer({
+    coords = vec3(100.0, 200.0, 30.4),
+    style = 'pill',
+    label = 'Cooking',
+    duration = 8000,
+    onEnd = function(timerId)
+        -- The plate is removed after this returns. Grant the result here.
+    end,
+})
+
+AddEventHandler('sleepless_waypoints:client:timerEnded', function(timerId)
+    if timerId ~= id then return end
+end)
+```
+
+`onEnd` runs on the client that created the timer, before the plate is removed. The local event still fires after it, which is useful when another resource needs to hear about every timer.
+
+`updateTimer` changes only the fields you pass. Passing `duration` starts that timer over. Passing `progress` on a duration timer jumps the fill.
+
+```lua
+exports.sleepless_waypoints:updateTimer(id, { paused = true })
+exports.sleepless_waypoints:updateTimer(id, { label = 'Resting', color = '#f5a623' })
+exports.sleepless_waypoints:removeTimer(id)
+```
+
+`colors` replaces that flat colour. Leave `blend` out, or set it `false`, and the fill switches the moment progress reaches a stop. `blend = true` holds the current colour, then eases into the next one on the way into the stop. Pass `colors = {}` to `updateTimer` to go back to `color`.
+
+```lua
+exports.sleepless_waypoints:createTimer({
+    coords = vec3(100.0, 200.0, 30.4),
+    style = 'signal',
+    label = 'Heat',
+    duration = 20000,
+    colors = {
+        { at = 0.0, color = '#31a4fc' },
+        { at = 0.55, color = '#f5a623' },
+        { at = 0.85, color = '#b83e3e' },
+    },
+    blend = true,
+})
+```
+
+Set `removeOnComplete` to `false` if the plate should stay full until you remove it. `onEnd` and the ended event still run.
+
+`onEnd` does not cross the network. A timer created on the server still fires `sleepless_waypoints:client:timerEnded` on each client that has it. Keep the reward on the server with your own timeout, the same way the example below removes the timer.
+
+## Script timer [#script-timer]
+
+Leave `duration` out and set `progress` whenever your script moves.
+
+```lua
+local id = exports.sleepless_waypoints:createTimer({
+    coords = vec3(100.0, 200.0, 31.2),
+    style = 'stack',
+    label = 'Filling',
+    progress = 0.0,
+    color = '#31a4fc',
+})
+
+exports.sleepless_waypoints:updateTimer(id, { progress = 0.4 })
+```
+
+Script timers do not end on their own. Remove them when the action is done.
+
+## Server [#server]
+
+```lua
+local id = exports.sleepless_waypoints:createTimer(source, {
+    coords = vec3(100.0, 200.0, 30.4),
+    style = 'bar',
+    label = 'Brewing',
+    duration = 15000,
+})
+
+SetTimeout(15000, function()
+    exports.sleepless_waypoints:removeTimer(id)
+end)
+```
+
+`source` can be one player id, a list of ids, or `-1` for everyone online. The id you get back is the server id. Use it with `updateTimer` and `removeTimer` on the server. It is not the id the client uses locally.
+
+`removeAllTimers()` drops every server timer. `removeAllTimers(playerId)` drops timers that were aimed at that one player. Global timers stay up for everyone else.
+
+<Callout type="info">
+  A player who joins after you create a timer does not receive it. Each client runs the countdown from the moment the timer arrives, and each client fires `sleepless_waypoints:client:timerEnded` on its own. If the server created the timer, remove it there when the interaction is over.
+</Callout>
+
+Client exports are documented on [Client](/docs/waypoints/exports/Client). Server exports are documented on [Server](/docs/waypoints/exports/Server). Defaults live in [Configuration](/docs/waypoints/configuration#timers).
 
 
 # Client Events (/docs/crafting/Events/Client)
@@ -5903,16 +6161,16 @@ local id = exports.sleepless_interact:addCoords(coords, options)
 
 ### Parameters [#parameters]
 
-| Parameter | Type                   | Description                                                                      |
-| --------- | ---------------------- | -------------------------------------------------------------------------------- |
-| `coords`  | `vector3 \| vector3[]` | Single coordinate or array of coordinates                                        |
-| `options` | `Option \| Option[]`   | Single option or array of interaction [options](/docs/interact/interact-options) |
+| Parameter | Type                              | Description                                                                      |
+| --------- | --------------------------------- | -------------------------------------------------------------------------------- |
+| `coords`  | `vector3 \| vector4 \| vector3[]` | Single coordinate or array of coordinates. A `vector4` uses x, y, and z          |
+| `options` | `Option \| Option[]`              | Single option or array of interaction [options](/docs/interact/interact-options) |
 
 ### Returns [#returns]
 
-| Type     | Description                                                |
-| -------- | ---------------------------------------------------------- |
-| `string` | The unique identifier for the added coordinate interaction |
+| Type                 | Description                                                       |
+| -------------------- | ----------------------------------------------------------------- |
+| `string \| string[]` | One id, or an array of ids when you pass more than one coordinate |
 
 ### Example [#example]
 
@@ -5929,7 +6187,7 @@ local id = exports.sleepless_interact:addCoords(vec3(100.0, 200.0, 30.0), {
 })
 
 -- Multiple coordinates
-local id = exports.sleepless_interact:addCoords({
+local ids = exports.sleepless_interact:addCoords({
     vec3(100.0, 200.0, 30.0),
     vec3(150.0, 250.0, 30.0)
 }, {
@@ -5939,7 +6197,7 @@ local id = exports.sleepless_interact:addCoords({
 ```
 
 <Callout type="warn">
-  When using multiple coordinates, each option maintains the same ID but is tracked separately in the system.
+  Several coordinates return one id per point. Each id is derived from that coordinate.
 </Callout>
 
 ***
@@ -5949,16 +6207,15 @@ local id = exports.sleepless_interact:addCoords({
 Removes coordinate-based interactions from the game.
 
 ```lua
-exports.sleepless_interact:removeCoords(id, options?, suppressWarning?)
+exports.sleepless_interact:removeCoords(id, options?)
 ```
 
 ### Parameters [#parameters-1]
 
-| Parameter         | Type                  | Description                                                     |
-| ----------------- | --------------------- | --------------------------------------------------------------- |
-| `id`              | `string`              | The coordinate ID to remove                                     |
-| `options`         | `string \| string[]?` | Specific option names to remove (optional — omit to remove all) |
-| `suppressWarning` | `boolean?`            | Suppress warning if ID doesn't exist                            |
+| Parameter | Type                  | Description                                                             |
+| --------- | --------------------- | ----------------------------------------------------------------------- |
+| `id`      | `string`              | The coordinate ID to remove                                             |
+| `options` | `string \| string[]?` | Option names to remove. Omit to remove every option your resource added |
 
 ### Example [#example-1]
 
@@ -5973,7 +6230,7 @@ local id = exports.sleepless_interact:addCoords(vec3(100.0, 200.0, 30.0), {
 -- Remove specific options by name
 exports.sleepless_interact:removeCoords(id, { "option1" })
 
--- Remove all options for this coordinate
+-- Remove every option this resource added at this coordinate
 exports.sleepless_interact:removeCoords(id)
 ```
 
@@ -6016,10 +6273,10 @@ exports.sleepless_interact:removeLocalEntity(arr, options?)
 
 ### Parameters [#parameters-3]
 
-| Parameter | Type                  | Description                                              |
-| --------- | --------------------- | -------------------------------------------------------- |
-| `arr`     | `number \| number[]`  | Entity ID or array of entity IDs                         |
-| `options` | `string \| string[]?` | Option name(s) to remove (optional — omit to remove all) |
+| Parameter | Type                  | Description                                                             |
+| --------- | --------------------- | ----------------------------------------------------------------------- |
+| `arr`     | `number \| number[]`  | Entity ID or array of entity IDs                                        |
+| `options` | `string \| string[]?` | Option names to remove. Omit to remove every option your resource added |
 
 ### Example [#example-3]
 
@@ -6027,7 +6284,7 @@ exports.sleepless_interact:removeLocalEntity(arr, options?)
 -- Remove specific options by name
 exports.sleepless_interact:removeLocalEntity(entityId, "local_interaction")
 
--- Remove all options from the entity
+-- Remove every option this resource added to the entity
 exports.sleepless_interact:removeLocalEntity(entityId)
 ```
 
@@ -6072,10 +6329,10 @@ exports.sleepless_interact:removeEntity(arr, options?)
 
 ### Parameters [#parameters-5]
 
-| Parameter | Type                  | Description                                              |
-| --------- | --------------------- | -------------------------------------------------------- |
-| `arr`     | `number \| number[]`  | Network ID or array of network IDs                       |
-| `options` | `string \| string[]?` | Option name(s) to remove (optional — omit to remove all) |
+| Parameter | Type                  | Description                                                             |
+| --------- | --------------------- | ----------------------------------------------------------------------- |
+| `arr`     | `number \| number[]`  | Network ID or array of network IDs                                      |
+| `options` | `string \| string[]?` | Option names to remove. Omit to remove every option your resource added |
 
 ### Example [#example-5]
 
@@ -6085,7 +6342,7 @@ local NetId = NetworkGetNetworkIdFromEntity(entity)
 -- Remove specific options by name
 exports.sleepless_interact:removeEntity(NetId, "networked_interaction")
 
--- Remove all options from the entity
+-- Remove every option this resource added to the entity
 exports.sleepless_interact:removeEntity(NetId)
 ```
 
@@ -6128,10 +6385,10 @@ exports.sleepless_interact:removeModel(arr, options?)
 
 ### Parameters [#parameters-7]
 
-| Parameter | Type                                       | Description                                              |
-| --------- | ------------------------------------------ | -------------------------------------------------------- |
-| `arr`     | `number \| string \| (number \| string)[]` | Model hash/name or array of models                       |
-| `options` | `string \| string[]?`                      | Option name(s) to remove (optional — omit to remove all) |
+| Parameter | Type                                       | Description                                                             |
+| --------- | ------------------------------------------ | ----------------------------------------------------------------------- |
+| `arr`     | `number \| string \| (number \| string)[]` | Model hash/name or array of models                                      |
+| `options` | `string \| string[]?`                      | Option names to remove. Omit to remove every option your resource added |
 
 ### Example [#example-7]
 
@@ -6139,7 +6396,7 @@ exports.sleepless_interact:removeModel(arr, options?)
 -- Remove specific options by name
 exports.sleepless_interact:removeModel("prop_boxpile_01a", "box_interact")
 
--- Remove all options for this model
+-- Remove every option this resource added for this model
 exports.sleepless_interact:removeModel("prop_boxpile_01a")
 ```
 
@@ -6765,167 +7022,6 @@ exports.sleepless_lootbox:removeRewardHook('vehicle')
 </Callout>
 
 
-# Client Exports (/docs/pedmanager/exports/Client)
-
-
-
-## addPed [#addped]
-
-Add a new ped to be handled by the manager. Supports target options, interact options, animations, props, scenarios, and lifecycle callbacks.
-
-```lua
-local pedPoint = exports.sleepless_pedmanager:addPed(data)
-```
-
-### Parameters [#parameters]
-
-| Parameter | Type        | Description                                   |
-| --------- | ----------- | --------------------------------------------- |
-| `data`    | `PedConfig` | A table containing the ped configuration data |
-
-### PedConfig Properties [#pedconfig-properties]
-
-| Property          | Type                     | Required | Description                                                                         |
-| ----------------- | ------------------------ | -------- | ----------------------------------------------------------------------------------- |
-| `model`           | `string \| number`       | Yes      | A hash or string for the ped model                                                  |
-| `coords`          | `vec4 \| vec4[]`         | Yes      | The coordinates/heading where the ped(s) will be located                            |
-| `scenario`        | `string`                 | No       | The name of a scenario for the ped to play when spawned                             |
-| `animation`       | `table`                  | No       | Animation data (see below)                                                          |
-| `prop`            | `table`                  | No       | Prop attachment data (see below)                                                    |
-| `targetOptions`   | `table`                  | No       | An array of [ox\_target options](https://overextended.dev/ox_target)                |
-| `interactOptions` | `table`                  | No       | A [sleepless\_interact Option or array of Options](/docs/interact/interact-options) |
-| `renderDistance`  | `number`                 | No       | Distance from the player at which the ped spawns                                    |
-| `onSpawn`         | `function(ped?: number)` | No       | Callback called right **after** the ped is spawned                                  |
-| `onDespawn`       | `function(ped?: number)` | No       | Callback called right **before** the ped is despawned                               |
-
-### Animation Properties [#animation-properties]
-
-| Property | Type     | Required | Description          |
-| -------- | -------- | -------- | -------------------- |
-| `dict`   | `string` | Yes      | Animation dictionary |
-| `anim`   | `string` | Yes      | Animation name       |
-| `flag`   | `number` | No       | Animation flag       |
-
-### Prop Properties [#prop-properties]
-
-| Property    | Type               | Required | Description                                         |
-| ----------- | ------------------ | -------- | --------------------------------------------------- |
-| `propModel` | `string \| number` | Yes      | Model hash or string for the prop                   |
-| `bone`      | `string \| number` | Yes      | Bone name or index of the ped to attach the prop to |
-| `pos`       | `vec3`             | No       | Position offset of the prop relative to the bone    |
-| `rot`       | `vec3`             | No       | Rotation of the prop relative to the bone           |
-
-### Returns [#returns]
-
-| Type                             | Description                                                                                                                 |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `ox_lib point \| ox_lib point[]` | Returns a single `ox_lib` point if one coordinate was provided, or an array of points if multiple coordinates were provided |
-
-<Callout type="info">
-  Use either `scenario` **or** `animation` — not both. If both are provided, the scenario will be used.
-</Callout>
-
-### Example: Basic Ped with Target Options [#example-basic-ped-with-target-options]
-
-```lua
-local pedPoint = exports.sleepless_pedmanager:addPed({
-    model = "a_m_m_business_01",
-    coords = vec4(200.0, -900.0, 30.0, 180.0),
-    scenario = "WORLD_HUMAN_CLIPBOARD",
-    renderDistance = 15.0,
-    targetOptions = {
-        {
-            icon = "fas fa-comments",
-            label = "Talk",
-            serverEvent = "myresource:talkToNpc",
-        },
-    },
-})
-```
-
-### Example: Multiple Locations [#example-multiple-locations]
-
-```lua
-local pedPoints = exports.sleepless_pedmanager:addPed({
-    model = "a_m_m_business_01",
-    coords = {
-        vec4(-1665.45, -3143.31, 13.99, 281.13),
-        vec4(-1664.45, -3142.31, 13.99, 181.13),
-    },
-    scenario = "WORLD_HUMAN_STAND_IMPATIENT",
-    renderDistance = 10.0,
-})
-
--- pedPoints is an array of ox_lib points when multiple coords are provided
-```
-
-### Example: Animation with Prop and Interact Options [#example-animation-with-prop-and-interact-options]
-
-```lua
-local pedPoints = exports.sleepless_pedmanager:addPed({
-    model = "u_m_y_zombie_01",
-    coords = {
-        vec4(-1665.4545, -3143.3169, 13.9914, 281.1344),
-        vec4(-1664.4545, -3142.3169, 13.9914, 181.1344),
-    },
-    renderDistance = 8.0,
-    animation = {
-        dict = "amb@code_human_in_bus_passenger_idles@female@tablet@idle_a",
-        anim = "idle_a",
-        flag = 63,
-    },
-    prop = {
-        propModel = "prop_cs_tablet",
-        bone = 28422,
-        rot = vec3(0.0, 0.0, 0.03),
-        pos = vec3(0.0, 0.0, 0.03),
-    },
-    targetOptions = {
-        {
-            icon = "fas fa-money-bill-alt",
-            label = "Something",
-            serverEvent = "some_event",
-        },
-    },
-    interactOptions = {
-        {
-            label = "Talk to Ped",
-            name = "talk_to_ped",
-            icon = "comments",
-            distance = 2.0,
-            onSelect = function(data)
-                print("Talking to ped")
-            end,
-            canInteract = function(entity, distance, coords, name)
-                return distance < 2.0
-            end,
-        },
-        {
-            label = "Trade with Ped",
-            name = "trade_with_ped",
-            icon = "hand-holding-dollar",
-            distance = 2.0,
-            cooldown = 1500,
-            onSelect = function(data)
-                print("Trading with ped")
-            end,
-        },
-    },
-    onSpawn = function(ped)
-        GiveWeaponToPed(ped, `WEAPON_RPG`, 100, false, true)
-        SetCurrentPedWeapon(ped, `WEAPON_RPG`, true)
-    end,
-    onDespawn = function(ped)
-        -- cleanup logic here
-    end,
-})
-```
-
-<Callout type="warn">
-  Make sure ped models are valid and streamable. If a model fails to load, the ped will not spawn and no error may be thrown.
-</Callout>
-
-
 # Client Exports (/docs/prompts/exports/Client)
 
 
@@ -7484,6 +7580,208 @@ exports.sleepless_prompts:addGlobalPlayer({
 ```lua
 exports.sleepless_prompts:removeGlobalPlayer('trade')
 ```
+
+
+# Client Exports (/docs/pedmanager/exports/Client)
+
+
+
+## addPed [#addped]
+
+Add a new ped to be handled by the manager. Supports target options, interact options, prompt options, animations, props, scenarios, and lifecycle callbacks.
+
+```lua
+local pedPoint = exports.sleepless_pedmanager:addPed(data)
+```
+
+### Parameters [#parameters]
+
+| Parameter | Type        | Description                                   |
+| --------- | ----------- | --------------------------------------------- |
+| `data`    | `PedConfig` | A table containing the ped configuration data |
+
+### PedConfig Properties [#pedconfig-properties]
+
+| Property          | Type                     | Required | Description                                                                                                                                    |
+| ----------------- | ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `model`           | `string \| number`       | Yes      | A hash or string for the ped model                                                                                                             |
+| `coords`          | `vec4 \| vec4[]`         | Yes      | The coordinates/heading where the ped(s) will be located                                                                                       |
+| `scenario`        | `string`                 | No       | The name of a scenario for the ped to play when spawned                                                                                        |
+| `animation`       | `table`                  | No       | Animation data (see below)                                                                                                                     |
+| `prop`            | `table`                  | No       | Prop attachment data (see below)                                                                                                               |
+| `targetOptions`   | `table`                  | No       | An array of [ox\_target options](https://overextended.dev/ox_target)                                                                           |
+| `interactOptions` | `table`                  | No       | A [sleepless\_interact Option or array of Options](/docs/interact/interact-options)                                                            |
+| `promptOptions`   | `table`                  | No       | A [sleepless\_prompts entry or array of entries](/docs/prompts/prompt-options). Registered on the ped while it is spawned                      |
+| `promptSettings`  | `table`                  | No       | Optional [world target settings](/docs/prompts/exports/Client#world-targets): `position`, `layout`, `separator`, `offset`, `order`, `distance` |
+| `renderDistance`  | `number`                 | No       | Distance from the player at which the ped spawns                                                                                               |
+| `onSpawn`         | `function(ped?: number)` | No       | Callback called right **after** the ped is spawned                                                                                             |
+| `onDespawn`       | `function(ped?: number)` | No       | Callback called right **before** the ped is despawned                                                                                          |
+
+### Animation Properties [#animation-properties]
+
+| Property | Type     | Required | Description          |
+| -------- | -------- | -------- | -------------------- |
+| `dict`   | `string` | Yes      | Animation dictionary |
+| `anim`   | `string` | Yes      | Animation name       |
+| `flag`   | `number` | No       | Animation flag       |
+
+### Prop Properties [#prop-properties]
+
+| Property    | Type               | Required | Description                                         |
+| ----------- | ------------------ | -------- | --------------------------------------------------- |
+| `propModel` | `string \| number` | Yes      | Model hash or string for the prop                   |
+| `bone`      | `string \| number` | Yes      | Bone name or index of the ped to attach the prop to |
+| `pos`       | `vec3`             | No       | Position offset of the prop relative to the bone    |
+| `rot`       | `vec3`             | No       | Rotation of the prop relative to the bone           |
+
+### Returns [#returns]
+
+| Type                             | Description                                                                                                                 |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `ox_lib point \| ox_lib point[]` | Returns a single `ox_lib` point if one coordinate was provided, or an array of points if multiple coordinates were provided |
+
+<Callout type="info">
+  Use either `scenario` **or** `animation` — not both. If both are provided, the scenario will be used.
+</Callout>
+
+### Example: Basic Ped with Target Options [#example-basic-ped-with-target-options]
+
+```lua
+local pedPoint = exports.sleepless_pedmanager:addPed({
+    model = "a_m_m_business_01",
+    coords = vec4(200.0, -900.0, 30.0, 180.0),
+    scenario = "WORLD_HUMAN_CLIPBOARD",
+    renderDistance = 15.0,
+    targetOptions = {
+        {
+            icon = "fas fa-comments",
+            label = "Talk",
+            serverEvent = "myresource:talkToNpc",
+        },
+    },
+})
+```
+
+### Example: Multiple Locations [#example-multiple-locations]
+
+```lua
+local pedPoints = exports.sleepless_pedmanager:addPed({
+    model = "a_m_m_business_01",
+    coords = {
+        vec4(-1665.45, -3143.31, 13.99, 281.13),
+        vec4(-1664.45, -3142.31, 13.99, 181.13),
+    },
+    scenario = "WORLD_HUMAN_STAND_IMPATIENT",
+    renderDistance = 10.0,
+})
+
+-- pedPoints is an array of ox_lib points when multiple coords are provided
+```
+
+### Example: Animation with Prop and Interact Options [#example-animation-with-prop-and-interact-options]
+
+```lua
+local pedPoints = exports.sleepless_pedmanager:addPed({
+    model = "u_m_y_zombie_01",
+    coords = {
+        vec4(-1665.4545, -3143.3169, 13.9914, 281.1344),
+        vec4(-1664.4545, -3142.3169, 13.9914, 181.1344),
+    },
+    renderDistance = 8.0,
+    animation = {
+        dict = "amb@code_human_in_bus_passenger_idles@female@tablet@idle_a",
+        anim = "idle_a",
+        flag = 63,
+    },
+    prop = {
+        propModel = "prop_cs_tablet",
+        bone = 28422,
+        rot = vec3(0.0, 0.0, 0.03),
+        pos = vec3(0.0, 0.0, 0.03),
+    },
+    targetOptions = {
+        {
+            icon = "fas fa-money-bill-alt",
+            label = "Something",
+            serverEvent = "some_event",
+        },
+    },
+    interactOptions = {
+        {
+            label = "Talk to Ped",
+            name = "talk_to_ped",
+            icon = "comments",
+            distance = 2.0,
+            onSelect = function(data)
+                print("Talking to ped")
+            end,
+            canInteract = function(entity, distance, coords, name)
+                return distance < 2.0
+            end,
+        },
+        {
+            label = "Trade with Ped",
+            name = "trade_with_ped",
+            icon = "hand-holding-dollar",
+            distance = 2.0,
+            cooldown = 1500,
+            onSelect = function(data)
+                print("Trading with ped")
+            end,
+        },
+    },
+    onSpawn = function(ped)
+        GiveWeaponToPed(ped, `WEAPON_RPG`, 100, false, true)
+        SetCurrentPedWeapon(ped, `WEAPON_RPG`, true)
+    end,
+    onDespawn = function(ped)
+        -- cleanup logic here
+    end,
+})
+```
+
+### Example: Prompt Options [#example-prompt-options]
+
+`promptOptions` is passed to `sleepless_prompts:addLocalEntity` when the ped spawns, and removed when it despawns. `sleepless_prompts` has to be started. Each entry needs a `label` and a `control`, `keybind`, `key`, or `icon`.
+
+`export` runs on the resource that called `addPed`. `onSelect` wins when both are set, same as prompts.
+
+```lua
+local pedPoint = exports.sleepless_pedmanager:addPed({
+    model = "a_m_m_business_01",
+    coords = vec4(200.0, -900.0, 30.0, 180.0),
+    scenario = "WORLD_HUMAN_CLIPBOARD",
+    renderDistance = 15.0,
+    promptOptions = {
+        {
+            name = "talk",
+            label = "Talk",
+            control = 38,
+            distance = 2.5,
+            onSelect = function(data)
+                print(data.entity, data.distance)
+            end,
+        },
+        {
+            name = "trade",
+            label = "Trade",
+            control = 47,
+            distance = 2.5,
+            onSelect = function(data)
+                print("Trading with ped")
+            end,
+        },
+    },
+    promptSettings = {
+        position = "bottom-center",
+        distance = 2.5,
+    },
+})
+```
+
+<Callout type="warn">
+  Make sure ped models are valid and streamable. If a model fails to load, the ped will not spawn and no error may be thrown.
+</Callout>
 
 
 # Server Exports (/docs/routing/exports/Server)
@@ -8291,6 +8589,109 @@ if waypoint and waypoint.active then
 end
 ```
 
+***
+
+## createTimer [#createtimer]
+
+Creates a world-space DUI timer on this client. The plate is centered on `coords`.
+
+```lua
+local id = exports.sleepless_waypoints:createTimer(data)
+```
+
+### Parameters [#parameters-4]
+
+| Parameter | Type        | Description                                                    |
+| --------- | ----------- | -------------------------------------------------------------- |
+| `data`    | `TimerData` | Timer fields. See [Timers](/docs/waypoints/timers#timer-data). |
+
+### Returns [#returns-2]
+
+| Type     | Description     |
+| -------- | --------------- |
+| `number` | Client timer id |
+
+Pass `duration` in milliseconds to run a countdown. Omit it and set `progress` from `0.0` to `1.0` when your script should move the fill.
+
+```lua
+local id = exports.sleepless_waypoints:createTimer({
+    coords = vec3(100.0, 200.0, 30.4),
+    style = 'pill',
+    label = 'Cooking',
+    duration = 8000,
+    color = '#31a4fc',
+    drawDistance = 12.0,
+    onEnd = function(id)
+        print('Timer finished', id)
+    end,
+})
+```
+
+`onEnd` runs when a duration timer hits zero, before the plate is removed. `updateTimer` can replace it. Script timers never call it.
+
+***
+
+## updateTimer [#updatetimer]
+
+Changes the fields you pass. Anything you leave out stays as it is.
+
+```lua
+exports.sleepless_waypoints:updateTimer(id, data)
+```
+
+Passing `duration` starts that countdown over. Passing `progress` on a duration timer jumps the fill. `paused = true` freezes a countdown, and `paused = false` resumes it.
+
+```lua
+exports.sleepless_waypoints:updateTimer(id, {
+    paused = true,
+    label = 'Resting',
+})
+```
+
+***
+
+## removeTimer [#removetimer]
+
+Removes one timer and releases its DUI back to the pool.
+
+```lua
+exports.sleepless_waypoints:removeTimer(id)
+```
+
+***
+
+## removeAllTimers [#removealltimers]
+
+Removes every timer on this client, including timers the server created for this player.
+
+```lua
+exports.sleepless_waypoints:removeAllTimers()
+```
+
+***
+
+## getTimer [#gettimer]
+
+Returns the timer table for a client id, or `nil` when it is already gone.
+
+```lua
+local timer = exports.sleepless_waypoints:getTimer(id)
+```
+
+***
+
+## timerEnded [#timerended]
+
+A duration timer fires this local event when it reaches zero. `onEnd`, when you passed one to `createTimer`, runs first. Then this event fires. Then `removeOnComplete` removes the plate.
+
+```lua
+AddEventHandler('sleepless_waypoints:client:timerEnded', function(id)
+    print('Timer finished', id)
+end)
+```
+
+Script timers do not fire this event.
+
 
 # Server Exports (/docs/waypoints/exports/Server)
 
@@ -8786,3 +9187,107 @@ RegisterNetEvent('mission:accept', function(missionId)
     })
 end)
 ```
+
+***
+
+## createTimer [#createtimer]
+
+Creates a timer for one player, a list of players, or `-1` for everyone currently online.
+
+```lua
+local id = exports.sleepless_waypoints:createTimer(target, data)
+```
+
+### Parameters [#parameters-7]
+
+| Parameter | Type                 | Description                                                    |
+| --------- | -------------------- | -------------------------------------------------------------- |
+| `target`  | `number \| number[]` | A server id, a list of server ids, or `-1`                     |
+| `data`    | `TimerData`          | Timer fields. See [Timers](/docs/waypoints/timers#timer-data). |
+
+### Returns [#returns-4]
+
+| Type     | Description                                        |
+| -------- | -------------------------------------------------- |
+| `number` | Server timer id. This is not the id on the client. |
+
+```lua
+local id = exports.sleepless_waypoints:createTimer(source, {
+    coords = vec3(100.0, 200.0, 30.4),
+    style = 'bar',
+    label = 'Brewing',
+    duration = 15000,
+})
+```
+
+`onEnd` is client only. A function passed from the server is dropped on the way to the client. Each client still fires `sleepless_waypoints:client:timerEnded` when its own countdown hits zero.
+
+<Callout type="info">
+  Players who join later do not receive a timer that already exists. Each client starts the countdown when the timer arrives.
+</Callout>
+
+***
+
+## updateTimer [#updatetimer]
+
+Patches a server timer and forwards the change to its targets.
+
+```lua
+exports.sleepless_waypoints:updateTimer(id, {
+    label = 'Almost done',
+    progress = 0.8,
+})
+```
+
+***
+
+## removeTimer [#removetimer]
+
+Removes a server timer from every player who can see it.
+
+```lua
+exports.sleepless_waypoints:removeTimer(id)
+```
+
+***
+
+## removeAllTimers [#removealltimers]
+
+With no argument, removes every server timer. With a player id, removes timers that were created for that player alone. Global timers stay up for everyone else.
+
+```lua
+exports.sleepless_waypoints:removeAllTimers()
+exports.sleepless_waypoints:removeAllTimers(playerId)
+```
+
+Disconnects drop that player's server timers on their own. A global timer stays until you remove it.
+
+***
+
+## getTimer [#gettimer]
+
+```lua
+local timer = exports.sleepless_waypoints:getTimer(id)
+```
+
+Returns the server record `{ target, data }`, or `nil`.
+
+***
+
+## getAllTimers [#getalltimers]
+
+```lua
+local timers = exports.sleepless_waypoints:getAllTimers()
+```
+
+Returns every server timer keyed by server id.
+
+***
+
+## getTimersForPlayer [#gettimersforplayer]
+
+```lua
+local timers = exports.sleepless_waypoints:getTimersForPlayer(playerId)
+```
+
+Returns the server timers tracked for that player, keyed by server id.

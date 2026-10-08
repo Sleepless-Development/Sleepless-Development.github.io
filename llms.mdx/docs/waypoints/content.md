@@ -4,7 +4,7 @@
 
 
 
-A 3D DUI waypoint and marker system for FiveM. Create customizable waypoints with support for different styles, icons, labels, and distance tracking.
+A 3D DUI waypoint and marker system for FiveM. Create customizable waypoints with support for different styles, icons, labels, and distance tracking. The same billboards can also show a [world timer](/docs/waypoints/timers).
 
 <ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_waypoints" />
 
@@ -13,6 +13,7 @@ A 3D DUI waypoint and marker system for FiveM. Create customizable waypoints wit
 * 📍 **Two Waypoint Types** - Small markers and checkpoint-style beacons
 * 🎨 **Customizable Appearance** - Colors, icons, labels, and sizes
 * 📏 **Distance Display** - Automatic distance tracking to waypoints
+* ⏱️ **World Timers** - Pill, bar, chip, stack, dial, pie, donut, gauge, clock, dots, and signal plates that count down or follow your script
 * 🗺️ **Map Waypoint Sync** - Automatically creates a 3D marker at the player's map waypoint
 * 🖥️ **Server-side Support** - Create waypoints for specific players or globally from the server
 * ⚡ **Performance Optimized** - Efficient rendering with distance-based culling
@@ -93,6 +94,21 @@ A 3D DUI waypoint and marker system for FiveM. Create customizable waypoints wit
         groundZ = 28.0,
     })
     ```
+  </div>
+
+  <div className="fd-step">
+    ### Create a Timer [#create-a-timer-step]
+
+    ```lua
+    local id = exports.sleepless_waypoints:createTimer({
+        coords = vec3(100.0, 200.0, 30.4),
+        style = 'pill',
+        label = 'Cooking',
+        duration = 8000,
+    })
+    ```
+
+    Build and copy a timer from the [timer studio](/docs/waypoints/timers).
   </div>
 
   <div className="fd-step">
