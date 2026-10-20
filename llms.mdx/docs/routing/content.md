@@ -125,7 +125,7 @@ No framework resource is required. On join, bucket state is published for ox\_co
 
 ## Debug [#debug]
 
-`/setroute` is registered only when `debug` is true in `config.lua`. The command is ACE restricted to `command.setroute`. With no argument, the player returns to the global bucket. With a name, they move into that named bucket (population off).
+`/setroute` is registered only when `debug` is true in `config.lua`. It requires the `command` permission. With no argument, the player returns to the global bucket. With a name, they move into that named bucket (population off).
 
 ```lua
 debug = true,
