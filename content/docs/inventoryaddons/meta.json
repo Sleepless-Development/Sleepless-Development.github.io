@@ -1,7 +1,6 @@
 {
   "title": "Inventory Addons",
   "pages": [
-    "index",
     "back-items",
     "drag-craft",
     "item-carry"

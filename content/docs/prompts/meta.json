@@ -1,7 +1,6 @@
 {
   "title": "Prompts",
   "pages": [
-    "index",
     "configuration",
     "custom-themes",
     "prompt-options",

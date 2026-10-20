@@ -1,7 +1,6 @@
 {
   "title": "Lootbox",
   "pages": [
-    "index",
     "configuration",
     "framework-setup",
     "item-setup",
