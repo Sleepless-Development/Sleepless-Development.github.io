@@ -1525,601 +1525,6 @@ exports.object_gizmo:useGizmo(entity, {
 ```
 
 
-# Back Items (/docs/inventoryaddons/back-items)
-
-
-
-Attach items to player models with customizable bone positions and rotations. Supports weapons, backpacks, and custom items with priority-based slot management.
-
-You can find the configuration in `backitems/config.lua`.
-
-## Configuration Overview [#configuration-overview]
-
-The Back Items module has two main configuration sections:
-
-1. **Default Slots** (`Config.defaultSlots`) — Defines available attachment slots with bone positions and rotations
-2. **Back Items** (`Config.BackItems`) — Defines which items can be attached and how they display
-
-***
-
-## Default Slots [#default-slots]
-
-Default slots define the available positions for item attachment, each linked to a specific bone, position, and rotation.
-
-```lua
-Config.defaultSlots = {
-    ['back'] = {
-        { bone = 24818, pos = vec3(0.09, -0.16, 0.12), rot = vec3(0.0, 180.0, 0.0) },
-        -- Add more slots to allow multiple items on the back
-    }
-}
-```
-
-### Slot Properties [#slot-properties]
-
-| Property | Type     | Description                            |
-| -------- | -------- | -------------------------------------- |
-| `bone`   | `number` | The bone ID where the slot is attached |
-| `pos`    | `vec3`   | Position offset relative to the bone   |
-| `rot`    | `vec3`   | Rotation offset relative to the bone   |
-
-<Callout type="info">
-  Each slot group (e.g., `'back'`) can contain multiple slots, allowing multiple items to be displayed simultaneously based on priority.
-</Callout>
-
-***
-
-## Back Items [#back-items]
-
-Back items define which inventory items can be attached to the player model and how they are displayed. The **index** for each entry should match the **item name** in your inventory system.
-
-```lua
-Config.BackItems = {
-    ['WEAPON_CARBINERIFLE'] = {
-        prio = 3,
-        group = 'back',
-    },
-}
-```
-
-### BackItem Properties [#backitem-properties]
-
-| Property       | Type      | Required | Description                                                  |
-| -------------- | --------- | -------- | ------------------------------------------------------------ |
-| `prio`         | `number`  | Yes      | Display priority of the item (lower = higher priority)       |
-| `group`        | `string`  | No       | Slot group for the item (defaults to `'back'`)               |
-| `model`        | `number`  | No       | Model hash for non-weapon items or alternative weapon models |
-| `customPos`    | `table`   | No       | Custom position override (see below)                         |
-| `ignoreLimits` | `boolean` | No       | When `true`, the item attaches regardless of available slots |
-
-### Custom Position Properties [#custom-position-properties]
-
-| Property | Type     | Required | Description                   |
-| -------- | -------- | -------- | ----------------------------- |
-| `bone`   | `number` | No\*     | Bone ID for custom attachment |
-| `pos`    | `vec3`   | No\*     | Custom position offset        |
-| `rot`    | `vec3`   | No\*     | Custom rotation offset        |
-
-<Callout type="warn">
-  When using `ignoreLimits = true`, a complete `customPos` with `bone`, `pos`, and `rot` is **required**.
-</Callout>
-
-***
-
-## Examples [#examples]
-
-### Normal Weapon Back Item [#normal-weapon-back-item]
-
-Standard weapon that uses the default slot group and positioning:
-
-```lua
-Config.BackItems = {
-    ['WEAPON_CARBINERIFLE'] = {
-        prio = 3,
-        group = 'back',
-    },
-}
-```
-
-### Non-Weapon Back Item [#non-weapon-back-item]
-
-Non-weapon items require a `model` property since they don't have an inherent weapon model:
-
-```lua
-Config.BackItems = {
-    ['cone'] = {
-        prio = 3,
-        model = `prop_roadcone02a`,
-        group = 'back',
-    },
-}
-```
-
-### Weapon with Alternative Model [#weapon-with-alternative-model]
-
-Use a custom model instead of the default weapon model:
-
-```lua
-Config.BackItems = {
-    ['katana'] = {
-        prio = 3,
-        model = `sheathed_katana`,
-        group = 'back',
-    },
-}
-```
-
-### Weapon with Custom Position [#weapon-with-custom-position]
-
-Override the default slot position with partial custom offsets:
-
-```lua
-Config.BackItems = {
-    ['WEAPON_BAT'] = {
-        prio = 3,
-        group = 'back',
-        customPos = {
-            pos = { x = 0.4, y = -0.15 },
-            rot = { y = 270.0 },
-        },
-    },
-}
-```
-
-### Item with `ignoreLimits` [#item-with-ignorelimits]
-
-Items with `ignoreLimits` will **always** equip when in the inventory, regardless of available slots. A complete `customPos` is required.
-
-This example places a cone on the player's head:
-
-```lua
-Config.BackItems = {
-    ['cone'] = {
-        ignoreLimits = true,
-        model = `prop_roadcone02a`,
-        customPos = {
-            bone = 12844,
-            pos = vec3(0.06, 0.0, 0.0),
-            rot = vec3(0.0, 90.0, 0.0),
-        },
-    },
-}
-```
-
-<Callout type="info">
-  Items with `ignoreLimits` don't use a slot group or priority — they bypass the slot system entirely.
-</Callout>
-
-***
-
-## Customization Tips [#customization-tips]
-
-* Ensure correct bone IDs, positions, and rotations for desired item placements
-* Use `ignoreLimits` only with a complete `customPos` (bone, pos, and rot)
-* The `model` field is **required** for non-weapon items or when using an alternative weapon model
-* Lower `prio` values take precedence when multiple items compete for the same slot
-
-
-# Drag Craft (/docs/inventoryaddons/drag-craft)
-
-
-
-A simple crafting system using `ox_inventory` drag-and-drop hooks. Players craft items by dragging one item onto another in their inventory.
-
-## Configuration [#configuration]
-
-Recipes are defined in `dragcraft/config.lua`. Each recipe key is a pair of item names separated by a space — these are the two items the player drags onto each other.
-
-### Recipe Properties [#recipe-properties]
-
-| Property   | Type     | Required | Description                                                        |
-| ---------- | -------- | -------- | ------------------------------------------------------------------ |
-| `duration` | `number` | Yes      | Duration in milliseconds for the craft to complete                 |
-| `client`   | `table`  | No       | Client-side callbacks (`before` and `after`)                       |
-| `server`   | `table`  | No       | Server-side callbacks (`before`, `after`, and optional `metadata`) |
-| `costs`    | `table`  | Yes      | Items required and whether they are consumed                       |
-| `result`   | `table`  | Yes      | Array of resulting items from the craft                            |
-
-### Cost Properties [#cost-properties]
-
-Each entry in the `costs` table is keyed by item name:
-
-| Property | Type      | Description                                                                                                       |
-| -------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
-| `need`   | `number`  | Quantity required in the dragged slot. If between `0.0` and `1.0`, removes that percentage of durability instead. |
-| `remove` | `boolean` | Whether the item should be removed/consumed upon completion                                                       |
-
-<Callout type="info">
-  A `need` value of `0.1` with `remove = true` removes 10% durability per craft, allowing up to 10 uses before the item breaks.
-</Callout>
-
-<Callout type="warn">
-  Ingredient counts are checked against the **dragged slots**, not the player's total item count. The items are also removed from those slots on success.
-</Callout>
-
-### Result Properties [#result-properties]
-
-Each entry in the `result` array:
-
-| Property | Type     | Required | Description                                          |
-| -------- | -------- | -------- | ---------------------------------------------------- |
-| `name`   | `string` | Yes      | Item name to give the player                         |
-| `amount` | `number` | No       | Fixed quantity to give (use this **or** `min`/`max`) |
-| `min`    | `number` | No       | Minimum random quantity                              |
-| `max`    | `number` | No       | Maximum random quantity                              |
-
-### Callback Functions [#callback-functions]
-
-The `client` table supports `before` and `after`. The `server` table supports `before`, `after`, and `metadata`:
-
-| Callback                                 | Context         | Description                                                                                                    |
-| ---------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------- |
-| `before(recipeData)`                     | Client / Server | Runs before crafting starts. Return `false` to cancel the craft. Returning `true` or `nil` continues normally. |
-| `after(recipeData)`                      | Client / Server | Runs after crafting completes successfully.                                                                    |
-| `metadata(resultName, fromSlot, toSlot)` | Server          | Optional. Return a metadata table applied to that result item.                                                 |
-
-<Callout type="warn">
-  The `recipeData` parameter passed to `before` / `after` contains all the properties defined for that specific recipe.
-</Callout>
-
-### Complete Example [#complete-example]
-
-```lua
-RECIPES = {
-    ['garbage scrapmetal'] = {
-        duration = 2000,
-        client = {
-            before = function(recipeData)
-                -- Client logic before crafting
-                -- Return false to cancel the craft
-            end,
-            after = function(recipeData)
-                -- Client logic after successfully crafting
-            end,
-        },
-        server = {
-            before = function(recipeData)
-                -- Server logic before crafting
-                -- Return false to cancel the craft
-            end,
-            after = function(recipeData)
-                -- Server logic after successfully crafting
-            end,
-            metadata = function(resultName, fromSlot, toSlot)
-                -- Optional metadata for the resulting item
-                -- return { quality = 100 }
-            end,
-        },
-        costs = {
-            ['garbage'] = { need = 1, remove = true },
-            ['scrapmetal'] = { need = 0.1, remove = true },
-        },
-        result = {
-            { name = 'lockpick', amount = 1 },
-        },
-    },
-}
-```
-
-## Exports [#exports]
-
-### addRecipe [#addrecipe]
-
-Register a recipe externally from another resource.
-
-Craftable recipes (&#x2A;*`costs`*&#x2A;, &#x2A;*`result`*&#x2A;, &#x2A;*`duration`**, and server callbacks) must be registered on the **server**. The client export only stores client callbacks and cannot create a working craft.
-
-```lua
--- server
-local success = exports.sleepless_inventory_addons:addRecipe(key, data, target?)
-
--- client (callbacks only)
-exports.sleepless_inventory_addons:addRecipe(key, data)
-```
-
-#### Server Parameters [#server-parameters]
-
-| Parameter | Type      | Description                                                                           |
-| --------- | --------- | ------------------------------------------------------------------------------------- |
-| `key`     | `string`  | The recipe key — two item names separated by a space (e.g., `'garbage scrapmetal'`)   |
-| `data`    | `table`   | The recipe data. Must include `costs` and `result`                                    |
-| `target`  | `number?` | Optional player id to sync the recipe UI to. Omit (or pass `nil`) to sync all players |
-
-#### Server Returns [#server-returns]
-
-| Type      | Description                         |
-| --------- | ----------------------------------- |
-| `boolean` | `true` if the recipe was registered |
-
-#### Client Parameters [#client-parameters]
-
-| Parameter | Type     | Description                                                       |
-| --------- | -------- | ----------------------------------------------------------------- |
-| `key`     | `string` | The same recipe key used on the server                            |
-| `data`    | `table`  | Client-side data. Only `client` callbacks are used from this call |
-
-<Callout type="error">
-  A client-only `addRecipe` call does **not** register the recipe on the server. Players will not be able to craft it unless the same key is also registered from a server resource.
-</Callout>
-
-<Callout type="warn">
-  Callbacks only work in the context you register them. A client-side call can only register `client` callbacks, and a server-side call can only register `server` callbacks. Functions cannot be sent over the network.
-</Callout>
-
-<Tabs items="['Server', 'Client']">
-  <Tab value="Server">
-    ```lua
-    local success = exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
-        duration = 2000,
-        server = {
-            before = function(recipeData)
-                -- Server logic before crafting
-                -- Return false to cancel
-            end,
-            after = function(recipeData)
-                -- Server logic after crafting
-            end,
-            metadata = function(resultName, fromSlot, toSlot)
-                -- Optional metadata for the resulting item
-            end,
-        },
-        costs = {
-            ['garbage'] = { need = 1, remove = true },
-            ['scrapmetal'] = { need = 0.1, remove = true },
-        },
-        result = {
-            { name = 'lockpick', amount = 1 },
-        },
-    })
-    ```
-  </Tab>
-
-  <Tab value="Client">
-    ```lua
-    -- Only registers client callbacks. The craftable recipe must already
-    -- exist in config or be registered from the server export.
-    exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
-        client = {
-            before = function(recipeData)
-                -- Client logic before crafting
-                -- Return false to cancel
-            end,
-            after = function(recipeData)
-                -- Client logic after crafting
-            end,
-        },
-    })
-    ```
-  </Tab>
-</Tabs>
-
-
-# Sleepless Inventory Addons (/docs/inventoryaddons)
-
-
-
-
-
-Addon modules for ox\_inventory that enhance its utility with back items, drag crafting, and item carrying systems. Each addon can be used independently or together.
-
-<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_inventory_addons" />
-
-## Features [#features]
-
-* 🎒 **Back Items** - Attach items to player models with customizable bone positions and rotations
-* 🔨 **Drag Craft** - Simple crafting system using ox\_inventory drag-and-drop mechanics
-* 📦 **Item Carry** - Automatic item carrying with animations and prop attachments
-
-## Dependencies [#dependencies]
-
-* [ox\_lib](https://github.com/overextended/ox_lib) (required)
-* [ox\_inventory](https://github.com/overextended/ox_inventory) (required)
-
-## Installation [#installation]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Download the Resource [#download-the-resource-step]
-
-    Download a [release](https://github.com/Sleepless-Development/sleepless_inventory_addons/releases) or clone the repository:
-
-    ```bash
-    git clone https://github.com/Sleepless-Development/sleepless_inventory_addons.git
-    ```
-  </div>
-
-  <div className="fd-step">
-    ### Add to Server [#add-to-server-step]
-
-    Place the `sleepless_inventory_addons` folder in your server's resources directory.
-  </div>
-
-  <div className="fd-step">
-    ### Configure Your Server [#configure-your-server-step]
-
-    Add the following to your `server.cfg` (after ox\_inventory):
-
-    ```bash
-    ensure ox_lib
-    ensure ox_inventory
-    ensure sleepless_inventory_addons
-    ```
-  </div>
-
-  <div className="fd-step">
-    ### Configure Addons [#configure-addons-step]
-
-    Each addon has its own configuration file in its respective subfolder. See the individual addon pages for details:
-
-    * [Back Items](/docs/inventoryaddons/back-items) — `backitems/config.lua`
-    * [Drag Craft](/docs/inventoryaddons/drag-craft) — `dragcraft/config.lua`
-    * [Item Carry](/docs/inventoryaddons/item-carry) — `itemcarry/config.lua`
-  </div>
-</div>
-
-## Addons Overview [#addons-overview]
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ### Back Items [#back-items-step]
-
-    Configure item attachments to player models with bone-specific positioning. Supports weapons, backpacks, and custom items with priority-based slot management. Items visually display on the player's back (or other bones) when in their inventory.
-  </div>
-
-  <div className="fd-step">
-    ### Drag Craft [#drag-craft-step]
-
-    Create crafting recipes that work with ox\_inventory's drag-and-drop system. Drag one item onto another to trigger a craft. Supports multi-item recipes, durability costs, and client/server-side callbacks for custom logic.
-  </div>
-
-  <div className="fd-step">
-    ### Item Carry [#item-carry-step]
-
-    Automatically attach props and play animations when players receive specific items. Includes options for vehicle blocking and walk-only mode for realistic item carrying behavior.
-
-    <Callout type="info">
-      Each addon can be configured independently. You only need to set up the addons you want to use — unused addons can be left with their default (empty) configurations.
-    </Callout>
-  </div>
-</div>
-
-## Support [#support]
-
-If you need help or have questions:
-
-* [Discord](https://discord.gg/A2bDPbfgNP)
-* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_inventory_addons/issues)
-
-
-# Item Carry (/docs/inventoryaddons/item-carry)
-
-
-
-Automatically attach props and play animations when players receive specific items using `ox_inventory`. Includes vehicle blocking and walk-only options for realistic item carrying.
-
-## Configuration [#configuration]
-
-The configuration file is located at `itemcarry/config.lua`. Each entry in the config table maps an inventory item name to its carry behavior.
-
-### Config Properties [#config-properties]
-
-| Property       | Type      | Required | Description                                                                   |
-| -------------- | --------- | -------- | ----------------------------------------------------------------------------- |
-| `walkOnly`     | `boolean` | No       | Whether the player can only walk while carrying this item                     |
-| `blockVehicle` | `boolean` | No       | Whether the player is blocked from entering vehicles while carrying this item |
-| `anim`         | `table`   | Yes      | Animation data for the carrying animation                                     |
-| `prop`         | `table`   | Yes      | Prop attachment data for the carried item                                     |
-
-### Animation Properties [#animation-properties]
-
-| Property | Type     | Required | Description                                       |
-| -------- | -------- | -------- | ------------------------------------------------- |
-| `dict`   | `string` | Yes      | Animation dictionary name                         |
-| `clip`   | `string` | Yes      | Animation clip name                               |
-| `flag`   | `number` | No       | Animation flag (controls looping, movement, etc.) |
-
-### Prop Properties [#prop-properties]
-
-| Property        | Type               | Required | Description                                            |
-| --------------- | ------------------ | -------- | ------------------------------------------------------ |
-| `bone`          | `number`           | Yes      | Bone index to attach the prop to                       |
-| `model`         | `number \| string` | Yes      | Model hash or string for the prop                      |
-| `placement`     | `table`            | Yes      | Position and rotation of the prop relative to the bone |
-| `placement.pos` | `vec3`             | Yes      | Position offset relative to the bone                   |
-| `placement.rot` | `vec3`             | Yes      | Rotation offset relative to the bone                   |
-
-## Examples [#examples]
-
-### Box Carry (Walk Only, No Vehicles) [#box-carry-walk-only-no-vehicles]
-
-```lua
-['box'] = {
-    walkOnly = true,
-    blockVehicle = true,
-    anim = {
-        dict = 'anim@heists@box_carry@',
-        clip = 'idle',
-        flag = 51,
-    },
-    prop = {
-        bone = 60309,
-        model = joaat('hei_prop_heist_box'),
-        placement = {
-            pos = vec3(0.025000, 0.080000, 0.255000),
-            rot = vec3(-145.000000, 290.000000, 0.000000),
-        },
-    },
-},
-```
-
-### Briefcase Carry (Free Movement) [#briefcase-carry-free-movement]
-
-```lua
-['briefcase'] = {
-    anim = {
-        dict = 'anim@heists@briefcase@',
-        clip = 'idle',
-        flag = 52,
-    },
-    prop = {
-        bone = 60310,
-        model = 'prop_briefcase_02',
-        placement = {
-            pos = vec3(0.035000, 0.070000, 0.240000),
-            rot = vec3(-135.000000, 280.000000, 0.000000),
-        },
-    },
-},
-```
-
-## Complete Config Example [#complete-config-example]
-
-```lua
-local config = {
-    ['box'] = {
-        walkOnly = true,
-        blockVehicle = true,
-        anim = {
-            dict = 'anim@heists@box_carry@',
-            clip = 'idle',
-            flag = 51,
-        },
-        prop = {
-            bone = 60309,
-            model = joaat('hei_prop_heist_box'),
-            placement = {
-                pos = vec3(0.025000, 0.080000, 0.255000),
-                rot = vec3(-145.000000, 290.000000, 0.000000),
-            },
-        },
-    },
-    ['briefcase'] = {
-        anim = {
-            dict = 'anim@heists@briefcase@',
-            clip = 'idle',
-            flag = 52,
-        },
-        prop = {
-            bone = 60310,
-            model = 'prop_briefcase_02',
-            placement = {
-                pos = vec3(0.035000, 0.070000, 0.240000),
-                rot = vec3(-135.000000, 280.000000, 0.000000),
-            },
-        },
-    },
-}
-```
-
-<Callout type="info">
-  The config key (e.g., `'box'`, `'briefcase'`) must match the item name in your `ox_inventory` item definitions. When a player receives the item, the carry behavior activates automatically.
-</Callout>
-
-<Callout type="warn">
-  Ensure the animation dictionaries and prop models you reference are valid and available in the game. Invalid references will result in the carry behavior not displaying correctly.
-</Callout>
-
-
 # Configuration (/docs/interact/configuration)
 
 
@@ -2863,6 +2268,601 @@ local options = {
     },
 }
 ```
+
+
+# Back Items (/docs/inventoryaddons/back-items)
+
+
+
+Attach items to player models with customizable bone positions and rotations. Supports weapons, backpacks, and custom items with priority-based slot management.
+
+You can find the configuration in `backitems/config.lua`.
+
+## Configuration Overview [#configuration-overview]
+
+The Back Items module has two main configuration sections:
+
+1. **Default Slots** (`Config.defaultSlots`) — Defines available attachment slots with bone positions and rotations
+2. **Back Items** (`Config.BackItems`) — Defines which items can be attached and how they display
+
+***
+
+## Default Slots [#default-slots]
+
+Default slots define the available positions for item attachment, each linked to a specific bone, position, and rotation.
+
+```lua
+Config.defaultSlots = {
+    ['back'] = {
+        { bone = 24818, pos = vec3(0.09, -0.16, 0.12), rot = vec3(0.0, 180.0, 0.0) },
+        -- Add more slots to allow multiple items on the back
+    }
+}
+```
+
+### Slot Properties [#slot-properties]
+
+| Property | Type     | Description                            |
+| -------- | -------- | -------------------------------------- |
+| `bone`   | `number` | The bone ID where the slot is attached |
+| `pos`    | `vec3`   | Position offset relative to the bone   |
+| `rot`    | `vec3`   | Rotation offset relative to the bone   |
+
+<Callout type="info">
+  Each slot group (e.g., `'back'`) can contain multiple slots, allowing multiple items to be displayed simultaneously based on priority.
+</Callout>
+
+***
+
+## Back Items [#back-items]
+
+Back items define which inventory items can be attached to the player model and how they are displayed. The **index** for each entry should match the **item name** in your inventory system.
+
+```lua
+Config.BackItems = {
+    ['WEAPON_CARBINERIFLE'] = {
+        prio = 3,
+        group = 'back',
+    },
+}
+```
+
+### BackItem Properties [#backitem-properties]
+
+| Property       | Type      | Required | Description                                                  |
+| -------------- | --------- | -------- | ------------------------------------------------------------ |
+| `prio`         | `number`  | Yes      | Display priority of the item (lower = higher priority)       |
+| `group`        | `string`  | No       | Slot group for the item (defaults to `'back'`)               |
+| `model`        | `number`  | No       | Model hash for non-weapon items or alternative weapon models |
+| `customPos`    | `table`   | No       | Custom position override (see below)                         |
+| `ignoreLimits` | `boolean` | No       | When `true`, the item attaches regardless of available slots |
+
+### Custom Position Properties [#custom-position-properties]
+
+| Property | Type     | Required | Description                   |
+| -------- | -------- | -------- | ----------------------------- |
+| `bone`   | `number` | No\*     | Bone ID for custom attachment |
+| `pos`    | `vec3`   | No\*     | Custom position offset        |
+| `rot`    | `vec3`   | No\*     | Custom rotation offset        |
+
+<Callout type="warn">
+  When using `ignoreLimits = true`, a complete `customPos` with `bone`, `pos`, and `rot` is **required**.
+</Callout>
+
+***
+
+## Examples [#examples]
+
+### Normal Weapon Back Item [#normal-weapon-back-item]
+
+Standard weapon that uses the default slot group and positioning:
+
+```lua
+Config.BackItems = {
+    ['WEAPON_CARBINERIFLE'] = {
+        prio = 3,
+        group = 'back',
+    },
+}
+```
+
+### Non-Weapon Back Item [#non-weapon-back-item]
+
+Non-weapon items require a `model` property since they don't have an inherent weapon model:
+
+```lua
+Config.BackItems = {
+    ['cone'] = {
+        prio = 3,
+        model = `prop_roadcone02a`,
+        group = 'back',
+    },
+}
+```
+
+### Weapon with Alternative Model [#weapon-with-alternative-model]
+
+Use a custom model instead of the default weapon model:
+
+```lua
+Config.BackItems = {
+    ['katana'] = {
+        prio = 3,
+        model = `sheathed_katana`,
+        group = 'back',
+    },
+}
+```
+
+### Weapon with Custom Position [#weapon-with-custom-position]
+
+Override the default slot position with partial custom offsets:
+
+```lua
+Config.BackItems = {
+    ['WEAPON_BAT'] = {
+        prio = 3,
+        group = 'back',
+        customPos = {
+            pos = { x = 0.4, y = -0.15 },
+            rot = { y = 270.0 },
+        },
+    },
+}
+```
+
+### Item with `ignoreLimits` [#item-with-ignorelimits]
+
+Items with `ignoreLimits` will **always** equip when in the inventory, regardless of available slots. A complete `customPos` is required.
+
+This example places a cone on the player's head:
+
+```lua
+Config.BackItems = {
+    ['cone'] = {
+        ignoreLimits = true,
+        model = `prop_roadcone02a`,
+        customPos = {
+            bone = 12844,
+            pos = vec3(0.06, 0.0, 0.0),
+            rot = vec3(0.0, 90.0, 0.0),
+        },
+    },
+}
+```
+
+<Callout type="info">
+  Items with `ignoreLimits` don't use a slot group or priority — they bypass the slot system entirely.
+</Callout>
+
+***
+
+## Customization Tips [#customization-tips]
+
+* Ensure correct bone IDs, positions, and rotations for desired item placements
+* Use `ignoreLimits` only with a complete `customPos` (bone, pos, and rot)
+* The `model` field is **required** for non-weapon items or when using an alternative weapon model
+* Lower `prio` values take precedence when multiple items compete for the same slot
+
+
+# Drag Craft (/docs/inventoryaddons/drag-craft)
+
+
+
+A simple crafting system using `ox_inventory` drag-and-drop hooks. Players craft items by dragging one item onto another in their inventory.
+
+## Configuration [#configuration]
+
+Recipes are defined in `dragcraft/config.lua`. Each recipe key is a pair of item names separated by a space — these are the two items the player drags onto each other.
+
+### Recipe Properties [#recipe-properties]
+
+| Property   | Type     | Required | Description                                                        |
+| ---------- | -------- | -------- | ------------------------------------------------------------------ |
+| `duration` | `number` | Yes      | Duration in milliseconds for the craft to complete                 |
+| `client`   | `table`  | No       | Client-side callbacks (`before` and `after`)                       |
+| `server`   | `table`  | No       | Server-side callbacks (`before`, `after`, and optional `metadata`) |
+| `costs`    | `table`  | Yes      | Items required and whether they are consumed                       |
+| `result`   | `table`  | Yes      | Array of resulting items from the craft                            |
+
+### Cost Properties [#cost-properties]
+
+Each entry in the `costs` table is keyed by item name:
+
+| Property | Type      | Description                                                                                                       |
+| -------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
+| `need`   | `number`  | Quantity required in the dragged slot. If between `0.0` and `1.0`, removes that percentage of durability instead. |
+| `remove` | `boolean` | Whether the item should be removed/consumed upon completion                                                       |
+
+<Callout type="info">
+  A `need` value of `0.1` with `remove = true` removes 10% durability per craft, allowing up to 10 uses before the item breaks.
+</Callout>
+
+<Callout type="warn">
+  Ingredient counts are checked against the **dragged slots**, not the player's total item count. The items are also removed from those slots on success.
+</Callout>
+
+### Result Properties [#result-properties]
+
+Each entry in the `result` array:
+
+| Property | Type     | Required | Description                                          |
+| -------- | -------- | -------- | ---------------------------------------------------- |
+| `name`   | `string` | Yes      | Item name to give the player                         |
+| `amount` | `number` | No       | Fixed quantity to give (use this **or** `min`/`max`) |
+| `min`    | `number` | No       | Minimum random quantity                              |
+| `max`    | `number` | No       | Maximum random quantity                              |
+
+### Callback Functions [#callback-functions]
+
+The `client` table supports `before` and `after`. The `server` table supports `before`, `after`, and `metadata`:
+
+| Callback                                 | Context         | Description                                                                                                    |
+| ---------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------- |
+| `before(recipeData)`                     | Client / Server | Runs before crafting starts. Return `false` to cancel the craft. Returning `true` or `nil` continues normally. |
+| `after(recipeData)`                      | Client / Server | Runs after crafting completes successfully.                                                                    |
+| `metadata(resultName, fromSlot, toSlot)` | Server          | Optional. Return a metadata table applied to that result item.                                                 |
+
+<Callout type="warn">
+  The `recipeData` parameter passed to `before` / `after` contains all the properties defined for that specific recipe.
+</Callout>
+
+### Complete Example [#complete-example]
+
+```lua
+RECIPES = {
+    ['garbage scrapmetal'] = {
+        duration = 2000,
+        client = {
+            before = function(recipeData)
+                -- Client logic before crafting
+                -- Return false to cancel the craft
+            end,
+            after = function(recipeData)
+                -- Client logic after successfully crafting
+            end,
+        },
+        server = {
+            before = function(recipeData)
+                -- Server logic before crafting
+                -- Return false to cancel the craft
+            end,
+            after = function(recipeData)
+                -- Server logic after successfully crafting
+            end,
+            metadata = function(resultName, fromSlot, toSlot)
+                -- Optional metadata for the resulting item
+                -- return { quality = 100 }
+            end,
+        },
+        costs = {
+            ['garbage'] = { need = 1, remove = true },
+            ['scrapmetal'] = { need = 0.1, remove = true },
+        },
+        result = {
+            { name = 'lockpick', amount = 1 },
+        },
+    },
+}
+```
+
+## Exports [#exports]
+
+### addRecipe [#addrecipe]
+
+Register a recipe externally from another resource.
+
+Craftable recipes (&#x2A;*`costs`*&#x2A;, &#x2A;*`result`*&#x2A;, &#x2A;*`duration`**, and server callbacks) must be registered on the **server**. The client export only stores client callbacks and cannot create a working craft.
+
+```lua
+-- server
+local success = exports.sleepless_inventory_addons:addRecipe(key, data, target?)
+
+-- client (callbacks only)
+exports.sleepless_inventory_addons:addRecipe(key, data)
+```
+
+#### Server Parameters [#server-parameters]
+
+| Parameter | Type      | Description                                                                           |
+| --------- | --------- | ------------------------------------------------------------------------------------- |
+| `key`     | `string`  | The recipe key — two item names separated by a space (e.g., `'garbage scrapmetal'`)   |
+| `data`    | `table`   | The recipe data. Must include `costs` and `result`                                    |
+| `target`  | `number?` | Optional player id to sync the recipe UI to. Omit (or pass `nil`) to sync all players |
+
+#### Server Returns [#server-returns]
+
+| Type      | Description                         |
+| --------- | ----------------------------------- |
+| `boolean` | `true` if the recipe was registered |
+
+#### Client Parameters [#client-parameters]
+
+| Parameter | Type     | Description                                                       |
+| --------- | -------- | ----------------------------------------------------------------- |
+| `key`     | `string` | The same recipe key used on the server                            |
+| `data`    | `table`  | Client-side data. Only `client` callbacks are used from this call |
+
+<Callout type="error">
+  A client-only `addRecipe` call does **not** register the recipe on the server. Players will not be able to craft it unless the same key is also registered from a server resource.
+</Callout>
+
+<Callout type="warn">
+  Callbacks only work in the context you register them. A client-side call can only register `client` callbacks, and a server-side call can only register `server` callbacks. Functions cannot be sent over the network.
+</Callout>
+
+<Tabs items="['Server', 'Client']">
+  <Tab value="Server">
+    ```lua
+    local success = exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
+        duration = 2000,
+        server = {
+            before = function(recipeData)
+                -- Server logic before crafting
+                -- Return false to cancel
+            end,
+            after = function(recipeData)
+                -- Server logic after crafting
+            end,
+            metadata = function(resultName, fromSlot, toSlot)
+                -- Optional metadata for the resulting item
+            end,
+        },
+        costs = {
+            ['garbage'] = { need = 1, remove = true },
+            ['scrapmetal'] = { need = 0.1, remove = true },
+        },
+        result = {
+            { name = 'lockpick', amount = 1 },
+        },
+    })
+    ```
+  </Tab>
+
+  <Tab value="Client">
+    ```lua
+    -- Only registers client callbacks. The craftable recipe must already
+    -- exist in config or be registered from the server export.
+    exports.sleepless_inventory_addons:addRecipe('garbage scrapmetal', {
+        client = {
+            before = function(recipeData)
+                -- Client logic before crafting
+                -- Return false to cancel
+            end,
+            after = function(recipeData)
+                -- Client logic after crafting
+            end,
+        },
+    })
+    ```
+  </Tab>
+</Tabs>
+
+
+# Sleepless Inventory Addons (/docs/inventoryaddons)
+
+
+
+
+
+Addon modules for ox\_inventory that enhance its utility with back items, drag crafting, and item carrying systems. Each addon can be used independently or together.
+
+<ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_inventory_addons" />
+
+## Features [#features]
+
+* 🎒 **Back Items** - Attach items to player models with customizable bone positions and rotations
+* 🔨 **Drag Craft** - Simple crafting system using ox\_inventory drag-and-drop mechanics
+* 📦 **Item Carry** - Automatic item carrying with animations and prop attachments
+
+## Dependencies [#dependencies]
+
+* [ox\_lib](https://github.com/overextended/ox_lib) (required)
+* [ox\_inventory](https://github.com/overextended/ox_inventory) (required)
+
+## Installation [#installation]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Download the Resource [#download-the-resource-step]
+
+    Download a [release](https://github.com/Sleepless-Development/sleepless_inventory_addons/releases) or clone the repository:
+
+    ```bash
+    git clone https://github.com/Sleepless-Development/sleepless_inventory_addons.git
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Add to Server [#add-to-server-step]
+
+    Place the `sleepless_inventory_addons` folder in your server's resources directory.
+  </div>
+
+  <div className="fd-step">
+    ### Configure Your Server [#configure-your-server-step]
+
+    Add the following to your `server.cfg` (after ox\_inventory):
+
+    ```bash
+    ensure ox_lib
+    ensure ox_inventory
+    ensure sleepless_inventory_addons
+    ```
+  </div>
+
+  <div className="fd-step">
+    ### Configure Addons [#configure-addons-step]
+
+    Each addon has its own configuration file in its respective subfolder. See the individual addon pages for details:
+
+    * [Back Items](/docs/inventoryaddons/back-items) — `backitems/config.lua`
+    * [Drag Craft](/docs/inventoryaddons/drag-craft) — `dragcraft/config.lua`
+    * [Item Carry](/docs/inventoryaddons/item-carry) — `itemcarry/config.lua`
+  </div>
+</div>
+
+## Addons Overview [#addons-overview]
+
+<div className="fd-steps">
+  <div className="fd-step">
+    ### Back Items [#back-items-step]
+
+    Configure item attachments to player models with bone-specific positioning. Supports weapons, backpacks, and custom items with priority-based slot management. Items visually display on the player's back (or other bones) when in their inventory.
+  </div>
+
+  <div className="fd-step">
+    ### Drag Craft [#drag-craft-step]
+
+    Create crafting recipes that work with ox\_inventory's drag-and-drop system. Drag one item onto another to trigger a craft. Supports multi-item recipes, durability costs, and client/server-side callbacks for custom logic.
+  </div>
+
+  <div className="fd-step">
+    ### Item Carry [#item-carry-step]
+
+    Automatically attach props and play animations when players receive specific items. Includes options for vehicle blocking and walk-only mode for realistic item carrying behavior.
+
+    <Callout type="info">
+      Each addon can be configured independently. You only need to set up the addons you want to use — unused addons can be left with their default (empty) configurations.
+    </Callout>
+  </div>
+</div>
+
+## Support [#support]
+
+If you need help or have questions:
+
+* [Discord](https://discord.gg/A2bDPbfgNP)
+* [GitHub Issues](https://github.com/Sleepless-Development/sleepless_inventory_addons/issues)
+
+
+# Item Carry (/docs/inventoryaddons/item-carry)
+
+
+
+Automatically attach props and play animations when players receive specific items using `ox_inventory`. Includes vehicle blocking and walk-only options for realistic item carrying.
+
+## Configuration [#configuration]
+
+The configuration file is located at `itemcarry/config.lua`. Each entry in the config table maps an inventory item name to its carry behavior.
+
+### Config Properties [#config-properties]
+
+| Property       | Type      | Required | Description                                                                   |
+| -------------- | --------- | -------- | ----------------------------------------------------------------------------- |
+| `walkOnly`     | `boolean` | No       | Whether the player can only walk while carrying this item                     |
+| `blockVehicle` | `boolean` | No       | Whether the player is blocked from entering vehicles while carrying this item |
+| `anim`         | `table`   | Yes      | Animation data for the carrying animation                                     |
+| `prop`         | `table`   | Yes      | Prop attachment data for the carried item                                     |
+
+### Animation Properties [#animation-properties]
+
+| Property | Type     | Required | Description                                       |
+| -------- | -------- | -------- | ------------------------------------------------- |
+| `dict`   | `string` | Yes      | Animation dictionary name                         |
+| `clip`   | `string` | Yes      | Animation clip name                               |
+| `flag`   | `number` | No       | Animation flag (controls looping, movement, etc.) |
+
+### Prop Properties [#prop-properties]
+
+| Property        | Type               | Required | Description                                            |
+| --------------- | ------------------ | -------- | ------------------------------------------------------ |
+| `bone`          | `number`           | Yes      | Bone index to attach the prop to                       |
+| `model`         | `number \| string` | Yes      | Model hash or string for the prop                      |
+| `placement`     | `table`            | Yes      | Position and rotation of the prop relative to the bone |
+| `placement.pos` | `vec3`             | Yes      | Position offset relative to the bone                   |
+| `placement.rot` | `vec3`             | Yes      | Rotation offset relative to the bone                   |
+
+## Examples [#examples]
+
+### Box Carry (Walk Only, No Vehicles) [#box-carry-walk-only-no-vehicles]
+
+```lua
+['box'] = {
+    walkOnly = true,
+    blockVehicle = true,
+    anim = {
+        dict = 'anim@heists@box_carry@',
+        clip = 'idle',
+        flag = 51,
+    },
+    prop = {
+        bone = 60309,
+        model = joaat('hei_prop_heist_box'),
+        placement = {
+            pos = vec3(0.025000, 0.080000, 0.255000),
+            rot = vec3(-145.000000, 290.000000, 0.000000),
+        },
+    },
+},
+```
+
+### Briefcase Carry (Free Movement) [#briefcase-carry-free-movement]
+
+```lua
+['briefcase'] = {
+    anim = {
+        dict = 'anim@heists@briefcase@',
+        clip = 'idle',
+        flag = 52,
+    },
+    prop = {
+        bone = 60310,
+        model = 'prop_briefcase_02',
+        placement = {
+            pos = vec3(0.035000, 0.070000, 0.240000),
+            rot = vec3(-135.000000, 280.000000, 0.000000),
+        },
+    },
+},
+```
+
+## Complete Config Example [#complete-config-example]
+
+```lua
+local config = {
+    ['box'] = {
+        walkOnly = true,
+        blockVehicle = true,
+        anim = {
+            dict = 'anim@heists@box_carry@',
+            clip = 'idle',
+            flag = 51,
+        },
+        prop = {
+            bone = 60309,
+            model = joaat('hei_prop_heist_box'),
+            placement = {
+                pos = vec3(0.025000, 0.080000, 0.255000),
+                rot = vec3(-145.000000, 290.000000, 0.000000),
+            },
+        },
+    },
+    ['briefcase'] = {
+        anim = {
+            dict = 'anim@heists@briefcase@',
+            clip = 'idle',
+            flag = 52,
+        },
+        prop = {
+            bone = 60310,
+            model = 'prop_briefcase_02',
+            placement = {
+                pos = vec3(0.035000, 0.070000, 0.240000),
+                rot = vec3(-135.000000, 280.000000, 0.000000),
+            },
+        },
+    },
+}
+```
+
+<Callout type="info">
+  The config key (e.g., `'box'`, `'briefcase'`) must match the item name in your `ox_inventory` item definitions. When a player receives the item, the carry behavior activates automatically.
+</Callout>
+
+<Callout type="warn">
+  Ensure the animation dictionaries and prop models you reference are valid and available in the game. Invalid references will result in the carry behavior not displaying correctly.
+</Callout>
 
 
 # Configuration (/docs/lootbox/configuration)
