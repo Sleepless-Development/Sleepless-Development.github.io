@@ -1,0 +1,128 @@
+---
+title: "Server Exports"
+---
+
+Call these with `exports.sleepless_grid`. The server is authoritative for occupancy and streaming. Client cell lists are not trusted.
+
+Bucket `0` is the global world. A numeric bucket is used as-is. A string is a `sleepless_routing` bucket name. An unknown name matches nobody.
+
+`getCellIdFromCoords`, `getCellCenter`, `parseCellId`, `getNearbyCells`, and `getBufferSize` match the [client exports](/docs/grid/exports/Client).
+
+---
+
+## getPlayersFromCell
+
+Players physically standing in a cell. This is occupancy for one routing bucket, not the players streaming that cell.
+
+```lua
+local players = exports.sleepless_grid:getPlayersFromCell(cellId, includeBuffer, bucket)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `cellId` | `string \| vector3` | Cell id or a world position |
+| `includeBuffer` | `boolean?` | When `true`, include the surrounding buffer once |
+| `bucket` | `number \| string?` | Routing bucket id or a registered name. Defaults to `0` |
+
+A routing name passed in the `includeBuffer` slot is treated as the bucket, with no extra buffer.
+
+### Returns
+
+| Type | Description |
+| --- | --- |
+| `number[]` | Server ids whose live bucket still matches |
+
+---
+
+## getSubscribersFromCell
+
+Players streaming a cell. Subscriptions already cover the neighborhood, so the result is not expanded again.
+
+```lua
+local players = exports.sleepless_grid:getSubscribersFromCell(cellId, bucket)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `cellId` | `string \| vector3` | Cell id or a world position |
+| `bucket` | `number \| string?` | Routing bucket id or a registered name. Defaults to `0` |
+
+### Returns
+
+| Type | Description |
+| --- | --- |
+| `number[]` | Server ids streaming that cell in the bucket |
+
+---
+
+## triggerClientEventForCell
+
+Sends one client event to players standing in the cell.
+
+```lua
+exports.sleepless_grid:triggerClientEventForCell(cellId, event, ...)
+exports.sleepless_grid:triggerClientEventForCell(cellId, bucket, event, ...)
+```
+
+`bucket` may be a number or a registered routing name. When it is omitted, the event goes to bucket `0`.
+
+`triggerClientEventForCellAndBuffer` is the same call with the configured buffer included.
+
+---
+
+## triggerLatentClientEventForCell
+
+Latent form of the cell broadcast. The bytes-per-second value comes after the event name.
+
+```lua
+exports.sleepless_grid:triggerLatentClientEventForCell(cellId, event, bps, ...)
+exports.sleepless_grid:triggerLatentClientEventForCell(cellId, bucket, event, bps, ...)
+```
+
+`triggerLatentClientEventForCellAndBuffer` includes the configured buffer.
+
+---
+
+## RegisterCellHandler
+
+Fires when a player's streaming set changes.
+
+```lua
+exports.sleepless_grid:RegisterCellHandler(onLoad, onUnload)
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `onLoad` | `fun(playerId: number, cellId: string, bucket: number)?` | Player started streaming a cell |
+| `onUnload` | `fun(playerId: number, cellId: string, bucket: number)?` | Player stopped streaming a cell |
+
+`bucket` is the routing bucket that membership belonged to. Handlers are removed when the calling resource stops.
+
+---
+
+## ReplayActiveCells
+
+Runs the calling resource's load handlers again for current subscriptions.
+
+```lua
+exports.sleepless_grid:ReplayActiveCells()
+exports.sleepless_grid:ReplayActiveCells(playerId)
+```
+
+Pass a server id to replay one player. With no argument, every online player is replayed.
+
+---
+
+## getBucketName
+
+Returns the `sleepless_routing` name for a bucket id or a registered name.
+
+```lua
+local name = exports.sleepless_grid:getBucketName(bucket)
+```
+
+Returns `nil` when routing is not running, or the bucket has no name.
