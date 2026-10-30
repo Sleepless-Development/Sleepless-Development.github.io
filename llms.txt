@@ -47,6 +47,12 @@
   - [Sleepless Routing](/docs/routing)
   - Exports
     - [Server Exports](/docs/routing/exports/Server)
+- Grid
+  - [Sleepless Grid](/docs/grid)
+  - [Configuration](/docs/grid/configuration)
+  - Exports
+    - [Client Exports](/docs/grid/exports/Client)
+    - [Server Exports](/docs/grid/exports/Server)
 - Inventory Addons
   - [Sleepless Inventory Addons](/docs/inventoryaddons)
   - [Back Items](/docs/inventoryaddons/back-items)

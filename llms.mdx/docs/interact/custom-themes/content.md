@@ -35,7 +35,7 @@ Each look is a CSS file. The Lua config only picks an id and an accent. Copy a b
     }
     ```
 
-    `themeColors` is the default HUD accent. Leave `config.themeColor = nil` so this color is not forced onto every other theme. CSS distant markers use that same accent as their second color. The `sprite` marker uses `config.IndicatorSprite.color`.
+    `themeColors` is the default HUD accent. Leave `config.themeColor = nil` so this color is not forced onto every other theme. Distant markers use that same accent as their second color unless `indicatorColors` sets one.
   </div>
 
   <div className="fd-step">
