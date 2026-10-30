@@ -11,10 +11,10 @@ The configuration file is located at `client/modules/config.lua`. This file cont
 ```lua
 local config = {}
 
--- Maximum distance the indicator sprite renders.
+-- Maximum distance an indicator renders.
 config.maxInteractDistance = 5.0
 
--- Maximum indicator sprites drawn at once.
+-- Maximum indicators drawn at once.
 config.maxIndicators = 8
 
 -- Only open the prompt when looking at the target.
@@ -85,19 +85,16 @@ config.compactIdleMs = 2500
 -- Default interact key.
 config.defaultInteractKey = 'E'
 
--- Distant indicator. sprite, or an id in web/indicators.
+-- Distant indicator id in web/indicators.
 config.indicator = 'ripple'
 
--- World size of a CSS indicator.
+-- World size of the indicator.
 config.indicatorScale = 0.02
 
--- GTA texture used when the indicator is sprite.
-config.IndicatorSprite = {
-    dict = 'mpcarhud',
-    txt = 'leaderboard_car_colour_icon_singlecolour',
-    rotation = 0.0,
-    color = { 255, 255, 255, 220 },
-    scale = 0.0085,
+-- Main, then accent. Nil uses the theme color. Optional alpha is 0-1 or 0-255.
+config.indicatorColors = {
+    { 255, 255, 255 },
+    nil,
 }
 
 -- Dot drawn at the center of the screen.
@@ -143,9 +140,9 @@ config.showKeyBindBehavior = 'toggle'
 | `compactOptions` | `boolean` | `true` | Compact multi-option prompt. See [Compact prompt](#compact-prompt). |
 | `compactIdleMs` | `number` | `2500` | Idle time in milliseconds before a compact list collapses. Minimum `500`. |
 | `defaultInteractKey` | `string` | `'E'` | Default mapping for the interact action. Players can rebind it in GTA Settings; the prompt shows the live key. |
-| `indicator` | `string` | `'ripple'` | Distant marker. `sprite` uses `IndicatorSprite`. Any other id loads `web/indicators/<id>.css`. A missing id falls back to the sprite. |
-| `indicatorScale` | `number` | `0.02` | World size of a CSS marker. Every CSS id uses this same scale. |
-| `IndicatorSprite` | `table` | white circle | Streamed marker used when `indicator` is `sprite`, and the fallback when a CSS id is missing. `dict` and `txt` are a GTA texture. `color` tints it. `scale` is its world size. |
+| `indicator` | `string` | `'ripple'` | Distant marker id. Loads `web/indicators/<id>.css`. A missing id draws nothing. |
+| `indicatorScale` | `number` | `0.02` | World size of the distant marker. Every id uses this same scale. |
+| `indicatorColors` | `table` | white, theme | `{ color1, color2 }`. Each color is `{ r, g, b }` or `{ r, g, b, a }`. Leave off `a` for a solid color. `0` to `1` is a fraction (`0.5` is half). Above `1` it is `0` to `255`, same as `themeColors`. A nil color keeps the default: white, then the theme accent. |
 | `CenterDot` | `table` | `mpcarhud` colour icon | Screen-center circle while at least one usable interact is nearby. Set `enabled` to `false` to hide it. `color` tints the sprite. `scale` is screen size, `x` / `y` are 0–1 screen position. Optional `file` loads a PNG instead of `dict` / `txt`. |
 | `useShowKeyBind` | `boolean` | `false` | Whether a keybind is required to show/hide interactions. |
 | `defaultShowKeyBind` | `string` | `'LMENU'` | The default key mapping for toggling interaction visibility. |
@@ -165,15 +162,15 @@ config.showKeyBindBehavior = 'toggle'
 
 ## Distant indicator
 
-`config.indicator` is the mark on targets that are in range but are not the open prompt. Set it to `sprite` for `IndicatorSprite`, or to an id from the gallery. Click a name to copy it.
+`config.indicator` is the mark on targets that are in range but are not the open prompt. Set it to an id from the gallery. Click a name to copy it.
 
-The marker stays white. Its second color is the theme accent, or `config.themeColor` when that is set. `wedge` does not take the accent.
+The marker stays white. Its second color is the theme accent, or `config.themeColor` when that is set. Set `indicatorColors` to replace either color. Add a fourth number when that color should be translucent, such as `{ 255, 80, 40, 0.5 }` or `{ 255, 80, 40, 128 }`. `wedge` keeps its own whites until you set a color there.
 
 <IndicatorGallery />
 
-`indicatorScale` sizes every CSS marker the same way. `IndicatorSprite.scale` sizes only the sprite.
+`indicatorScale` sizes every marker the same way.
 
-A custom marker is a file at `web/indicators/<id>.css` whose loader is a `<span class="loader">`. `--color-1` is white and `--color-2` is the accent.
+A custom marker is a file at `web/indicators/<id>.css` whose loader is a `<span class="loader">`. `--color-1` is the first `indicatorColors` entry and `--color-2` is the second.
 
 ## Themes
 
