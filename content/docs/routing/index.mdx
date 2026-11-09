@@ -12,6 +12,7 @@ A server-side routing bucket helper. Give an instance a name, move a player into
 ## Features
 
 - **Named buckets** so callers store a name instead of a raw bucket id
+- **Clusters** so several buckets share one id for player lists and client events
 - **Reserved buckets** for the shared world and a hidden instance
 - **Replicated player state** for `currentBucket`, `oldBucket`, and `currentBucketName`
 - **Entities follow the player**: the occupied vehicle and objects attached to the ped move too
@@ -28,7 +29,7 @@ A server-side routing bucket helper. Give an instance a name, move a player into
 `currentBucketName` is `nil` for the global and hidden buckets.
 
 <Callout type="warn">
-  Restarting `sleepless_routing` moves every online player back to bucket `0` and clears `currentBucketName`.
+  Restarting `sleepless_routing` moves every online player back to bucket `0`, clears `currentBucketName`, and forgets named buckets and clusters.
 </Callout>
 
 ## Player state
@@ -106,6 +107,28 @@ end)
 
 ```lua
 exports.sleepless_routing:routePlayerToHiddenBucket(source)
+```
+
+## Clusters
+
+A cluster is a name for several buckets. It does not move players. Use it when one client event, or one player list, should cover more than one instance.
+
+`createCluster` registers the name. `addBucketToCluster` takes a bucket id or a registered name and stores the numeric id. The same bucket can sit in more than one cluster. Adding it again is a no-op. `getClusterBuckets` returns those ids in the order they were added. `getPlayersInCluster` reads each player's live routing bucket, so a player moved by another resource is included when their current bucket is in the group.
+
+`triggerClientEventForCluster` uses the same argument order as `lib.triggerClientEvent`: event name, then the cluster name, then the payload. An empty cluster still returns `true`.
+
+`removeCluster` forgets the group only. `removeBucketId` does not take a bucket out of a cluster. After that name is gone, remove the member with its numeric id.
+
+```lua
+local routing = exports.sleepless_routing
+
+routing:createCluster('hotel')
+routing:requestBucketId('hotel_lobby', false)
+routing:requestBucketId('hotel_floor_2', false)
+routing:addBucketToCluster('hotel', 'hotel_lobby')
+routing:addBucketToCluster('hotel', 'hotel_floor_2')
+
+routing:triggerClientEventForCluster('myresource:client:hotelAlert', 'hotel', message)
 ```
 
 ## Debug
