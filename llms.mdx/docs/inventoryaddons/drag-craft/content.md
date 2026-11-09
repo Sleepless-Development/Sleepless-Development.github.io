@@ -2,7 +2,7 @@
 
 
 
-A simple crafting system using `ox_inventory` drag-and-drop hooks. Players craft items by dragging one item onto another in their inventory.
+A simple crafting system using inventory drag-and-drop hooks. Players craft items by dragging one item onto another in their inventory. Works with ox\_inventory and sleepless\_inventory.
 
 ## Configuration [#configuration]
 

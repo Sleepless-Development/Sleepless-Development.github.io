@@ -395,6 +395,221 @@ exports.sleepless_routing:triggerClientEventForBucket('myresource:client:houseUp
 
 ***
 
+## createCluster [#createcluster]
+
+Registers a cluster. A cluster is a name for a group of buckets. It does not create buckets and it does not move players.
+
+Calling it again with the same name leaves the existing group in place and returns `true`.
+
+```lua
+local created = exports.sleepless_routing:createCluster(name)
+```
+
+### Parameters [#parameters-12]
+
+| Parameter | Type     | Description          |
+| --------- | -------- | -------------------- |
+| `name`    | `string` | Non-empty cluster id |
+
+### Returns [#returns-12]
+
+| Type      | Description                                                                 |
+| --------- | --------------------------------------------------------------------------- |
+| `boolean` | `true` when the cluster exists after the call. `false` when `name` is empty |
+
+### Example [#example-12]
+
+```lua
+exports.sleepless_routing:createCluster('hotel')
+```
+
+***
+
+## addBucketToCluster [#addbuckettocluster]
+
+Adds one bucket to a cluster. Pass a bucket id or a registered name. The cluster stores the numeric id from that moment.
+
+The bucket must already resolve. A name that `requestBucketId` has not registered yet is rejected. Adding a bucket that is already in the cluster returns `true`. The same bucket can belong to more than one cluster.
+
+```lua
+local added = exports.sleepless_routing:addBucketToCluster(cluster, bucket)
+```
+
+### Parameters [#parameters-13]
+
+| Parameter | Type               | Description                                 |
+| --------- | ------------------ | ------------------------------------------- |
+| `cluster` | `string`           | Cluster id from `createCluster`             |
+| `bucket`  | `number \| string` | Bucket id, or a name from `requestBucketId` |
+
+### Returns [#returns-13]
+
+| Type      | Description                                                                                                                               |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `boolean` | `true` when the bucket is in the cluster afterward. `false` when the cluster is missing, the name is not registered, or the id is invalid |
+
+### Example [#example-13]
+
+```lua
+exports.sleepless_routing:requestBucketId('hotel_lobby', false)
+exports.sleepless_routing:requestBucketId('hotel_floor_2', false)
+exports.sleepless_routing:addBucketToCluster('hotel', 'hotel_lobby')
+exports.sleepless_routing:addBucketToCluster('hotel', 'hotel_floor_2')
+```
+
+***
+
+## removeBucketFromCluster [#removebucketfromcluster]
+
+Removes one bucket from a cluster. Pass the same kind of value you can pass to `getPlayersInBucket`: a bucket id or a name that is still registered.
+
+`removeBucketId` does not update clusters. Once that name is forgotten, remove the member with the numeric id.
+
+```lua
+local removed = exports.sleepless_routing:removeBucketFromCluster(cluster, bucket)
+```
+
+### Parameters [#parameters-14]
+
+| Parameter | Type               | Description                     |
+| --------- | ------------------ | ------------------------------- |
+| `cluster` | `string`           | Cluster id                      |
+| `bucket`  | `number \| string` | Bucket id, or a registered name |
+
+### Returns [#returns-14]
+
+| Type      | Description                                                  |
+| --------- | ------------------------------------------------------------ |
+| `boolean` | `true` when the bucket was in the cluster and is now removed |
+
+### Example [#example-14]
+
+```lua
+exports.sleepless_routing:removeBucketFromCluster('hotel', 'hotel_lobby')
+```
+
+***
+
+## getClusterBuckets [#getclusterbuckets]
+
+Returns the bucket ids in a cluster, in the order they were added.
+
+```lua
+local bucketIds = exports.sleepless_routing:getClusterBuckets(cluster)
+```
+
+### Parameters [#parameters-15]
+
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `cluster` | `string` | Cluster id  |
+
+### Returns [#returns-15]
+
+| Type              | Description                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| `number[] \| nil` | Bucket ids. `{}` when the cluster is empty. `nil` when the cluster is not registered |
+
+### Example [#example-15]
+
+```lua
+local bucketIds = exports.sleepless_routing:getClusterBuckets('hotel') or {}
+```
+
+***
+
+## getPlayersInCluster [#getplayersincluster]
+
+Returns the server ids of players whose live routing bucket is one of the buckets in the cluster. This reads `GetPlayerRoutingBucket`, so it includes players moved by another resource. A player is listed once.
+
+```lua
+local playerIds = exports.sleepless_routing:getPlayersInCluster(cluster)
+```
+
+### Parameters [#parameters-16]
+
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `cluster` | `string` | Cluster id  |
+
+### Returns [#returns-16]
+
+| Type              | Description                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| `number[] \| nil` | Server ids. `{}` when nobody is in those buckets. `nil` when the cluster is not registered |
+
+### Example [#example-16]
+
+```lua
+local playerIds = exports.sleepless_routing:getPlayersInCluster('hotel') or {}
+
+for i = 1, #playerIds do
+    exports.sleepless_routing:routePlayerToGlobalBucket(playerIds[i])
+end
+```
+
+***
+
+## triggerClientEventForCluster [#triggerclienteventforcluster]
+
+Sends one client event to every player currently in any bucket in the cluster. This wraps `lib.triggerClientEvent`, so the payload is packed once.
+
+The argument order matches `lib.triggerClientEvent`: event name, then the target, then the payload. The target is the cluster id.
+
+```lua
+local sent = exports.sleepless_routing:triggerClientEventForCluster(eventName, cluster, ...)
+```
+
+### Parameters [#parameters-17]
+
+| Parameter   | Type     | Description                             |
+| ----------- | -------- | --------------------------------------- |
+| `eventName` | `string` | Client event name                       |
+| `cluster`   | `string` | Cluster id from `createCluster`         |
+| `...`       | `any`    | Arguments forwarded to the client event |
+
+### Returns [#returns-17]
+
+| Type      | Description                                                                                                                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `boolean` | `true` when the cluster resolved and the event was handed to `lib.triggerClientEvent`. An empty cluster still returns `true`. `false` when the event name is empty or the cluster is not registered |
+
+### Example [#example-17]
+
+```lua
+exports.sleepless_routing:triggerClientEventForCluster('myresource:client:hotelAlert', 'hotel', message)
+```
+
+***
+
+## removeCluster [#removecluster]
+
+Forgets a cluster. Buckets stay registered, and players stay in those buckets.
+
+```lua
+local removed = exports.sleepless_routing:removeCluster(name)
+```
+
+### Parameters [#parameters-18]
+
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `name`    | `string` | Cluster id  |
+
+### Returns [#returns-18]
+
+| Type      | Description                            |
+| --------- | -------------------------------------- |
+| `boolean` | `true` when the cluster was registered |
+
+### Example [#example-18]
+
+```lua
+exports.sleepless_routing:removeCluster('hotel')
+```
+
+***
+
 ## moveEntityToBucket [#moveentitytobucket]
 
 Moves one entity into a bucket. Pass a bucket id, or the name used with `requestBucketId`. Use `addPlayerToBucket` for players.
@@ -403,20 +618,20 @@ Moves one entity into a bucket. Pass a bucket id, or the name used with `request
 local ok = exports.sleepless_routing:moveEntityToBucket(entityId, bucket)
 ```
 
-### Parameters [#parameters-12]
+### Parameters [#parameters-19]
 
 | Parameter  | Type               | Description                     |
 | ---------- | ------------------ | ------------------------------- |
 | `entityId` | `number`           | Entity handle                   |
 | `bucket`   | `number \| string` | Bucket id, or a registered name |
 
-### Returns [#returns-12]
+### Returns [#returns-19]
 
 | Type      | Description                                                                            |
 | --------- | -------------------------------------------------------------------------------------- |
 | `boolean` | `true` when the entity exists, the bucket resolved, and the entity ends in that bucket |
 
-### Example [#example-12]
+### Example [#example-19]
 
 ```lua
 local bucketId = exports.sleepless_routing:requestBucketId(('garage_%s'):format(propertyId), false)
@@ -433,19 +648,19 @@ Moves one entity into bucket `0`. Use `addPlayerToBucket` for players.
 local ok = exports.sleepless_routing:moveEntityToGlobalBucket(entityId)
 ```
 
-### Parameters [#parameters-13]
+### Parameters [#parameters-20]
 
 | Parameter  | Type     | Description   |
 | ---------- | -------- | ------------- |
 | `entityId` | `number` | Entity handle |
 
-### Returns [#returns-13]
+### Returns [#returns-20]
 
 | Type      | Description                                          |
 | --------- | ---------------------------------------------------- |
 | `boolean` | `true` when the entity exists and ends in bucket `0` |
 
-### Example [#example-13]
+### Example [#example-20]
 
 ```lua
 exports.sleepless_routing:moveEntityToGlobalBucket(vehicle)

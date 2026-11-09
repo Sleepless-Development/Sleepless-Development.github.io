@@ -4,20 +4,20 @@
 
 
 
-Addon modules for ox\_inventory that enhance its utility with back items, drag crafting, and item carrying systems. Each addon can be used independently or together.
+Addon modules for ox\_inventory and sleepless\_inventory. Back items, drag crafting, and item carrying can be used independently or together.
 
 <ResourceLinks repo="https://github.com/Sleepless-Development/sleepless_inventory_addons" />
 
 ## Features [#features]
 
 * 🎒 **Back Items** - Attach items to player models with customizable bone positions and rotations
-* 🔨 **Drag Craft** - Simple crafting system using ox\_inventory drag-and-drop mechanics
+* 🔨 **Drag Craft** - Simple crafting system using inventory drag-and-drop mechanics
 * 📦 **Item Carry** - Automatic item carrying with animations and prop attachments
 
 ## Dependencies [#dependencies]
 
 * [ox\_lib](https://github.com/overextended/ox_lib) (required)
-* [ox\_inventory](https://github.com/overextended/ox_inventory) (required)
+* [ox\_inventory](https://github.com/overextended/ox_inventory) or [sleepless\_inventory](/docs/inventory)
 
 ## Installation [#installation]
 
@@ -41,11 +41,17 @@ Addon modules for ox\_inventory that enhance its utility with back items, drag c
   <div className="fd-step">
     ### Configure Your Server [#configure-your-server-step]
 
-    Add the following to your `server.cfg` (after ox\_inventory):
+    Add one of the following to your `server.cfg`. sleepless\_inventory provides ox\_inventory, so this resource starts with either inventory. Do not start both.
 
     ```bash
     ensure ox_lib
     ensure ox_inventory
+    ensure sleepless_inventory_addons
+    ```
+
+    ```bash
+    ensure ox_lib
+    ensure sleepless_inventory
     ensure sleepless_inventory_addons
     ```
   </div>
@@ -73,7 +79,7 @@ Addon modules for ox\_inventory that enhance its utility with back items, drag c
   <div className="fd-step">
     ### Drag Craft [#drag-craft-step]
 
-    Create crafting recipes that work with ox\_inventory's drag-and-drop system. Drag one item onto another to trigger a craft. Supports multi-item recipes, durability costs, and client/server-side callbacks for custom logic.
+    Create crafting recipes that work with the inventory drag-and-drop system. Drag one item onto another to trigger a craft. Supports multi-item recipes, durability costs, and client/server-side callbacks for custom logic.
   </div>
 
   <div className="fd-step">
